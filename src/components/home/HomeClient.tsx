@@ -2,7 +2,6 @@
 "use client";
 
 import HomePage from './HomePage';
-import HomeCon from './HomeCon';
 import Loading from '../loading/Loading';
 import { useState, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '../redux/hooks';

@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "KalifaOs",
-    template: "%s - KalifaOs",
+    default: "Kalifa Os",
+    template: "%s - Kalifa Os",
   },
   description:
     "Discover Kalifa OS, the next-generation operating system. Unlock your device with FRP bypass tools and system app management. Try our free diagnostic service today",

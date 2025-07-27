@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'learn more',
-  description: "Try Kalifa OS's free unlocking service! Submit your device details and IMEI to receive a diagnostic report via email. Check compatibility, verify security, and start unlocking today!",
+  description: "Discover Kalifa OS’s advanced unlocking technology. Learn about our secure, fast, and legal device unlocking process with global coverage and no data loss.",
 };
 
 export default function InstrumentalPage() {

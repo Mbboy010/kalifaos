@@ -3,17 +3,11 @@
 
 import { Shield, Zap, Lock, Smartphone, Code, Globe, ShieldCheck, BadgeCheck } from 'lucide-react';
 import Link from 'next/link';
-import { useSelector } from 'react-redux';
-import type { RootState } from '../components/redux/store';
-import type { Metadata } from 'next';
+import { useAppSelector, useAppDispatch } from '../redux/hooks';
 
-export const metadata: Metadata = {
-  title: 'Learn More - Kalifa OS',
-  description: 'Discover Kalifa OS’s advanced unlocking technology. Learn about our secure, fast, and legal device unlocking process with global coverage and no data loss.',
-};
 
 export default function LearnMore() {
-  const isColor = useSelector((state: RootState) => state.color.value);
+  const isColor = useAppSelector((state) => state.color.value);
 
   const features = [
     {

@@ -68,8 +68,8 @@ export default function LearnMore() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="py-20 mt-10">
-        <div className="max-w-6xl mx-auto px-4 text-center">
+      <section className="py-20">
+        <div className="max-w-6xl mx-auto mt-7 px-4 text-center">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               The Most <span className="text-blue-600">Advanced</span> Unlocking Technology

@@ -4,12 +4,12 @@
 import { Smartphone, Shield, Zap, Unlock, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useSelector } from 'react-redux';
+import { useAppSelector, useAppDispatch } from '../redux/hooks';
 import { useState } from 'react';
-import type { RootState } from '../redux/store';
+
 
 export default function HomePage() {
-  const isColor = useSelector((state: RootState) => state.color.value);
+  const isColor = useAppSelector((state) => state.color.value);
   const [selectedPrice, setSelectedPrice] = useState<string>('');
 
   const handlePrice = (price: string, name: string): void => {
@@ -39,7 +39,7 @@ export default function HomePage() {
           </Link>
           <Link
             href="/learn-more"
-            className="border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-100 transition font-medium"
+            className="border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-400 transition font-medium"
           >
             Learn More
           </Link>

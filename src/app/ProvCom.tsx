@@ -3,13 +3,12 @@
 import Footer from '../components/footer/Footer';
 import Navigate from "../components/navigate/Navigate";
 import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useAppSelector, useAppDispatch } from '../components/redux/hooks';
 import { setColor } from "@/components/redux/slicer/color";
-import type { RootState } from "@/components/redux/store";
 
 export function ProvCom({ children }: { children: React.ReactNode }) {
-  const dispatch = useDispatch();
-  const isColor = useSelector((state: RootState) => state.color.value);
+  const dispatch = useAppDispatch();
+  const isColor = useAppSelector((state) => state.color.value);
 
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window === "undefined") return true; // Default to dark on server

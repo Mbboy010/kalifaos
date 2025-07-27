@@ -1,11 +1,11 @@
 'use client';
 
 import Toggle from './Toggle';
-import { useSelector, useDispatch } from 'react-redux';
+import { useAppSelector, useAppDispatch } from '../redux/hooks';
 import { setChat } from '../redux/slicer/CheckChat';
 import Link from 'next/link';
 import { Unlock, Menu, X } from 'lucide-react';
-import type { RootState, AppDispatch } from '../redux/store';
+
 
 interface NavigateProps {
   darkMode: boolean;
@@ -13,8 +13,8 @@ interface NavigateProps {
 }
 
 export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
-  const dispatch = useDispatch<AppDispatch>();
-  const chat = useSelector((state: RootState) => state.chatCheck.value);
+  const dispatch = useAppDispatch();
+  const chat = useAppSelector((state) => state.chatCheck.value);
 
   const toggleMenu = () => {
     dispatch(setChat(!chat));

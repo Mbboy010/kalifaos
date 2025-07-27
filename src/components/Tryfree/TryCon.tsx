@@ -2,14 +2,13 @@
 
 import { Smartphone, Shield, Zap, CheckCircle, Lock } from 'lucide-react';
 import Link from 'next/link';
-import { useSelector } from 'react-redux';
+import { useAppSelector, useAppDispatch } from '../redux/hooks';
 import { FormEvent, useState } from 'react';
-import type { RootState } from '@/redux/store'; // Adjust the path as needed
 import { db } from '@/server/firebaseApi';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 
 export default function TryCon() {
-  const isColor = useSelector((state: RootState) => state.color.value);
+  const isColor = useAppSelector((state) => state.color.value);
 
   const [formData, setFormData] = useState({
     deviceType: '',

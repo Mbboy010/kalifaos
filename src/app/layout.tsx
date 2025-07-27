@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/redux/Provider";
 import { ProvCom } from "./ProvCom";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,8 +30,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"  >
+    <html lang="en">
+      <head>
+        {/* ✅ AdSense Verification Script */}
+        <Script
+          id="adsense-verification"
+          strategy="afterInteractive"
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9241182560906060"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Providers>
           <ProvCom>{children}</ProvCom>
@@ -38,4 +48,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+} 

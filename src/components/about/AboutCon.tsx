@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { useAppSelector, useAppDispatch } from '../redux/hooks';
 
 export default function AboutCon() {
-  const isColor = useAppSelector((state: RootState) => state.color.value);
+  const isColor = useAppSelector((state) => state.color.value);
 
   return (
     <div className="min-h-screen">

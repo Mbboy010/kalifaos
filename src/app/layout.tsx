@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     default: "Kalifa Os",
     template: "%s - Kalifa Os",
   },
-  description: "This page could not be found on Kalifa OS.",
+  description: "Discover Kalifa OS, the next-generation operating system. Unlock your device with FRP bypass tools and system app management. Try our free diagnostic service today",
   other: {
     "google-site-verification": "CTf3k5K1pHcDm8TDmu_Qp6AjT-opf6Bn2rny8MrWEoc",
   },

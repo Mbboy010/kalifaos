@@ -6,7 +6,7 @@ import { useAppSelector, useAppDispatch } from '../redux/hooks';
 
 
 export default function PolicyCon() {
-  const isColor = useAppSelector((state: RootState) => state.color.value);
+  const isColor = useAppSelector((state) => state.color.value);
   const currentYear = new Date().getFullYear();
 
   const sectionBg = isColor ? 'bg-[#d7d7d719]' : 'bg-[#72727236]';

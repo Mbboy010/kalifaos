@@ -16,11 +16,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Kalifa Os",
+    default: "404 - Page Not Found - Kalifa Os",
     template: "%s - Kalifa Os",
   },
   description:
-    "Discover Kalifa OS, the next-generation operating system. Unlock your device with FRP bypass tools and system app management. Try our free diagnostic service today",
+    "This page could not be found on Kalifa OS.",
 };
 
 export default function RootLayout({

@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "404 - Page Not Found - Kalifa Os",
+    default: "Kalifa Os",
     template: "%s - Kalifa Os",
   },
   description:

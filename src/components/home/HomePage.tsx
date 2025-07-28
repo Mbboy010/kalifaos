@@ -23,7 +23,7 @@ export default function HomePage() {
   return (
     <div className="container ">
       {/* Hero Section */}
-      <section className="max-w-6xl mt-6 mx-auto px-4 pb-20 pt-20 text-center">
+      <section className="max-w-6xl mt-12 mx-auto px-4 pb-20 pt-20 text-center">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">
           Unlock Your Device in <span className="text-blue-600">Minutes</span>
         </h1>

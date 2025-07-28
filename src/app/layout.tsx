@@ -19,8 +19,10 @@ export const metadata: Metadata = {
     default: "Kalifa Os",
     template: "%s - Kalifa Os",
   },
-  description:
-    "This page could not be found on Kalifa OS.",
+  description: "This page could not be found on Kalifa OS.",
+  other: {
+    "google-site-verification": "CTf3k5K1pHcDm8TDmu_Qp6AjT-opf6Bn2rny8MrWEoc",
+  },
 };
 
 export default function RootLayout({
@@ -31,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* ✅ Google AdSense verification script */}
+        {/* ✅ Google AdSense script stays here */}
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9241182560906060"

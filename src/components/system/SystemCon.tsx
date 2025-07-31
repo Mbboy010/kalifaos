@@ -1,10 +1,10 @@
-// app/system-apps/page.tsx
 'use client';
 
 import { useAppSelector } from '../redux/hooks';
 import { useState, useEffect } from 'react';
 import { getDocs, collection } from 'firebase/firestore';
 import { db } from '@/server/firebaseApi';
+import { trackClick } from '@/lib/trackClick';
 
 import {
   AndroidLogoCustom,
@@ -13,7 +13,6 @@ import {
   TecnoLogoCustom,
 } from '../svg/Icons';
 
-// Define the type for Firestore documents
 type AppData = {
   id: string;
   title: string;
@@ -35,8 +34,6 @@ const BRAND_CONFIG: Record<
   tecno: { label: 'Tecno apps', color: 'text-blue-500', Logo: TecnoLogoCustom },
   others: { label: 'Others mobile apps', color: 'text-red-500', Logo: AndroidLogoCustom },
 };
-
-
 
 export default function SystemCon() {
   const isColor = useAppSelector((state) => state.color.value);
@@ -94,6 +91,9 @@ export default function SystemCon() {
               if (!navigator.userAgent.includes('Android')) {
                 e.preventDefault();
                 alert('This feature is available on Android devices only.');
+              } else {
+                // Save click info by brand + title
+                trackClick(`system-apps/${brand}/${title}`);
               }
             }}
           >
@@ -146,10 +146,7 @@ const SkeletonLoader = () => (
           <div className="h-5 w-[50%] bg-gray-300 animate-pulse rounded" />
         </div>
         {[...Array(3)].map((_, idx) => (
-          <div
-            key={idx}
-            className="px-4 py-1"
-          >
+          <div key={idx} className="px-4 py-1">
             <div
               style={{ backgroundColor: '#72727236' }}
               className="flex items-center p-2 shadow rounded-lg border border-gray-300 dark:border-gray-700"
@@ -167,3 +164,4 @@ const SkeletonLoader = () => (
     ))}
   </div>
 );
+

@@ -1,11 +1,16 @@
-// app/bypass-frp-setting/page.tsx
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Settings2, Phone, Unlock } from 'lucide-react';
 import { useAppSelector } from '../redux/hooks';
+import { trackClick } from '@/lib/trackClick';
 
 export default function BypassFrpSetting() {
   const isColor = useAppSelector((state) => state.color.value);
+
+  const handleTrackClick = (action: string) => {
+    trackClick(`/bypass-frp-setting/${action}`);
+  };
 
   return (
     <div className="flex flex-col items-center p-6 min-h-screen">
@@ -15,10 +20,15 @@ export default function BypassFrpSetting() {
       </p>
 
       <div className="w-full max-w-md space-y-4">
-        <a className="p-3 block" href="intent://com.android.settings/#Intent;scheme=android-app;end">
+        {/* 1. Open App Setting */}
+        <a
+          className="p-3 block"
+          href="intent://com.android.settings/#Intent;scheme=android-app;end"
+          onClick={() => handleTrackClick('open-app-setting')}
+        >
           <div
             style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
-            className="flex items-center hover:bg-gray-700 p-4 shadow rounded-lg "
+            className="flex items-center hover:bg-gray-700 p-4 shadow rounded-lg"
           >
             <div className="bg-blue-500 text-white p-3 rounded-full mr-4">
               <Settings2 className="w-6 h-6" />
@@ -30,10 +40,15 @@ export default function BypassFrpSetting() {
           </div>
         </a>
 
-        <a className="p-3 block" href="intent://com.google.android.gms/#Intent;scheme=promote_smartlock_scheme;end">
+        {/* 2. Set Screen Lock */}
+        <a
+          className="p-3 block"
+          href="intent://com.google.android.gms/#Intent;scheme=promote_smartlock_scheme;end"
+          onClick={() => handleTrackClick('set-screen-lock')}
+        >
           <div
             style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
-            className="flex items-center hover:bg-gray-700 p-4 shadow rounded-lg "
+            className="flex items-center hover:bg-gray-700 p-4 shadow rounded-lg"
           >
             <div className="bg-orange-500 text-white p-3 rounded-full mr-4">
               <Unlock className="w-6 h-6" />
@@ -45,10 +60,15 @@ export default function BypassFrpSetting() {
           </div>
         </a>
 
-        <a className="p-3 block" href="tel:+2349013644892">
+        {/* 3. Phone App */}
+        <a
+          className="p-3 block"
+          href="tel:+2349013644892"
+          onClick={() => handleTrackClick('phone-call')}
+        >
           <div
             style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
-            className="flex items-center hover:bg-gray-700 p-4 shadow rounded-lg "
+            className="flex items-center hover:bg-gray-700 p-4 shadow rounded-lg"
           >
             <div className="bg-green-500 text-white p-3 rounded-full mr-4">
               <Phone className="w-6 h-6" />

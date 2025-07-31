@@ -5,6 +5,7 @@ import Navigate from "../components/navigate/Navigate";
 import React, { useState, useEffect } from "react";
 import { useAppSelector, useAppDispatch } from '../components/redux/hooks';
 import { setColor } from "@/components/redux/slicer/color";
+import RouteTracker from "./View"
 
 export function ProvCom({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
@@ -37,6 +38,7 @@ export function ProvCom({ children }: { children: React.ReactNode }) {
       }`}
     >
       <Navigate setDarkMode={setDarkMode} darkMode={darkMode} />
+      <RouteTracker />
       {children}
      <Footer />
 

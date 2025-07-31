@@ -1,4 +1,3 @@
-// app/frp-tools/page.tsx
 'use client';
 
 import { Download, ShieldAlert, Smartphone } from 'lucide-react';
@@ -6,17 +5,14 @@ import { useAppSelector } from '../redux/hooks';
 import { useState, useEffect } from 'react';
 import { getDocs, collection } from 'firebase/firestore';
 import { db } from '@/server/firebaseApi';
+import { incrementToolCount } from '@/lib/incrementToolCount';
 
-
-// Define the type for Firestore documents
 interface ToolData {
   id: string;
   title: string;
   version: string;
   link: string;
 }
-
-
 
 export default function FrpCon() {
   const isColor = useAppSelector((state) => state.color.value);
@@ -40,6 +36,10 @@ export default function FrpCon() {
 
     fetchData();
   }, []);
+
+  const handleDownload = (title: string) => {
+    incrementToolCount(title);
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
@@ -75,14 +75,21 @@ export default function FrpCon() {
       </div>
 
       {/* Download Tools */}
-      <div className="flex flex-col  items-center">
+      <div className="flex flex-col items-center">
         <div className="w-full flex flex-col gap-2">
           {istrue ? (
             data.map((element: ToolData, index: number) => (
-              <a className="px-1 py-1 block" href={element.link} key={index}>
+              <a
+                className="px-1 py-1 block"
+                href={element.link}
+                key={index}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => handleDownload(element.title)}
+              >
                 <div
                   style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
-                  className="flex items-center  p-3 shadow rounded-lg border border-gray-300 dark:border-gray-700"
+                  className="flex items-center p-3 shadow rounded-lg border border-gray-300 dark:border-gray-700"
                 >
                   <div className="p-2 mr-3">
                     <Download className="w-11 h-11 text-green-500" />
@@ -95,7 +102,7 @@ export default function FrpCon() {
               </a>
             ))
           ) : (
-            <div className="w-full flex flex-col  gap-2">
+            <div className="w-full flex flex-col gap-2">
               {[...Array(3)].map((_, idx) => (
                 <div
                   key={idx}

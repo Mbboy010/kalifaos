@@ -6,7 +6,7 @@ const normalizePath = (path: string) => {
   return path === "/" ? "home" : path.replace(/\//g, "_");
 };
 
-export const increaseVisit = async (path: string, prevPath: string) => {
+export const increaseVisit = async (path: string, prevPath: any) => {
   const normalizedPath = normalizePath(path);
 
   try {

@@ -18,7 +18,7 @@ export default function FrpCon() {
   const isColor = useAppSelector((state) => state.color.value);
   const [data, setData] = useState<ToolData[]>([]);
   const [istrue, setIstrue] = useState<boolean>(false);
-  const [loading, setLoading] = useState<{ [key: string]: boolean }>({}); // Track loading state for each tool
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({}); // Track loading state for each tools
 
   useEffect(() => {
     async function fetchData() {

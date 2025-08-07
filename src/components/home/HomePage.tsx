@@ -56,7 +56,6 @@ export default function HomePage() {
         </div>
       </section>
       
-      <AdBanner />
 
       {/* Features */}
       <section id="features" className="py-16">

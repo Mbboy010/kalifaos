@@ -18,7 +18,7 @@ export default function FrpCon() {
   const isColor = useAppSelector((state) => state.color.value);
   const [data, setData] = useState<ToolData[]>([]);
   const [istrue, setIstrue] = useState<boolean>(false);
-  const [loading, setLoading] = useState<{ [key: string]: boolean }>({}); // Track loading state for each tools
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     async function fetchData() {
@@ -40,13 +40,17 @@ export default function FrpCon() {
 
   const handleDownload = async (title: string, url: string) => {
     try {
-      // Set loading state for this specific tool
       setLoading((prev) => ({ ...prev, [title]: true }));
-      await incrementToolCount(title);
-      const response = await fetch(url);
-      const blob = await response.blob();
 
+      await incrementToolCount(title);
+
+      const response = await fetch(url, { mode: 'cors' });
+
+      if (!response.ok) throw new Error('Failed to fetch file.');
+
+      const blob = await response.blob();
       const downloadUrl = URL.createObjectURL(blob);
+
       const a = document.createElement('a');
       a.href = downloadUrl;
       a.download = `${title}.apk`;
@@ -56,15 +60,20 @@ export default function FrpCon() {
       URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error('Download failed:', error);
+
+      // Fallback: Open the URL directly
+      try {
+        window.open(url, '_blank');
+      } catch (fallbackError) {
+        console.error('Fallback download also failed:', fallbackError);
+      }
     } finally {
-      // Reset loading state for this tool
       setLoading((prev) => ({ ...prev, [title]: false }));
     }
   };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      {/* Page Header */}
       <div className="text-center mt-16 mb-12">
         <h1 className="text-3xl md:text-4xl font-bold mb-4 flex items-center justify-center gap-3">
           <Smartphone className="w-8 h-8 text-blue-600" />
@@ -76,7 +85,6 @@ export default function FrpCon() {
         </p>
       </div>
 
-      {/* Security Warning */}
       <div
         style={{ backgroundColor: isColor ? '#4f16164c' : '#f0cece4c' }}
         className="rounded-xl border-l-4 border-red-500 p-4 mb-8"
@@ -95,7 +103,6 @@ export default function FrpCon() {
         </div>
       </div>
 
-      {/* Download Tools */}
       <div className="flex flex-col items-center">
         <div className="w-full flex flex-col gap-2">
           {istrue ? (
@@ -104,7 +111,7 @@ export default function FrpCon() {
                 className="px-1 py-1 block text-left w-full"
                 key={index}
                 onClick={() => handleDownload(element.title, element.link)}
-                disabled={loading[element.title]} // Disable button while loading
+                disabled={loading[element.title]}
               >
                 <div
                   style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
@@ -170,7 +177,6 @@ export default function FrpCon() {
         </div>
       </div>
 
-      {/* Disclaimer */}
       <div
         style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
         className="mt-12 p-4 rounded-lg text-center text-sm border border-gray-300 dark:border-gray-700"

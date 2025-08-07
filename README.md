@@ -1,36 +1,150 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kalifa OS
 
-## Getting Started
+Kalifa OS is a web application built with Next.js, TypeScript, Tailwind CSS, Redux, and Firebase, designed to provide tools and resources for managing Android devices. It offers features such as Factory Reset Protection (FRP) bypass tools, system application access, contact management, and guides for Android device configuration, with a focus on Samsung, Infinix, Tecno, and other Android devices.
 
-First, run the development server:
+## Table of Contents
+
+- Overview  
+- Features  
+- Tech Stack  
+- Project Structure  
+- Installation  
+- Environment Variables  
+- Firebase Setup  
+- Running the Application  
+- Available Routes  
+- Testing  
+- Contributing  
+- License  
+- Contact  
+
+## Overview
+
+Kalifa OS is a user-friendly platform aimed at Android enthusiasts and technicians, providing tools and guides to bypass FRP, access system applications, and contact support. The application emphasizes legal and responsible use of tools, with a responsive design and dark mode support for enhanced usability.
+
+## Features
+
+- **FRP Bypass Tools**: Download specialized tools to bypass Factory Reset Protection on Android devices (`/frp-tools`).
+- **System Applications**: Access and manage system apps for Samsung, Infinix, Tecno, and other Android devices using Android intent links (`/system-apps`).
+- **Bypass FRP Settings**: Step-by-step guide to open app settings, set screen locks, or access the phone app for device unlocking (`/bypass-frp-setting`).
+- **Contact Form**: Submit inquiries or support requests, stored in Firebase Firestore (`/contact`).
+- **Custom 404 Page**: Friendly error page for invalid routes (`/not-found`).
+- **Dark Mode**: Toggle between light and dark themes using Redux state management.
+- **Responsive Design**: Built with Tailwind CSS for a mobile-first, responsive UI.
+- **Firebase Integration**: Firestore for data storage (tools, system apps, contact messages) and Authentication for Google sign-in.
+- **Android Intent Links**: Direct access to Android system settings and apps (Android-specific).
+
+## Tech Stack
+
+- **Framework**: Next.js (App Router, 13+)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: Redux Toolkit
+- **Backend**: Firebase (Firestore, Authentication, Storage)
+- **Icons**: Lucide React and custom SVG icons (Android, Samsung, Infinix, Tecno)
+- **Fonts**: Google Fonts (Geist, Geist Mono)
+- **Build Tool**: Node.js
+
+## Project Structure
+
+kalifa-os/ ├── app/ │   ├── layout.tsx               # Root layout with Navigate and Footer │   ├── page.tsx                 # Homepage │   ├── try-free/ │   │   ├── page.tsx            # TryFreePage component │   ├── learn-more/ │   │   ├── page.tsx            # LearnMore component │   ├── frp-tools-apk-download/ │   │   ├── page.tsx            # FRPToolsPage component │   ├── pricing/ │   │   ├── page.tsx            # PricingPage component │   ├── privacy/ │   │   ├── page.tsx            # PrivacyPage component │   ├── terms/ │   │   ├── page.tsx            # TermsPage component │   ├── about/ │   │   ├── page.tsx            # AboutPage component │   ├── contact/ │   │   ├── page.tsx            # ContactPage component │   ├── bypass-frp-setting/ │   │   ├── page.tsx            # BypassFrpSettingPage component │   ├── not-found.tsx            # Custom 404 page │   ├── frp-tools/ │   │   ├── page.tsx            # FrpToolsPage component │   ├── system-apps/ │   │   ├── page.tsx            # SystemAppsPage component │   ├── server/ │   │   ├── firebaseApi.ts      # Firebase configuration with env variables │   ├── components/ │   │   ├── about/ │   │   │   ├── AboutCon.tsx     # About content component │   │   ├── home/ │   │   │   ├── HomeClient.tsx   # Client-side home component │   │   │   ├── HomePage.tsx     # HomePage component │   │   ├── loading/ │   │   │   ├── Loading.tsx      # Loading component │   │   │   ├── OrbitingDotsSpinner.tsx # Spinner component (placeholder) │   │   ├── startTopPage/ │   │   │   ├── ScrollToTop.tsx  # ScrollToTop component │   │   ├── navigate/ │   │   │   ├── Navigate.tsx     # Navigation component │   │   │   ├── Toggle.tsx       # Theme toggle component (placeholder) │   │   ├── footer/ │   │   │   ├── Footer.tsx       # Footer component │   │   ├── redux/ │   │   │   ├── slicer/ │   │   │   │   ├── Load.ts      # Redux slice for loading state │   │   │   │   ├── CheckChat.ts # Redux slice for chat state │   │   │   │   ├── Color.ts     # Redux slice for theme (dark/light mode) │   │   │   ├── store.ts         # Redux store configuration │   │   │   ├── Provider.tsx     # Redux Provider wrapper │   │   │   ├── hooks.ts         # Custom Redux hooks (useAppSelector, useAppDispatch) │   │   ├── svg/ │   │   │   ├── Icons.tsx        # Custom SVG icons (Android, Samsung, Infinix, Tecno) │   ├── styles/ │   │   ├── global.css           # Tailwind CSS with custom animations ├── public/ │   ├── Bypass.jpg               # Image for HomePage ├── .env.local                   # Firebase environment variables ├── .gitignore                   # Ignore .env.local and node_modules ├── package.json ├── tsconfig.json ├── README.md                    # This file
+
+## Installation
+
+### 1. Clone the Repository
 
 ```bash
+git clone https://github.com/your-username/kalifa-os.git
+cd kalifa-os
+
+2. Install Dependencies
+
+npm install
+
+3. Set Up Environment Variables
+
+Create a .env.local file in the root directory.
+
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+
+Firebase Setup
+
+1. Go to Firebase Console
+
+
+2. Create a new project
+
+
+3. Enable:
+
+Firestore Database
+
+Firebase Authentication (Google Sign-In)
+
+Firebase Storage
+
+
+
+4. Copy your Firebase config and paste into .env.local
+
+
+
+Running the Application
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit http://localhost:3000 in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Available Routes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+/ – Home
 
-## Learn More
+/frp-tools – FRP tool list
 
-To learn more about Next.js, take a look at the following resources:
+/frp-tools-apk-download – APK file downloads
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+/system-apps – System app links
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+/bypass-frp-setting – Step-by-step bypass guide
 
-## Deploy on Vercel
+/contact – Contact support
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+/about, /terms, /privacy, /pricing, /try-free, /learn-more – Static pages
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+/not-found – Custom 404 page
+
+
+Testing
+
+Testing is manual for now. Automated tests coming soon.
+
+Contributing
+
+Feel free to contribute to this project by submitting issues or pull requests.
+
+License
+
+This project is licensed under the MIT License.
+
+Contact
+
+For support or feedback:
+
+GitHub: @your-username
+
+Email: your-email@example.com
+
+
+---
+
+Let me know if you'd like me to:
+
+- Insert your real GitHub username and email,
+- Generate and download this as a `.md` file,
+- Add badges (e.g., Build Passing, License MIT),
+- Or auto-generate a LICENSE file.

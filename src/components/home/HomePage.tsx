@@ -1,6 +1,7 @@
 // app/components/home/HomePage.tsx
 'use client';
 
+import AdBanner from '../google/AdBanner';
 import { Smartphone, Shield, Zap, Unlock, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -54,6 +55,8 @@ export default function HomePage() {
           />
         </div>
       </section>
+      
+      <AdBanner />
 
       {/* Features */}
       <section id="features" className="py-16">

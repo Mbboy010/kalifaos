@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/redux/Provider";
 import { ProvCom } from "./ProvCom";
+import Script from "next/script"; // ✅ Import Script
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,9 +20,11 @@ export const metadata: Metadata = {
     default: "Kalifa Os",
     template: "%s - Kalifa Os",
   },
-  description: "Discover Kalifa OS, the next-generation operating system. Unlock your device with FRP bypass tools and system app management. Try our free diagnostic service today",
+  description:
+    "Discover Kalifa OS, the next-generation operating system. Unlock your device with FRP bypass tools and system app management. Try our free diagnostic service today",
   other: {
-    "google-site-verification": "CTf3k5K1pHcDm8TDmu_Qp6AjT-opf6Bn2rny8MrWEoc",
+    "google-site-verification":
+      "CTf3k5K1pHcDm8TDmu_Qp6AjT-opf6Bn2rny8MrWEoc",
   },
 };
 
@@ -33,9 +36,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* ✅ Google AdSense script stays here */}
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9241182560906060"
-     crossOrigin="anonymous"></script>
+        {/* ✅ Google AdSense Auto Ads script */}
+        <Script
+          id="adsense-script"
+          async
+          strategy="afterInteractive"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9241182560906060"
+          crossOrigin="anonymous"
+        />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Providers>

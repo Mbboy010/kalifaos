@@ -47,7 +47,50 @@ Kalifa OS is a user-friendly platform aimed at Android enthusiasts and technicia
 
 ## Project Structure
 
-kalifa-os/ ├── app/ │   ├── layout.tsx               # Root layout with Navigate and Footer │   ├── page.tsx                 # Homepage │   ├── try-free/ │   │   ├── page.tsx            # TryFreePage component │   ├── learn-more/ │   │   ├── page.tsx            # LearnMore component │   ├── frp-tools-apk-download/ │   │   ├── page.tsx            # FRPToolsPage component │   ├── pricing/ │   │   ├── page.tsx            # PricingPage component │   ├── privacy/ │   │   ├── page.tsx            # PrivacyPage component │   ├── terms/ │   │   ├── page.tsx            # TermsPage component │   ├── about/ │   │   ├── page.tsx            # AboutPage component │   ├── contact/ │   │   ├── page.tsx            # ContactPage component │   ├── bypass-frp-setting/ │   │   ├── page.tsx            # BypassFrpSettingPage component │   ├── not-found.tsx            # Custom 404 page │   ├── frp-tools/ │   │   ├── page.tsx            # FrpToolsPage component │   ├── system-apps/ │   │   ├── page.tsx            # SystemAppsPage component │   ├── server/ │   │   ├── firebaseApi.ts      # Firebase configuration with env variables │   ├── components/ │   │   ├── about/ │   │   │   ├── AboutCon.tsx     # About content component │   │   ├── home/ │   │   │   ├── HomeClient.tsx   # Client-side home component │   │   │   ├── HomePage.tsx     # HomePage component │   │   ├── loading/ │   │   │   ├── Loading.tsx      # Loading component │   │   │   ├── OrbitingDotsSpinner.tsx # Spinner component (placeholder) │   │   ├── startTopPage/ │   │   │   ├── ScrollToTop.tsx  # ScrollToTop component │   │   ├── navigate/ │   │   │   ├── Navigate.tsx     # Navigation component │   │   │   ├── Toggle.tsx       # Theme toggle component (placeholder) │   │   ├── footer/ │   │   │   ├── Footer.tsx       # Footer component │   │   ├── redux/ │   │   │   ├── slicer/ │   │   │   │   ├── Load.ts      # Redux slice for loading state │   │   │   │   ├── CheckChat.ts # Redux slice for chat state │   │   │   │   ├── Color.ts     # Redux slice for theme (dark/light mode) │   │   │   ├── store.ts         # Redux store configuration │   │   │   ├── Provider.tsx     # Redux Provider wrapper │   │   │   ├── hooks.ts         # Custom Redux hooks (useAppSelector, useAppDispatch) │   │   ├── svg/ │   │   │   ├── Icons.tsx        # Custom SVG icons (Android, Samsung, Infinix, Tecno) │   ├── styles/ │   │   ├── global.css           # Tailwind CSS with custom animations ├── public/ │   ├── Bypass.jpg               # Image for HomePage ├── .env.local                   # Firebase environment variables ├── .gitignore                   # Ignore .env.local and node_modules ├── package.json ├── tsconfig.json ├── README.md                    # This file
+kalifa-os/
+├── app/
+│   ├── layout.tsx               # Root layout with Navigate and Footer
+│   ├── page.tsx                 # Homepage
+│   ├── try-free/
+│   │   ├── page.tsx            # TryFreePage component
+│   ├── learn-more/
+│   │   ├── page.tsx            # LearnMore component
+│   ├── frp-tools-apk-download/
+│   │   ├── page.tsx            # FRPToolsPage component
+│   ├── pricing/
+│   │   ├── page.tsx            # PricingPage component
+│   ├── privacy/
+│   │   ├── page.tsx            # PrivacyPage component
+│   ├── terms/
+│   │   ├── page.tsx            # TermsPage component
+│   ├── about/
+│   │   ├── page.tsx            # AboutPage component
+│   ├── contact/
+│   │   ├── page.tsx            # ContactPage component
+│   ├── bypass-frp-setting/
+│   │   ├── page.tsx            # BypassFrpSettingPage component
+│   ├── not-found.tsx            # Custom 404 page
+│   ├── frp-tools/
+│   │   ├── page.tsx            # FrpToolsPage component
+│   ├── system-apps/
+│   │   ├── page.tsx            # SystemAppsPage component
+│   ├── server/
+│   │   ├── firebaseApi.ts      # Firebase configuration with env variables
+│   ├── components/
+│   │   ├── about/
+│   │   │   ├── AboutCon.tsx     # About content component
+│   │   ├── home/
+│   │   │   ├── HomeClient.tsx   # Client-side home component
+│   │   │   ├── HomePage.tsx     # HomePage component
+│   │   ├── loading/
+│   │   │   ├── Loading.tsx      # Loading component
+│   │   │   ├── OrbitingDotsSpinner.tsx # Spinner component
+│   │   ├── startTopPage/
+│   │   │   ├── ScrollToTop.tsx  # ScrollToTop component
+│   │   ├── navigate/
+│   │   │   ├── Navigate.tsx     # Navigation component
+│   │   │   ├── Toggle.tsx
+
 
 ## Installation
 

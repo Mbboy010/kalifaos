@@ -18,6 +18,7 @@ export default function FrpCon() {
   const isColor = useAppSelector((state) => state.color.value);
   const [data, setData] = useState<ToolData[]>([]);
   const [istrue, setIstrue] = useState<boolean>(false);
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({}); // Track loading state for each tool
 
   useEffect(() => {
     async function fetchData() {
@@ -27,7 +28,7 @@ export default function FrpCon() {
           .map((doc) => ({ ...doc.data(), id: doc.id } as ToolData))
           .sort((a, b) => a.title.localeCompare(b.title));
 
-        setData(sortedData);
+        setData sortedData);
         setIstrue(sortedData.length > 0);
       } catch (error) {
         console.error('Error fetching tools:', error);
@@ -39,20 +40,25 @@ export default function FrpCon() {
 
   const handleDownload = async (title: string, url: string) => {
     try {
-      incrementToolCount(title);
+      // Set loading state for this specific tool
+      setLoading((prev) => ({ ...prev, [title]: true }));
+      await incrementToolCount(title);
       const response = await fetch(url);
       const blob = await response.blob();
 
       const downloadUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = downloadUrl;
-      a.download = `${title}.apk`; // Force correct file extension
+      a.download = `${title}.apk`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error('Download failed:', error);
+    } finally {
+      // Reset loading state for this tool
+      setLoading((prev) => ({ ...prev, [title]: false }));
     }
   };
 
@@ -98,17 +104,46 @@ export default function FrpCon() {
                 className="px-1 py-1 block text-left w-full"
                 key={index}
                 onClick={() => handleDownload(element.title, element.link)}
+                disabled={loading[element.title]} // Disable button while loading
               >
                 <div
                   style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
                   className="flex items-center p-3 shadow rounded-lg border border-gray-300 dark:border-gray-700"
                 >
                   <div className="p-2 mr-3">
-                    <Download className="w-11 h-11 text-green-500" />
+                    {loading[element.title] ? (
+                      <div className="w-11 h-11 flex items-center justify-center">
+                        <svg
+                          className="animate-spin h-6 w-6 text-green-500"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                          ></path>
+                        </svg>
+                      </div>
+                    ) : (
+                      <Download className="w-11 h-11 text-green-500" />
+                    )}
                   </div>
                   <div>
                     <h2 className="text-lg font-semibold text-green-500">{element.title}</h2>
                     <p>version: {element.version}</p>
+                    {loading[element.title] && (
+                      <p className="text-sm text-gray-500">Downloading...</p>
+                    )}
                   </div>
                 </div>
               </button>

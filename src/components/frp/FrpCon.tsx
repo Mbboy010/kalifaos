@@ -28,7 +28,7 @@ export default function FrpCon() {
           .map((doc) => ({ ...doc.data(), id: doc.id } as ToolData))
           .sort((a, b) => a.title.localeCompare(b.title));
 
-        setData sortedData);
+        setData(sortedData);
         setIstrue(sortedData.length > 0);
       } catch (error) {
         console.error('Error fetching tools:', error);

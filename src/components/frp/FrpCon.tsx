@@ -37,8 +37,23 @@ export default function FrpCon() {
     fetchData();
   }, []);
 
-  const handleDownload = (title: string) => {
-    incrementToolCount(title);
+  const handleDownload = async (title: string, url: string) => {
+    try {
+      incrementToolCount(title);
+      const response = await fetch(url);
+      const blob = await response.blob();
+
+      const downloadUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = `${title}.apk`; // Force correct file extension
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
   };
 
   return (
@@ -79,13 +94,10 @@ export default function FrpCon() {
         <div className="w-full flex flex-col gap-2">
           {istrue ? (
             data.map((element: ToolData, index: number) => (
-              <a
-                className="px-1 py-1 block"
-                href={element.link}
+              <button
+                className="px-1 py-1 block text-left w-full"
                 key={index}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => handleDownload(element.title)}
+                onClick={() => handleDownload(element.title, element.link)}
               >
                 <div
                   style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
@@ -99,7 +111,7 @@ export default function FrpCon() {
                     <p>version: {element.version}</p>
                   </div>
                 </div>
-              </a>
+              </button>
             ))
           ) : (
             <div className="w-full flex flex-col gap-2">

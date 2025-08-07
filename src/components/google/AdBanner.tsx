@@ -6,8 +6,8 @@ export default function AdBanner() {
   useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
-        window.adsbygoogle = window.adsbygoogle || [];
-        window.adsbygoogle.push({});
+        (window as any).adsbygoogle = (window as any).adsbygoogle || [];
+        (window as any).adsbygoogle.push({});
       }
     } catch (e) {
       console.error('AdSense error:', e);

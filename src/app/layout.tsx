@@ -37,7 +37,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* ✅ Google AdSense Auto Ads script */}
-        <Script
+        <script
           id="adsense-script"
           async
           strategy="afterInteractive"

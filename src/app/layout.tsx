@@ -43,7 +43,7 @@ export default function RootLayout({
           strategy="afterInteractive"
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9241182560906060"
           crossOrigin="anonymous"
-        />
+        ></script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Providers>

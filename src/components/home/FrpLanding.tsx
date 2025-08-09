@@ -10,7 +10,7 @@ export default function FrpLanding() {
   return (
     <div className="flex flex-col  p-5 sm:p-6 md:p-8">
       {/* Header */}
-      <div className="flex  items-center w-full mb-8 sm:mb-12">
+      <div className="flex justify-center items-center w-full mb-8 sm:mb-12">
         <h2 className="text-3xl sm:text-3xl md:text-4xl font-bold text-left">
           Android Bypass Tools
         </h2>
@@ -58,7 +58,7 @@ export default function FrpLanding() {
         </Link>
         <Link
         style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
-          href="/bypass-frp-setting"
+          href="/setting-and-lock-screen"
           className="flex items-center  p-4 sm:p-6 rounded-lg shadow-md transition-colors "
         >
           <div className="flex items-center gap-4">

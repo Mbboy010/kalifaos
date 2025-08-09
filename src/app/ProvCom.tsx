@@ -33,7 +33,7 @@ export function ProvCom({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-500 ${
+      className={`min-h-screen w-screen transition-colors duration-500 ${
         darkMode ? "bg-[#121212] text-white" : "bg-gray-100 text-gray-800"
       }`}
     >

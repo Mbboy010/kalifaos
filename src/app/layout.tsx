@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/redux/Provider";
 import { ProvCom } from "./ProvCom";
-import Script from "next/script"; // ✅ Import Script
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,22 +30,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <head>
-        {/* ✅ Google AdSense Auto Ads script */}
-        <script
+      <head />
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        {/* ✅ Load Google AdSense script client-side */}
+        <Script
           id="adsense-script"
-          async
           strategy="afterInteractive"
+          async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9241182560906060"
           crossOrigin="anonymous"
-        ></script>
-      </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        />
         <Providers>
           <ProvCom>{children}</ProvCom>
         </Providers>

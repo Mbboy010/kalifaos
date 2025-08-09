@@ -1,6 +1,7 @@
 // app/components/home/HomePage.tsx
 'use client';
 
+import FrpLanding from './FrpLanding';
 import AdBanner from '../google/AdBanner';
 import { Smartphone, Shield, Zap, Unlock, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -56,6 +57,7 @@ export default function HomePage() {
         </div>
       </section>
       
+      <FrpLanding />
 
       {/* Features */}
       <section id="features" className="py-16">

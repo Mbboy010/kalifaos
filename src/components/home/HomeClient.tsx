@@ -24,7 +24,7 @@ export default function HomeClient() {
   return (
     <div>
       {loading ? (
-        <div className="flex flex-col justify-center items-center w-screen min-h-screen">
+        <div>
             <HomePage />  
         </div>
       ) : (

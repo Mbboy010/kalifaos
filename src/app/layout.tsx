@@ -35,14 +35,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head />
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {/* ✅ Load Google AdSense script client-side */}
-        <Script
+      <head>
+     {/* ✅ Load Google AdSense script client-side */}
+        <script
+          id="adsense-script"
+          strategy="afterInteractive"
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9241182560906060"
-          crossOrigin="anonymous"
-        />
+          crossOrigin="anonymous"></script>
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Providers>
           <ProvCom>{children}</ProvCom>
         </Providers>

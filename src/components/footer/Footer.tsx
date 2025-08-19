@@ -23,6 +23,7 @@ export default function Footer() {
         { name: 'Home', to: '/' },
         { name: 'FRP Tools apk', to: '/frp-tools-apk-download' },
         { name: 'System apps', to: '/system-apps' },
+        { name: 'Windows tools', to: '/windows-tools' },
         { name: 'About', to: '/about' },
       ],
     },

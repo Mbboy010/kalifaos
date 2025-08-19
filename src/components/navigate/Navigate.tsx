@@ -60,6 +60,14 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
               >
                 System apps
               </Link>
+              <Link
+                href="/windows-tools"
+                className={`font-semibold hover:text-blue-500 ${
+                  darkMode ? 'text-gray-200' : 'text-gray-700'
+                }`}
+              >
+                Windows tools
+              </Link>
               
                 <Link
                 href="/about"
@@ -117,6 +125,13 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
                 onClick={toggleMenu}
               >
                 Setting and lock screen
+              </Link>
+              <Link
+                href="/windows-tools"
+                className="block font-semibold hover:text-blue-500"
+                onClick={toggleMenu}
+              >
+                Windows tools
               </Link>
               <Link
                 href="/about"

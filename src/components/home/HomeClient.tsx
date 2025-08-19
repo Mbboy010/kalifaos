@@ -22,7 +22,7 @@ export default function HomeClient() {
   }, []);
 
   return (
-    <div>
+    <div className="min-h-screen">
       {loading ? (
         <div>
             <HomePage />  

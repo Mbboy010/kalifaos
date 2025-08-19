@@ -2,7 +2,6 @@
 'use client';
 
 import OrbitingDotsSpinner from './OrbitingDotsSpinner';
-import ScrollToTop from '../startTopPage/ScrollToTop';
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
@@ -15,12 +14,11 @@ export default function Loading() {
   const router = useRouter();
 
   useEffect(() => {
-    // Add navigation logic here if needed (replacing useNavigate)
-  }, []);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
   return (
     <div className="flex justify-center items-center w-full h-[100vh]">
-      <ScrollToTop />
       <OrbitingDotsSpinner />
     </div>
   );

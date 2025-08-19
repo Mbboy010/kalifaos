@@ -1,6 +1,7 @@
 // app/components/home/HomePage.tsx
 'use client';
 
+import WindowsBypassTools from '../window/WindowsBypassTools';
 import FrpLanding from './FrpLanding';
 import AdBanner from '../google/AdBanner';
 import { Smartphone, Shield, Zap, Unlock, HelpCircle } from 'lucide-react';
@@ -23,10 +24,10 @@ export default function HomePage() {
   };
 
   return (
-    <div className="container ">
+    <div className="container min-h-full">
       {/* Hero Section */}
-      <section className="max-w-6xl mt-12 mx-auto px-4 pb-20 pt-20 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+      <section className="max-w-6xl  mx-auto px-4 pb-20 pt-20 text-center">
+        <h1 className="text-4xl mt-12 md:text-5xl font-bold mb-4">
           Unlock Your Device in <span className="text-blue-600">Minutes</span>
         </h1>
         <p className="text-xl mb-8 max-w-2xl mx-auto">
@@ -58,6 +59,7 @@ export default function HomePage() {
       </section>
       
       <FrpLanding />
+      <WindowsBypassTools />
 
       {/* Features */}
       <section id="features" className="py-16">

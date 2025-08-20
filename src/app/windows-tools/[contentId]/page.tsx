@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+import AppCom from '../../../components/window/appView/AppCom';
+
 
 
 
@@ -12,6 +14,8 @@ export const metadata: Metadata = {
 export default function ContentPage() {
   return (
     <div className="container mx-auto min-h-screen">
+      <AppCom />
+
 
     </div>
   );

@@ -54,7 +54,7 @@ const tools = [
   },
 ];
 
-export default function WindowsBypassTools() {
+export default function WinContent() {
   const isColor = useAppSelector((state) => state.color.value);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
@@ -94,7 +94,7 @@ export default function WindowsBypassTools() {
   };
 
   return (
-    <div className="flex flex-col p-6">
+    <div className="flex flex-col pt-20 p-6">
       {/* Tools List */}
       <div className="flex flex-col gap-4 max-w-4xl w-full mx-auto">
         {tools.map((tool, index) => (

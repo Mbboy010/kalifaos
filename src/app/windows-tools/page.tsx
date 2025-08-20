@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 
 
 
+import WinCom from '../../components/window/WinCom';
 export const metadata: Metadata = {
   title: 'System Applications',
   description:
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 export default function WindowsPage() {
   return (
     <div className="container mx-auto min-h-screen">
-
+        <WinCom />
     </div>
   );
 }

@@ -8,77 +8,78 @@ export default function FrpLanding() {
   const isColor = useAppSelector((state) => state.color.value);
 
   return (
-    <div className="flex flex-col  p-5 sm:p-6 md:p-8">
+    <div className="flex flex-col p-6 sm:p-8 md:p-12 lg:p-16">
       {/* Header */}
-      <div className="flex  items-center w-full mb-8 sm:mb-12">
-        <h2 className="text-3xl sm:text-3xl md:text-4xl font-bold text-left">
+      <div className="flex items-center w-full mb-10 sm:mb-14">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-left">
           Android Bypass Tools
         </h2>
       </div>
 
       {/* Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl w-full mx-auto animate-fade-in animation-delay-200">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl w-full mx-auto animate-fade-in animation-delay-200">
+        {/* Card 1 */}
         <Link
-        style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
+          style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
           href="/frp-tools-apk-download"
-          className="flex items-center p-4 sm:p-6 rounded-lg shadow-md transition-colors "
+          className="flex items-center p-6 sm:p-8 rounded-2xl shadow-lg transition-colors hover:shadow-xl"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 rounded-full flex items-center justify-center">
-              <Download className="w-5 h-5 sm:w-6 sm:h-6 " />
+          <div className="flex items-center gap-5">
+            <div className="w-12 sm:w-14 md:w-16 aspect-square bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <Download className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
             </div>
             <div className="flex flex-col">
-              <h2 className="text-base sm:text-lg font-semibold ">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-semibold">
                 Download FRP Tools APK
               </h2>
-              <p className="text-xs sm:text-sm mt-1 ">
+              <p className="text-sm sm:text-base md:text-lg mt-1">
                 Download APK files for FRP bypass tools.
               </p>
             </div>
           </div>
         </Link>
+
+        {/* Card 2 */}
         <Link
-        style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
+          style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
           href="/system-apps"
-          className="flex items-center p-4 sm:p-6 rounded-lg shadow-md transition-colors "
+          className="flex items-center p-6 sm:p-8 rounded-2xl shadow-lg transition-colors hover:shadow-xl"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-full flex items-center justify-center">
-              <Smartphone className="w-5 h-5 sm:w-6 sm:h-6 " />
+          <div className="flex items-center gap-5">
+            <div className="w-12 sm:w-14 md:w-16 aspect-square bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <Smartphone className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
             </div>
             <div className="flex flex-col">
-              <h2 className="text-base sm:text-lg font-semibold ">
-                Set System Apps
+              <h2 className="text-lg sm:text-xl md:text-2xl font-semibold">System Apps
               </h2>
-              <p className="text-xs sm:text-sm mt-1 ">
+              <p className="text-sm sm:text-base md:text-lg mt-1">
                 Access system applications for various Android brands.
               </p>
             </div>
           </div>
         </Link>
+
+        {/* Card 3 */}
         <Link
-        style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
+          style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
           href="/setting-and-lock-screen"
-          className="flex items-center  p-4 sm:p-6 rounded-lg shadow-md transition-colors "
+          className="flex items-center p-6 sm:p-8 rounded-2xl shadow-lg transition-colors hover:shadow-xl"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-500 rounded-full flex items-center justify-center">
-              <Settings className="w-5 h-5 sm:w-6 sm:h-6 " />
+          <div className="flex items-center gap-5">
+            <div className="w-12 sm:w-14 md:w-16 aspect-square bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <Settings className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
             </div>
             <div className="flex flex-col">
-              <h2 className="text-base sm:text-lg font-semibold ">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-semibold">
                 Configure Settings
               </h2>
-              <p className="text-xs sm:text-sm mt-1 ">
+              <p className="text-sm sm:text-base md:text-lg mt-1">
                 Configure settings and lock screen for FRP bypass.
               </p>
             </div>
           </div>
         </Link>
       </div>
-
-      {/* Disclaimer */}
-
     </div>
   );
 }

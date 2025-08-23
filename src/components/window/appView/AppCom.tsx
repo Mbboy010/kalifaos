@@ -1,6 +1,8 @@
 "use client"
 
 
+
+import AppView from './AppView';
 import Loading from '../../loading/Loading';
 import { useState, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks';
@@ -29,6 +31,8 @@ export default function AppCom() {
       loading ?
       <div>
 
+      
+      <AppView />
 
 
 

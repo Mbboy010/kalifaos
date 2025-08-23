@@ -95,6 +95,15 @@ export default function WindowsBypassTools() {
 
   return (
     <div className="flex flex-col p-6">
+    
+     {/* Header */}
+      <div className="flex  items-center w-full mb-8 sm:mb-12">
+        <h2 className="text-3xl sm:text-3xl md:text-4xl font-bold text-left">
+          Window Bypass Tools
+        </h2>
+      </div>
+    
+    
       {/* Tools List */}
       <div className="flex flex-col gap-4 max-w-4xl w-full mx-auto">
         {tools.map((tool, index) => (
@@ -155,10 +164,10 @@ export default function WindowsBypassTools() {
             onClick={(e) => e.stopPropagation()}
             
             style={{
-              backgroundColor: isColor ? "#4b5563" : "#e5e7eb",
+              backgroundColor: isColor ? "#76767625" : "#ffffff3f",
               }}
             
-            className="w-full  max-w-md h-52 rounded-t-2xl border-t border-blue-500 p-4 animate-slide-up"
+            className="w-full shadow-md backdrop-blur-md max-w-md  rounded-t-2xl border-t border-blue-500 p-4 animate-slide-up"
           >
             <div className="flex justify-between items-center mb-4">
               <h4 className="font-semibold text-sm">Options</h4>

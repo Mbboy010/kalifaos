@@ -1,3 +1,4 @@
+import Suggestions from './Suggestions';
 "use client";
 
 import Link from "next/link";
@@ -202,7 +203,7 @@ export default function ToolDetails() {
         </Link>
       </div>
 
-      <Suggestions />
+      <Suggestions currentToolId={tool.id} />
     </div>
   );
 }

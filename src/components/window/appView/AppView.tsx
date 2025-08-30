@@ -1,4 +1,3 @@
-import Suggestions from './Suggestions';
 "use client";
 
 import Link from "next/link";

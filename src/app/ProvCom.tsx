@@ -1,54 +1,49 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { Providers } from "@/components/redux/Provider";
-import { ProvCom } from "./ProvCom";
-import { SpeedInsights } from "@vercel/speed-insights/next"; // ✅ Import it
+"use client";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import ScrollToTopHandler from './ScrollToTopHandler';
+import Footer from '../components/footer/Footer';
+import Navigate from "../components/navigate/Navigate";
+import React, { useState, useEffect } from "react";
+import { useAppSelector, useAppDispatch } from '../components/redux/hooks';
+import { setColor } from "@/components/redux/slicer/color";
+import RouteTracker from "./View"
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+export function ProvCom({ children }: { children: React.ReactNode }) {
+  const dispatch = useAppDispatch();
+  const isColor = useAppSelector((state) => state.color.value);
 
-export const metadata: Metadata = {
-  title: {
-    default: "Kalifa Os",
-    template: "%s - Kalifa Os",
-  },
-  description: "This page could not be found on Kalifa OS.",
-  other: {
-    "google-site-verification": "CTf3k5K1pHcDm8TDmu_Qp6AjT-opf6Bn2rny8MrWEoc",
-  },
-};
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window === "undefined") return true; // Default to dark on server
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme ? savedTheme === "dark" : true; // Default to dark if no theme saved
+  });
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+      if (!isColor) dispatch(setColor(true));
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+      if (isColor) dispatch(setColor(false));
+    }
+    console.log(darkMode)
+    console.log(isColor)
+  }, [darkMode, dispatch, isColor]);
+
   return (
-    <html lang="en">
-      <head>
-        {/* ✅ Google AdSense script stays here */}
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9241182560906060"
-          crossOrigin="anonymous"
-        ></script>
-      </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Providers>
-          <ProvCom>{children}</ProvCom>
-        </Providers>
+    <div
+      className={`min-h-screen w-screen transition-colors duration-500 ${
+        darkMode ? "bg-[#121212] text-white" : "bg-gray-100 text-gray-800"
+      }`}
+    >
+      <Navigate setDarkMode={setDarkMode} darkMode={darkMode} />
+      <RouteTracker />
+      {children}
+      <ScrollToTopHandler />
+     <Footer />
 
-        {/* ✅ Add Speed Insights here */}
-        <SpeedInsights />
-      </body>
-    </html>
+    </div>
   );
 }

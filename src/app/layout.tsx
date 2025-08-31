@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/redux/Provider";
 import { ProvCom } from "./ProvCom";
+import { SpeedInsights } from "@vercel/speed-insights/next"; // ✅ Import it
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,6 +45,9 @@ export default function RootLayout({
         <Providers>
           <ProvCom>{children}</ProvCom>
         </Providers>
+
+        {/* ✅ Add Speed Insights here */}
+        <SpeedInsights />
       </body>
     </html>
   );

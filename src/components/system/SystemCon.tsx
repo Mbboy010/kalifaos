@@ -151,8 +151,8 @@ const SkeletonLoader = () => (
         {[...Array(3)].map((_, idx) => (
           <div key={idx} className="px-3 py-1">
             <div
-              style={{ backgroundColor: '#72727236' }}
-              className="flex items-center p-2 shadow rounded-md border border-gray-300 dark:border-gray-700"
+              
+              className="flex items-center p-2 "
             >
               <div className="p-2 mr-3">
                 <div className="w-8 h-8 bg-gray-300 animate-pulse rounded-2xl" />

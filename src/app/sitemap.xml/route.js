@@ -1,4 +1,5 @@
 "use strict";
+// app/sitemap.xml/route.ts
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -46,90 +47,39 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GET = exports.dynamic = void 0;
-var firestore_1 = require("firebase/firestore");
-var firebaseApi_1 = require("@/server/firebaseApi"); // adjust path if needed
-exports.dynamic = "force-dynamic";
+exports.GET = void 0;
 function GET() {
     return __awaiter(this, void 0, void 0, function () {
-        // Helper function for Firestore collections
-        function getCollectionRoutes(collectionName, basePath) {
-            return __awaiter(this, void 0, void 0, function () {
-                var snapshot, error_1;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            _a.trys.push([0, 2, , 3]);
-                            return [4 /*yield*/, (0, firestore_1.getDocs)((0, firestore_1.collection)(firebaseApi_1.db, collectionName))];
-                        case 1:
-                            snapshot = _a.sent();
-                            return [2 /*return*/, snapshot.docs.map(function (doc) {
-                                    var data = doc.data();
-                                    return {
-                                        url: "".concat(basePath, "/").concat(doc.id),
-                                        lastmod: data.date || new Date().toISOString().split("T")[0],
-                                        changefreq: "monthly",
-                                        priority: 0.6,
-                                    };
-                                })];
-                        case 2:
-                            error_1 = _a.sent();
-                            console.error("Error fetching ".concat(collectionName, " for sitemap:"), error_1);
-                            return [2 /*return*/, []];
-                        case 3: return [2 /*return*/];
-                    }
-                });
-            });
-        }
-        var baseUrl, staticRoutes, _a, windowsTools, frpTools, systemApps, allRoutes, sitemap;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://kalifaos.vercel.app";
-                    staticRoutes = [
-                        { url: "/", changefreq: "weekly", priority: 1.0 },
-                        { url: "/try-free", changefreq: "weekly", priority: 0.8 },
-                        { url: "/learn-more", changefreq: "weekly", priority: 0.8 },
-                        { url: "/frp-tools-apk-download", changefreq: "weekly", priority: 0.8 },
-                        { url: "/pricing", changefreq: "weekly", priority: 0.8 },
-                        { url: "/privacy", changefreq: "weekly", priority: 0.7 },
-                        { url: "/terms", changefreq: "weekly", priority: 0.7 },
-                        { url: "/about", changefreq: "weekly", priority: 0.8 },
-                        { url: "/contact", changefreq: "weekly", priority: 0.8 },
-                        { url: "/bypass-frp-setting", changefreq: "weekly", priority: 0.8 },
-                        { url: "/frp-tools", changefreq: "weekly", priority: 0.8 },
-                        { url: "/system-apps", changefreq: "weekly", priority: 0.8 },
-                        { url: "/windows-tools", changefreq: "weekly", priority: 0.8 },
-                    ];
-                    return [4 /*yield*/, Promise.all([
-                            getCollectionRoutes("windows-tools", "/windows-tools"),
-                            getCollectionRoutes("frp-tools", "/frp-tools"),
-                            getCollectionRoutes("system-apps", "/system-apps"),
-                        ])];
-                case 1:
-                    _a = _b.sent(), windowsTools = _a[0], frpTools = _a[1], systemApps = _a[2];
-                    allRoutes = __spreadArray(__spreadArray(__spreadArray(__spreadArray([], staticRoutes.map(function (route) { return (__assign(__assign({}, route), { lastmod: new Date().toISOString().split("T")[0] })); }), true), windowsTools, true), frpTools, true), systemApps, true);
-                    sitemap = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  ".concat(allRoutes
-                        .map(function (route) { return "\n    <url>\n      <loc>".concat(baseUrl).concat(route.url, "</loc>\n      <lastmod>").concat(route.lastmod, "</lastmod>\n      <changefreq>").concat(route.changefreq, "</changefreq>\n      <priority>").concat(route.priority, "</priority>\n    </url>"); })
-                        .join(""), "\n</urlset>");
-                    return [2 /*return*/, new Response(sitemap, {
-                            status: 200,
-                            headers: {
-                                "Content-Type": "application/xml",
-                                "Cache-Control": "public, max-age=3600",
-                            },
-                        })];
-            }
+        var baseUrl, staticRoutes, allRoutes, sitemap;
+        return __generator(this, function (_a) {
+            baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://kalifaos.vercel.app";
+            staticRoutes = [
+                { url: "/", changefreq: "weekly", priority: 1.0 },
+                { url: "/try-free", changefreq: "weekly", priority: 0.8 },
+                { url: "/learn-more", changefreq: "weekly", priority: 0.8 },
+                { url: "/frp-tools-apk-download", changefreq: "weekly", priority: 0.8 },
+                { url: "/pricing", changefreq: "weekly", priority: 0.8 },
+                { url: "/privacy", changefreq: "weekly", priority: 0.7 },
+                { url: "/terms", changefreq: "weekly", priority: 0.7 },
+                { url: "/about", changefreq: "weekly", priority: 0.8 },
+                { url: "/contact", changefreq: "weekly", priority: 0.8 },
+                { url: "/bypass-frp-setting", changefreq: "weekly", priority: 0.8 },
+                { url: "/frp-tools", changefreq: "weekly", priority: 0.8 },
+                { url: "/system-apps", changefreq: "weekly", priority: 0.8 },
+                { url: "/windows-tools", changefreq: "weekly", priority: 0.8 },
+            ];
+            allRoutes = staticRoutes.map(function (route) { return (__assign(__assign({}, route), { lastmod: new Date().toISOString().split("T")[0] })); });
+            sitemap = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  ".concat(allRoutes
+                .map(function (route) { return "\n    <url>\n      <loc>".concat(baseUrl).concat(route.url, "</loc>\n      <lastmod>").concat(route.lastmod, "</lastmod>\n      <changefreq>").concat(route.changefreq, "</changefreq>\n      <priority>").concat(route.priority, "</priority>\n    </url>"); })
+                .join(""), "\n</urlset>");
+            return [2 /*return*/, new Response(sitemap, {
+                    status: 200,
+                    headers: {
+                        "Content-Type": "application/xml",
+                        "Cache-Control": "public, max-age=86400", // cache for 1 day
+                    },
+                })];
         });
     });
 }

@@ -1,13 +1,10 @@
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/server/firebaseApi"; // adjust path if needed
-
-export const dynamic = "force-dynamic";
+// app/sitemap.xml/route.ts
 
 export async function GET() {
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL || "https://kalifaos.vercel.app";
 
-  // Static routes
+  // ✅ Only static routes
   const staticRoutes = [
     { url: "/", changefreq: "weekly", priority: 1.0 },
     { url: "/try-free", changefreq: "weekly", priority: 0.8 },
@@ -24,45 +21,11 @@ export async function GET() {
     { url: "/windows-tools", changefreq: "weekly", priority: 0.8 },
   ];
 
-  // Helper function for Firestore collections
-  async function getCollectionRoutes(
-    collectionName: string,
-    basePath: string
-  ) {
-    try {
-      const snapshot = await getDocs(collection(db, collectionName));
-      return snapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          url: `${basePath}/${doc.id}`,
-          lastmod: data.date || new Date().toISOString().split("T")[0],
-          changefreq: "monthly",
-          priority: 0.6,
-        };
-      });
-    } catch (error) {
-      console.error(`Error fetching ${collectionName} for sitemap:`, error);
-      return [];
-    }
-  }
-
-  // Fetch all collections
-  const [windowsTools, frpTools, systemApps] = await Promise.all([
-    getCollectionRoutes("windows-tools", "/windows-tools"),
-    getCollectionRoutes("frp-tools", "/frp-tools"),
-    getCollectionRoutes("system-apps", "/system-apps"),
-  ]);
-
-  // Combine everything
-  const allRoutes = [
-    ...staticRoutes.map((route) => ({
-      ...route,
-      lastmod: new Date().toISOString().split("T")[0],
-    })),
-    ...windowsTools,
-    ...frpTools,
-    ...systemApps,
-  ];
+  // Add today's date as lastmod for all
+  const allRoutes = staticRoutes.map((route) => ({
+    ...route,
+    lastmod: new Date().toISOString().split("T")[0],
+  }));
 
   // Generate XML
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -84,7 +47,7 @@ export async function GET() {
     status: 200,
     headers: {
       "Content-Type": "application/xml",
-      "Cache-Control": "public, max-age=3600",
+      "Cache-Control": "public, max-age=86400", // cache for 1 day
     },
   });
 }

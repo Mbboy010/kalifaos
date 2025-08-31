@@ -1,7 +1,8 @@
 "use client";
 
+import Comments from "./Comments";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Suggestions from "./Suggestions";
 import {
   Download,
@@ -37,9 +38,8 @@ This tool helps you reset your Windows password with a clean UI and step-by-step
 1. Download the ISO  
 2. Burn to USB / DVD  
 3. Boot your PC and follow on-screen steps  
-
   `,
-  image: "/New-google-chrome-icon-design-premium-vector-PNG.png",
+  image: "/images (1).jpeg",
   downloadLink: "#",
 
   price: "Free",
@@ -76,12 +76,23 @@ function formatDescription(text: string) {
 
 export default function ToolDetails() {
   const [fullscreen, setFullscreen] = useState<string | null>(null);
+  const [animate, setAnimate] = useState(false);
+
+  // disable/enable scroll on fullscreen open
+  useEffect(() => {
+    if (fullscreen) {
+      document.body.style.overflow = "hidden";
+      setTimeout(() => setAnimate(true), 10); // trigger zoom-in
+    } else {
+      document.body.style.overflow = "";
+      setAnimate(false);
+    }
+  }, [fullscreen]);
 
   return (
     <div className="container mx-auto px-4 py-6">
       {/* Tool Header */}
-      <div className="flex mt-20 flex-col gap-6 my-6">
-        {/* Tool Image + Stats */}
+      <div className="flex mt-16 flex-col gap-6 my-6">
         <div className="flex h-full flex-row items-center gap-4">
           <img
             src={tool.image}
@@ -108,7 +119,6 @@ export default function ToolDetails() {
         {/* Tool Info */}
         <div>
           <p className="text-3xl text-blue-500 font-bold mb-3">{tool.title}</p>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm ">
             <div className="flex items-center gap-2">
               <Tag className="w-4 h-4 text-blue-500" /> Price: {tool.price}
@@ -139,16 +149,16 @@ export default function ToolDetails() {
               key={idx}
               src={src}
               alt="screenshot"
-              className="h-40 rounded-lg shadow-md cursor-pointer hover:scale-105 transition"
+              className="h-36 rounded-lg shadow-md cursor-pointer hover:scale-105 transition"
               onClick={() => setFullscreen(src)}
             />
           ))}
         </div>
       </div>
 
-      {/* Fullscreen Modal */}
+      {/* Fullscreen Modal with zoom animation */}
       {fullscreen && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 transition-all duration-300">
           <button
             onClick={() => setFullscreen(null)}
             className="absolute top-4 right-4 text-white"
@@ -158,14 +168,15 @@ export default function ToolDetails() {
           <img
             src={fullscreen}
             alt="fullscreen"
-            className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg"
+            className={`max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg transform transition-all duration-300 ${
+              animate ? "scale-100 opacity-100" : "scale-75 opacity-0"
+            }`}
           />
         </div>
       )}
 
       {/* Description */}
       <div className="py-5 rounded-xl mb-6">
-
         <div className="space-y-4">
           <ReactMarkdown
             rehypePlugins={[rehypeRaw]}
@@ -180,9 +191,7 @@ export default function ToolDetails() {
                 <p className="text-lg font-semibold mt-4 mb-2">{children}</p>
               ),
               p: ({ children }) => (
-                <p className="leading-relaxed">
-                  {children}
-                </p>
+                <p className="leading-relaxed">{children}</p>
               ),
             }}
           >
@@ -203,6 +212,7 @@ export default function ToolDetails() {
       </div>
 
       <Suggestions currentToolId={tool.id} />
+      <Comments />
     </div>
   );
 }

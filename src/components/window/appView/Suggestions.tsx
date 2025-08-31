@@ -1,7 +1,5 @@
 // app/components/windows/Suggestions.tsx
-import Image from 'next/image';
 import Link from 'next/link';
-import { Download } from 'lucide-react';
 
 // Mock data fallback
 const mockSuggestions = [
@@ -11,38 +9,33 @@ const mockSuggestions = [
 ];
 
 export default function Suggestions({ currentToolId }: { currentToolId: string }) {
-  // Replace Firebase with mock suggestions (exclude current tool)
   const suggestions = mockSuggestions
     .filter((tool) => tool.id !== currentToolId)
     .slice(0, 3);
 
   return (
     <div className="mt-8">
-      <h2 className="text-xl font-semibold text-blue-500 mb-4">Suggested Tools</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <h2 className="text-xl font-semibold mb-4">Suggested Tools</h2>
+
+      {/* Horizontal scroll container */}
+      <div className="flex gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent">
         {suggestions.map((tool, index) => (
-          <div
+          <Link
             key={tool.id}
-            className="flex flex-col p-4 rounded-lg shadow-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors animate-fade-in"
+            href={`/windows-tools/${tool.id}`}
+            className="w-[200px] h-[200px] flex-shrink-0 flex flex-col items-center justify-between p-4 rounded-lg shadow-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors animate-fade-in"
             style={{ animationDelay: `${(index + 1) * 100}ms` }}
           >
             <img
               src={tool.image}
               alt={tool.title}
-              width={150}
-              height={150}
-              className="w-full h-24 object-cover rounded-md mb-3"
+              className="w-full h-32 object-cover rounded-md"
             />
-            <h3 className="text-base font-semibold text-blue-500">{tool.title}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">Price: {tool.price}</p>
-            <Link
-              href={`/windows-tools/${tool.id}`}
-              className="mt-3 flex items-center gap-2 text-blue-500 hover:underline"
-            >
-              <Download className="w-5 h-5" />
-              View Details
-            </Link>
-          </div>
+            <div className="text-left w-full">
+              <h3 className="text-sm font-semibold text-blue-500">{tool.title}</h3>
+              <p className="text-xs text-gray-600 dark:text-gray-300">Price: {tool.price}</p>
+            </div>
+          </Link>
         ))}
       </div>
     </div>

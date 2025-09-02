@@ -17,46 +17,26 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import { db } from "@/server/firebaseApi"; // your firebase config
+import { doc, getDoc } from "firebase/firestore";
+import { useParams } from "next/navigation";
 
-const tool = {
-  id: "1",
-  title: "Windows Password Reset",
-  description: `
-### Overview
-This tool helps you reset your Windows password with a clean UI and step-by-step instructions.
-
-[red]Warning:[/red] Use responsibly on your own system!  
-[green]Tip:[/green] Verified to work on most Windows editions.  
-[blue]Support:[/blue] Offline mode supported.  
-
-### Features
-- Fast recovery in under 5 minutes  
-- Works on both [blue]UEFI[/blue] and [blue]Legacy BIOS[/blue]  
-- Safe and secure with no data loss  
-
-### Usage
-1. Download the ISO  
-2. Burn to USB / DVD  
-3. Boot your PC and follow on-screen steps  
-  `,
-  image: "/images (1).jpeg",
-  downloadLink: "#",
-
-  price: "Free",
-  size: "120 MB",
-  os: "Windows 7/8/10/11",
-  architecture: "32-bit / 64-bit",
-  date: "Aug 25, 2025",
-  downloads: "15K+",
-  rating: "4.6/5",
-  security: "Verified",
-
-  screenshots: [
-    "https://images.unsplash.com/photo-1566241477600-ac026ad43874?q=80&w=400",
-    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=400",
-    "https://images.unsplash.com/photo-1551782450-17144efb9c50?q=80&w=400",
-  ],
-};
+interface Tool {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  downloadLink: string;
+  price: string;
+  size: string;
+  os: string;
+  architecture: string;
+  date: string;
+  downloads: string;
+  rating: string;
+  security: string;
+  screenshots: string[];
+}
 
 function formatDescription(text: string) {
   let formatted = text.replace(/\r\n/g, "\n");
@@ -75,8 +55,32 @@ function formatDescription(text: string) {
 }
 
 export default function ToolDetails() {
+  const params = useParams();
+  const id = params.contentId as string;
+  const [tool, setTool] = useState<Tool | null>(null);
+  const [loading, setLoading] = useState(true);
   const [fullscreen, setFullscreen] = useState<string | null>(null);
   const [animate, setAnimate] = useState(false);
+
+  // Fetch tool data from Firebase
+  useEffect(() => {
+    async function fetchTool() {
+      try {
+        const docRef = doc(db, "Windows-tools", id); // adjust collection name
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setTool({ id: docSnap.id, ...docSnap.data() } as Tool);
+        }
+      } catch (error) {
+        console.error("Error fetching tool:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (id) fetchTool();
+  }, [id]);
 
   // disable/enable scroll on fullscreen open
   useEffect(() => {
@@ -88,6 +92,22 @@ export default function ToolDetails() {
       setAnimate(false);
     }
   }, [fullscreen]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-6 text-center">
+        Loading tool details...
+      </div>
+    );
+  }
+
+  if (!tool) {
+    return (
+      <div className="container mx-auto px-4 py-6 text-center">
+        Tool not found.
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -141,22 +161,24 @@ export default function ToolDetails() {
       </div>
 
       {/* Screenshots */}
-      <div className="mb-6">
-        <p className="text-xl font-semibold mb-3">Screenshots</p>
-        <div className="flex gap-4 overflow-x-auto pb-3">
-          {tool.screenshots.map((src, idx) => (
-            <img
-              key={idx}
-              src={src}
-              alt="screenshot"
-              className="h-36 rounded-lg shadow-md cursor-pointer hover:scale-105 transition"
-              onClick={() => setFullscreen(src)}
-            />
-          ))}
+      {tool.screenshots && tool.screenshots.length > 0 && (
+        <div className="mb-6">
+          <p className="text-xl font-semibold mb-3">Screenshots</p>
+          <div className="flex gap-4 overflow-x-auto pb-3">
+            {tool.screenshots.map((src, idx) => (
+              <img
+                key={idx}
+                src={src}
+                alt="screenshot"
+                className="h-36 rounded-lg shadow-md cursor-pointer hover:scale-105 transition"
+                onClick={() => setFullscreen(src)}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Fullscreen Modal with zoom animation */}
+      {/* Fullscreen Modal */}
       {fullscreen && (
         <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 transition-all duration-300">
           <button
@@ -203,7 +225,7 @@ export default function ToolDetails() {
       {/* Download Button */}
       <div className="flex flex-col md:flex-row md:items-start gap-6 my-6">
         <Link
-          href={tool.downloadLink}
+          href={tool.downloadUrl}
           className="inline-flex w-fit items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
         >
           <Download className="w-4 h-4" />

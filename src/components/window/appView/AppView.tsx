@@ -17,8 +17,8 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { db } from "@/server/firebaseApi"; 
-import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
+import { db } from "@/server/firebaseApi";
+import { doc, getDoc, updateDoc, increment, Timestamp } from "firebase/firestore";
 import { useParams } from "next/navigation";
 
 interface Tool {
@@ -38,6 +38,65 @@ interface Tool {
   screenshots: string[];
 }
 
+// Skeleton Loader Component
+function SkeletonLoader() {
+  return (
+    <div className="container mx-auto px-4 py-6 animate-pulse">
+      {/* Tool Header Skeleton */}
+      <div className="flex mt-16 flex-col gap-6 my-6">
+        <div className="flex flex-row items-center gap-4">
+          <div className="w-24 h-24 bg-gray-300 rounded-xl"></div>
+          <div className="flex flex-col gap-2 w-full">
+            <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+          </div>
+        </div>
+
+        {/* Tool Info Skeleton */}
+        <div>
+          <div className="h-8 bg-gray-300 rounded w-1/2 mb-3"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Screenshots Skeleton */}
+      <div className="mb-6">
+        <div className="h-6 bg-gray-300 rounded w-1/4 mb-3"></div>
+        <div className="flex gap-4 overflow-x-auto pb-3">
+          {[...Array(3)].map((_, idx) => (
+            <div
+              key={idx}
+              className="h-36 w-64 bg-gray-300 rounded-lg"
+            ></div>
+          ))}
+        </div>
+      </div>
+
+      {/* Description Skeleton */}
+      <div className="py-5 rounded-xl mb-6">
+        <div className="space-y-4">
+          <div className="h-6 bg-gray-300 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-300 rounded w-full"></div>
+          <div className="h-4 bg-gray-300 rounded w-5/6"></div>
+          <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+        </div>
+      </div>
+
+      {/* Download Button Skeleton */}
+      <div className="flex flex-col md:flex-row gap-6 my-6">
+        <div className="h-10 bg-gray-300 rounded-lg w-32"></div>
+      </div>
+    </div>
+  );
+}
+
 function formatDescription(text: string) {
   let formatted = text.replace(/\r\n/g, "\n");
 
@@ -54,7 +113,16 @@ function formatDescription(text: string) {
   return formatted;
 }
 
-export default function ToolDetails() {
+// ✅ Format downloads into K, M, B
+function formatDownloads(num: number): string {
+  if (num < 1000) return num.toString();
+  if (num < 1_000_000) return (num / 1000).toFixed(2).replace(/\.00$/, "") + "k";
+  if (num < 1_000_000_000)
+    return (num / 1_000_000).toFixed(2).replace(/\.00$/, "") + "M";
+  return (num / 1_000_000_000).toFixed(2).replace(/\.00$/, "") + "B";
+}
+
+export default function AppView() {
   const params = useParams();
   const id = params.contentId as string;
   const [tool, setTool] = useState<Tool | null>(null);
@@ -70,7 +138,16 @@ export default function ToolDetails() {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          setTool({ id: docSnap.id, ...docSnap.data() } as Tool);
+          const data = docSnap.data();
+
+          setTool({
+            id: docSnap.id,
+            ...data,
+            createdAt:
+              data.createdAt instanceof Timestamp
+                ? data.createdAt.toDate().toLocaleDateString()
+                : String(data.createdAt ?? ""),
+          } as Tool);
         }
       } catch (error) {
         console.error("Error fetching tool:", error);
@@ -124,11 +201,7 @@ export default function ToolDetails() {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-6 text-center">
-        Loading tool details...
-      </div>
-    );
+    return <SkeletonLoader />;
   }
 
   if (!tool) {
@@ -154,7 +227,7 @@ export default function ToolDetails() {
           <div className="flex flex-col h-full gap-2 text-[1rem]">
             <div className="flex items-center gap-2">
               <Download className="w-5 h-5 text-indigo-500" /> Downloads:{" "}
-              {tool.downloads}
+              {formatDownloads(tool.downloads)}
             </div>
             <div className="flex items-center gap-2">
               <Star className="w-5 h-4 text-yellow-500" /> Rating: {tool.rating}

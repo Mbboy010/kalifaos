@@ -1,8 +1,8 @@
 // app/components/windows/WindowsBypassTools.tsx
 'use client';
 
+import WinContentSkeleton from './WinContentSkeleton';
 import {
-  ArrowRight,
   MoreVertical,
   Share2,
   Flag,
@@ -15,7 +15,7 @@ import { useAppSelector } from '../redux/hooks';
 import { useState, useEffect } from 'react';
 
 // Firebase
-import { db } from '@/server/firebaseApi'; // ensure you have firebase.ts config
+import { db } from '@/server/firebaseApi';
 import { collection, getDocs } from 'firebase/firestore';
 
 type Tool = {
@@ -31,12 +31,48 @@ export default function WinContent() {
   const isColor = useAppSelector((state) => state.color.value);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-  // Pagination
   const itemsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const [tools, setTools] = useState<Tool[]>([]);
   const [paginatedTools, setPaginatedTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // ---- Format Price ----
+  const formatPrice = (price: string) => {
+    const num = Number(price);
+    if (isNaN(num)) return price;
+    if (num === 0) return 'Free';
+    return new Intl.NumberFormat('en-NG', {
+      style: 'currency',
+      currency: 'NGN',
+    }).format(num);
+  };
+
+  // ---- Format Date (WhatsApp style) ----
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diff = Math.floor((now.getTime() - date.getTime()) / 1000); // in seconds
+
+    if (diff < 5) return 'now';
+    if (diff < 60) return `${diff}s ago`;
+
+    const minutes = Math.floor(diff / 60);
+    if (minutes < 60) return `${minutes}min ago`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days}d ago`;
+
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months}mo ago`;
+
+    const years = Math.floor(months / 12);
+    return `${years}y ago`;
+  };
 
   // Fetch from Firestore
   useEffect(() => {
@@ -105,7 +141,7 @@ export default function WinContent() {
     <div className="flex min-h-screen flex-col pt-20 p-6">
       {/* Loading */}
       {loading && (
-        <p className="text-center text-sm text-gray-500">Loading tools...</p>
+         <WinContentSkeleton />
       )}
 
       {/* Tools List */}
@@ -132,9 +168,9 @@ export default function WinContent() {
                 <h3 className="text-base font-semibold truncate">
                   {tool.title}
                 </h3>
-                <p className="text-sm">Price: {tool.price}</p>
+                <p className="text-sm">Price: {formatPrice(tool.price)}</p>
                 <p className="text-sm">Size: {tool.size}</p>
-                <p className="text-sm">Date: {tool.date}</p>
+                <p className="text-sm">Date: {formatDate(tool.date)}</p>
               </div>
             </Link>
 

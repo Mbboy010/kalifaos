@@ -4,59 +4,46 @@
 import { ArrowRight, MoreVertical, Share2, Flag, X } from 'lucide-react';
 import Link from 'next/link';
 import { useAppSelector } from '../redux/hooks';
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-const tools = [
-  {
-    id: '1',
-    title: 'Windows FRP Tool v1.0',
-    price: 'N15,000',
-    size: '25 MB',
-    date: '2025-01-15',
-    image:
-      'https://images.unsplash.com/photo-1755234647026-ecd6f2e6f086?q=80&w=774&auto=format&fit=crop',
-  },
-  {
-    id: '2',
-    title: 'Bypass Pro v2.3',
-    price: 'Free',
-    size: '15 MB',
-    date: '2025-03-22',
-    image:
-      'https://plus.unsplash.com/premium_photo-1674059169515-d91a32dfda1b?q=80&w=735&auto=format&fit=crop',
-  },
-  {
-    id: '3',
-    title: 'UnlockMate v1.5',
-    price: 'N22,000',
-    size: '30 MB',
-    date: '2025-05-10',
-    image:
-      'https://plus.unsplash.com/premium_photo-1674059169486-de3a45461c7e?q=80&w=735&auto=format&fit=crop',
-  },
-  {
-    id: '4',
-    title: 'EasyBypass v3.0',
-    price: 'N30,000',
-    size: '40 MB',
-    date: '2025-07-01',
-    image:
-      'https://plus.unsplash.com/premium_photo-1673340684013-db65ff165ddf?q=80&w=1032&auto=format&fit=crop',
-  },
-  {
-    id: '5',
-    title: 'WinLock Remover v1.2',
-    price: 'Free',
-    size: '20 MB',
-    date: '2025-08-05',
-    image:
-      'https://images.unsplash.com/photo-1597354681836-9a766292c295?q=80&w=735&auto=format&fit=crop',
-  },
-];
+// Firebase imports
+import { db } from '@/server/firebaseApi'; // make sure you have firebase.ts config in app/firebase.ts
+import { collection, getDocs } from 'firebase/firestore';
+
+interface Tool {
+  id: string;
+  title: string;
+  price: string;
+  size: string;
+  date: string;
+  image: string;
+}
 
 export default function WindowsBypassTools() {
   const isColor = useAppSelector((state) => state.color.value);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [tools, setTools] = useState<Tool[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch from Firestore
+  useEffect(() => {
+    const fetchTools = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'Windows-tools'));
+        const toolsData: Tool[] = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Tool[];
+        setTools(toolsData);
+      } catch (error) {
+        console.error('Error fetching tools:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTools();
+  }, []);
 
   const handleShare = async (toolId: string, title: string) => {
     const url =
@@ -80,13 +67,13 @@ export default function WindowsBypassTools() {
     }
   };
 
- useEffect(() =>{
-   if(openMenuId){
-     document.body.style.overflow = 'hidden';
-   }else{
-     document.body.style.overflow = '';
-   }
- },[openMenuId])
+  useEffect(() => {
+    if (openMenuId) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [openMenuId]);
 
   const handleReport = (toolId: string) => {
     alert(`Thanks, your report for item ${toolId} has been noted.`);
@@ -95,15 +82,18 @@ export default function WindowsBypassTools() {
 
   return (
     <div className="flex flex-col p-6">
-    
-     {/* Header */}
+      {/* Header */}
       <div className="flex  items-center w-full mb-8 sm:mb-12">
         <h2 className="text-3xl sm:text-3xl md:text-4xl font-bold text-left">
           Window Bypass Tools
         </h2>
       </div>
-    
-    
+
+      {/* Loading state */}
+      {loading && (
+        <p className="text-center text-sm text-gray-500">Loading tools...</p>
+      )}
+
       {/* Tools List */}
       <div className="flex flex-col gap-4 max-w-4xl w-full mx-auto">
         {tools.map((tool, index) => (
@@ -160,13 +150,10 @@ export default function WindowsBypassTools() {
           className="fixed inset-0 bg-black/40 z-40 flex justify-center items-end"
         >
           <div
-           
             onClick={(e) => e.stopPropagation()}
-            
             style={{
-              backgroundColor: isColor ? "#76767625" : "#ffffff3f",
-              }}
-            
+              backgroundColor: isColor ? '#76767625' : '#ffffff3f',
+            }}
             className="w-full shadow-md backdrop-blur-md max-w-md  rounded-t-2xl border-t border-blue-500 p-4 animate-slide-up"
           >
             <div className="flex justify-between items-center mb-4">
@@ -181,7 +168,10 @@ export default function WindowsBypassTools() {
 
             <button
               onClick={() => {
-                handleShare(openMenuId!, tools.find((t) => t.id === openMenuId)?.title || '');
+                handleShare(
+                  openMenuId!,
+                  tools.find((t) => t.id === openMenuId)?.title || ''
+                );
               }}
               className="w-full flex items-center gap-2 px-3 py-3 text-sm rounded "
             >

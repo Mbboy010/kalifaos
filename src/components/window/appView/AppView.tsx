@@ -17,8 +17,8 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { db } from "@/server/firebaseApi"; // your firebase config
-import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/server/firebaseApi"; 
+import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
 import { useParams } from "next/navigation";
 
 interface Tool {
@@ -27,12 +27,12 @@ interface Tool {
   description: string;
   image: string;
   downloadUrl: string;
-  price: string;
+  price: string | number;
   size: string;
   os: string;
   architecture: string;
-  date: string;
-  downloads: string;
+  createdAt: string;
+  downloads: number;
   rating: string;
   security: string;
   screenshots: string[];
@@ -66,7 +66,7 @@ export default function ToolDetails() {
   useEffect(() => {
     async function fetchTool() {
       try {
-        const docRef = doc(db, "Windows-tools", id); // adjust collection name
+        const docRef = doc(db, "Windows-tools", id);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -86,12 +86,42 @@ export default function ToolDetails() {
   useEffect(() => {
     if (fullscreen) {
       document.body.style.overflow = "hidden";
-      setTimeout(() => setAnimate(true), 10); // trigger zoom-in
+      setTimeout(() => setAnimate(true), 10);
     } else {
       document.body.style.overflow = "";
       setAnimate(false);
     }
   }, [fullscreen]);
+
+  // Format price
+  const formatPrice = (price: string | number) => {
+    const num = Number(price);
+    if (isNaN(num) || num === 0) return "Free";
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      minimumFractionDigits: 0,
+    }).format(num);
+  };
+
+  // Handle download click
+  const handleDownload = async () => {
+    if (!tool) return;
+
+    try {
+      const docRef = doc(db, "Windows-tools", tool.id);
+      await updateDoc(docRef, {
+        downloads: increment(1),
+      });
+
+      // Update local state immediately for better UI response
+      setTool((prev) =>
+        prev ? { ...prev, downloads: (prev.downloads || 0) + 1 } : prev
+      );
+    } catch (error) {
+      console.error("Error updating downloads:", error);
+    }
+  };
 
   if (loading) {
     return (
@@ -141,7 +171,8 @@ export default function ToolDetails() {
           <p className="text-3xl text-blue-500 font-bold mb-3">{tool.title}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm ">
             <div className="flex items-center gap-2">
-              <Tag className="w-4 h-4 text-blue-500" /> Price: {tool.price}
+              <Tag className="w-4 h-4 text-blue-500" /> Price:{" "}
+              {formatPrice(tool.price)}
             </div>
             <div className="flex items-center gap-2">
               <HardDrive className="w-4 h-4 text-green-500" /> Size: {tool.size}
@@ -154,7 +185,7 @@ export default function ToolDetails() {
               {tool.architecture}
             </div>
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-red-500" /> Date: {tool.date}
+              <Calendar className="w-4 h-4 text-red-500" /> Date: {tool.createdAt}
             </div>
           </div>
         </div>
@@ -224,13 +255,16 @@ export default function ToolDetails() {
 
       {/* Download Button */}
       <div className="flex flex-col md:flex-row md:items-start gap-6 my-6">
-        <Link
+        <a
           href={tool.downloadUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleDownload}
           className="inline-flex w-fit items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
         >
           <Download className="w-4 h-4" />
           Download
-        </Link>
+        </a>
       </div>
 
       <Suggestions currentToolId={tool.id} />

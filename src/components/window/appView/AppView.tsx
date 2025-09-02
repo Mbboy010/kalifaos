@@ -26,7 +26,7 @@ interface Tool {
   title: string;
   description: string;
   image: string;
-  downloadLink: string;
+  downloadUrl: string;
   price: string;
   size: string;
   os: string;

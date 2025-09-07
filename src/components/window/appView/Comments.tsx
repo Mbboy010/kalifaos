@@ -43,7 +43,7 @@ export default function Comments({ contentId }: { contentId: string }) {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...(doc.data() as Comment),
+        ...(doc.data() as Omit<Comment, 'id'>), // ✅ Fix: exclude duplicate id
       }));
       setComments(data);
       setLoading(false);

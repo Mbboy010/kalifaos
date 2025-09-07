@@ -1,4 +1,3 @@
-
 "use client";
 
 import Comments from "./Comments";
@@ -43,7 +42,6 @@ interface Tool {
 function SkeletonLoader() {
   return (
     <div className="container mx-auto px-4 py-6 animate-pulse">
-      {/* Tool Header Skeleton */}
       <div className="flex mt-16 flex-col gap-6 my-6">
         <div className="flex flex-row items-center gap-4">
           <div className="w-24 h-24 bg-gray-300 rounded-xl"></div>
@@ -54,7 +52,6 @@ function SkeletonLoader() {
           </div>
         </div>
 
-        {/* Tool Info Skeleton */}
         <div>
           <div className="h-8 bg-gray-300 rounded w-1/2 mb-3"></div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -67,20 +64,15 @@ function SkeletonLoader() {
         </div>
       </div>
 
-      {/* Screenshots Skeleton */}
       <div className="mb-6">
         <div className="h-6 bg-gray-300 rounded w-1/4 mb-3"></div>
         <div className="flex gap-4 overflow-x-auto pb-3">
           {[...Array(3)].map((_, idx) => (
-            <div
-              key={idx}
-              className="h-36 w-64 bg-gray-300 rounded-lg"
-            ></div>
+            <div key={idx} className="h-36 w-64 bg-gray-300 rounded-lg"></div>
           ))}
         </div>
       </div>
 
-      {/* Description Skeleton */}
       <div className="py-5 rounded-xl mb-6">
         <div className="space-y-4">
           <div className="h-6 bg-gray-300 rounded w-3/4"></div>
@@ -90,7 +82,6 @@ function SkeletonLoader() {
         </div>
       </div>
 
-      {/* Download Button Skeleton */}
       <div className="flex flex-col md:flex-row gap-6 my-6">
         <div className="h-10 bg-gray-300 rounded-lg w-32"></div>
       </div>
@@ -100,17 +91,14 @@ function SkeletonLoader() {
 
 function formatDescription(text: string) {
   let formatted = text.replace(/\r\n/g, "\n");
-
   formatted = formatted
     .replace(/\[red\](.*?)\[\/red\]/g, '<span class="text-red-500 font-bold">$1</span>')
     .replace(/\[green\](.*?)\[\/green\]/g, '<span class="text-green-500 font-bold">$1</span>')
-    .replace(/\[blue\](.*?)\[\/blue\]/g, '<span class="text-blue-500 font-bold">$1</span>');
-
-  formatted = formatted.replace(
-    /\[img\](.*?)\[\/img\]/g,
-    '<img src="$1" alt="tool image" class="rounded-lg shadow-md my-2" />'
-  );
-
+    .replace(/\[blue\](.*?)\[\/blue\]/g, '<span class="text-blue-500 font-bold">$1</span>')
+    .replace(
+      /\[img\](.*?)\[\/img\]/g,
+      '<img src="$1" alt="tool image" class="rounded-lg shadow-md my-2" />'
+    );
   return formatted;
 }
 
@@ -131,7 +119,6 @@ export default function AppView() {
   const [fullscreen, setFullscreen] = useState<string | null>(null);
   const [animate, setAnimate] = useState(false);
 
-  // Fetch tool data from Firebase
   useEffect(() => {
     async function fetchTool() {
       try {
@@ -140,7 +127,6 @@ export default function AppView() {
 
         if (docSnap.exists()) {
           const data = docSnap.data();
-
           setTool({
             id: docSnap.id,
             ...data,
@@ -160,7 +146,6 @@ export default function AppView() {
     if (id) fetchTool();
   }, [id]);
 
-  // disable/enable scroll on fullscreen open
   useEffect(() => {
     if (fullscreen) {
       document.body.style.overflow = "hidden";
@@ -171,7 +156,6 @@ export default function AppView() {
     }
   }, [fullscreen]);
 
-  // Format price
   const formatPrice = (price: string | number) => {
     const num = Number(price);
     if (isNaN(num) || num === 0) return "Free";
@@ -182,17 +166,13 @@ export default function AppView() {
     }).format(num);
   };
 
-  // Handle download click
   const handleDownload = async () => {
     if (!tool) return;
-
     try {
       const docRef = doc(db, "Windows-tools", tool.id);
       await updateDoc(docRef, {
         downloads: increment(1),
       });
-
-      // Update local state immediately for better UI response
       setTool((prev) =>
         prev ? { ...prev, downloads: (prev.downloads || 0) + 1 } : prev
       );
@@ -201,17 +181,35 @@ export default function AppView() {
     }
   };
 
-  if (loading) {
-    return <SkeletonLoader />;
-  }
+  // ✅ Handle paid purchase with Opay
+  const handleBuy = async () => {
+    if (!tool) return;
 
-  if (!tool) {
-    return (
-      <div className="container mx-auto px-4 py-6 text-center">
-        Tool not found.
-      </div>
-    );
-  }
+    try {
+      const res = await fetch("/api/opay/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: Number(tool.price),
+          toolId: tool.id,
+          title: tool.title,
+        }),
+      });
+
+      const data = await res.json();
+      if (data?.paymentUrl) {
+        window.location.href = data.paymentUrl; // redirect to Opay checkout
+      } else {
+        alert("Payment initialization failed");
+      }
+    } catch (error) {
+      console.error("Opay error:", error);
+      alert("Payment error, please try again");
+    }
+  };
+
+  if (loading) return <SkeletonLoader />;
+  if (!tool) return <div className="container mx-auto px-4 py-6 text-center">Tool not found.</div>;
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -227,15 +225,13 @@ export default function AppView() {
           />
           <div className="flex flex-col h-full gap-2 text-[1rem]">
             <div className="flex items-center gap-2">
-              <Download className="w-5 h-5 text-indigo-500" /> Downloads:{" "}
-              {formatDownloads(tool.downloads)}
+              <Download className="w-5 h-5 text-indigo-500" /> Downloads: {formatDownloads(tool.downloads)}
             </div>
             <div className="flex items-center gap-2">
               <Star className="w-5 h-4 text-yellow-500" /> Rating: {tool.rating}
             </div>
             <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-green-500" /> Security:{" "}
-              {tool.security}
+              <Shield className="w-5 h-5 text-green-500" /> Security: {tool.security}
             </div>
           </div>
         </div>
@@ -245,8 +241,7 @@ export default function AppView() {
           <p className="text-3xl text-blue-500 font-bold mb-3">{tool.title}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm ">
             <div className="flex items-center gap-2">
-              <Tag className="w-4 h-4 text-blue-500" /> Price:{" "}
-              {formatPrice(tool.price)}
+              <Tag className="w-4 h-4 text-blue-500" /> Price: {formatPrice(tool.price)}
             </div>
             <div className="flex items-center gap-2">
               <HardDrive className="w-4 h-4 text-green-500" /> Size: {tool.size}
@@ -255,8 +250,7 @@ export default function AppView() {
               <Monitor className="w-4 h-4 text-purple-500" /> System: {tool.os}
             </div>
             <div className="flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-orange-500" /> Arch:{" "}
-              {tool.architecture}
+              <Cpu className="w-4 h-4 text-orange-500" /> Arch: {tool.architecture}
             </div>
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-red-500" /> Date: {tool.createdAt}
@@ -308,18 +302,10 @@ export default function AppView() {
           <ReactMarkdown
             rehypePlugins={[rehypeRaw]}
             components={{
-              h1: ({ children }) => (
-                <p className="text-2xl font-bold mt-6 mb-3">{children}</p>
-              ),
-              h2: ({ children }) => (
-                <p className="text-xl font-semibold mt-5 mb-2">{children}</p>
-              ),
-              h3: ({ children }) => (
-                <p className="text-lg font-semibold mt-4 mb-2">{children}</p>
-              ),
-              p: ({ children }) => (
-                <p className="leading-relaxed">{children}</p>
-              ),
+              h1: ({ children }) => <p className="text-2xl font-bold mt-6 mb-3">{children}</p>,
+              h2: ({ children }) => <p className="text-xl font-semibold mt-5 mb-2">{children}</p>,
+              h3: ({ children }) => <p className="text-lg font-semibold mt-4 mb-2">{children}</p>,
+              p: ({ children }) => <p className="leading-relaxed">{children}</p>,
             }}
           >
             {formatDescription(tool.description)}
@@ -327,22 +313,31 @@ export default function AppView() {
         </div>
       </div>
 
-      {/* Download Button */}
+      {/* Download / Buy Button */}
       <div className="flex flex-col md:flex-row md:items-start gap-6 my-6">
-        <a
-          href={tool.downloadUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={handleDownload}
-          className="inline-flex w-fit items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-        >
-          <Download className="w-4 h-4" />
-          Download
-        </a>
+        {Number(tool.price) > 0 ? (
+          <button
+            onClick={handleBuy}
+            className="inline-flex w-fit items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
+          >
+            💳 Buy Now ({formatPrice(tool.price)})
+          </button>
+        ) : (
+          <a
+            href={tool.downloadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleDownload}
+            className="inline-flex w-fit items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+          >
+            <Download className="w-4 h-4" />
+            Download
+          </a>
+        )}
       </div>
 
       <Suggestions currentToolId={tool.id} />
-      <Comments  contentId={tool.id} />
+      <Comments contentId={tool.id} />
     </div>
   );
 }

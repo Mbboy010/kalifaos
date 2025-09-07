@@ -23,7 +23,7 @@ export default function Suggestions({ currentToolId }: { currentToolId: string }
         const querySnapshot = await getDocs(collection(db, 'Windows-tools'));
         let tools: Tool[] = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...(doc.data() as Tool),
+          ...(doc.data() as Omit<Tool, 'id'>), // ✅ Fix duplicate `id`
         }));
 
         // Exclude the current tool

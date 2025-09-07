@@ -1,3 +1,4 @@
+
 "use client";
 
 import Comments from "./Comments";
@@ -341,7 +342,7 @@ export default function AppView() {
       </div>
 
       <Suggestions currentToolId={tool.id} />
-      <Comments />
+      <Comments  contentId={tool.id} />
     </div>
   );
 }

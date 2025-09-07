@@ -1,96 +1,116 @@
-// app/components/windows/Comments.tsx
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useAppSelector } from "../../redux/hooks";
+import { useEffect, useState } from 'react';
+import { useAppSelector } from '../../redux/hooks';
+import { db } from '@/server/firebaseApi';
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  query,
+  orderBy,
+  onSnapshot,
+} from 'firebase/firestore';
 
 interface Comment {
   id: string;
   name: string;
   email: string;
   comment: string;
-  timestamp: string;
+  timestamp?: any;
 }
 
-export default function Comments() {
+export default function Comments({ contentId }: { contentId: string }) {
   const isColor = useAppSelector((state) => state.color.value);
-
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      id: "1",
-      name: "Musa Hakilu",
-      email: "musahakilu@example.com",
-      comment: "This tool is amazing! Helped me fix my issue.",
-      timestamp: new Date().toISOString(),
-    },
-    {
-      id: "2",
-      name: "John Doe",
-      email: "john@example.com",
-      comment: "Nice work, keep updating!",
-      timestamp: new Date().toISOString(),
-    },
-  ]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    comment: "",
+    name: '',
+    email: '',
+    comment: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  // 🔹 Fetch comments in real-time
+  useEffect(() => {
+    if (!contentId) return;
+
+    const q = query(
+      collection(db, 'Windows-tools', contentId, 'comments'),
+      orderBy('timestamp', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Comment),
+      }));
+      setComments(data);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [contentId]);
+
+  // 🔹 Handle input changes
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 🔹 Handle form submit
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name || !formData.email || !formData.comment) return;
 
-    const newComment: Comment = {
-      id: Date.now().toString(),
-      name: formData.name,
-      email: formData.email,
-      comment: formData.comment,
-      timestamp: new Date().toISOString(),
-    };
+    try {
+      await addDoc(collection(db, 'Windows-tools', contentId, 'comments'), {
+        name: formData.name,
+        email: formData.email,
+        comment: formData.comment,
+        timestamp: serverTimestamp(),
+      });
 
-    setComments((prev) => [newComment, ...prev]);
-    setFormData({ name: "", email: "", comment: "" });
+      setFormData({ name: '', email: '', comment: '' });
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
   };
 
   return (
     <div className="mt-8">
       <h2 className="text-xl font-semibold mb-4">User Comments</h2>
 
-
-
       {/* Comment List */}
-      {comments.length > 0 ? (
+      {loading ? (
+        <p className="text-sm text-gray-500">Loading comments...</p>
+      ) : comments.length > 0 ? (
         <div className="space-y-4">
           {comments.map((comment) => (
             <div
               key={comment.id}
               className="p-4 rounded-lg border border-gray-300 dark:border-gray-700"
-              style={{ backgroundColor: isColor ? "#d7d7d719" : "#72727236" }}
+              style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
             >
-              <p className="text-sm font-semibold ">
-                {comment.name}
-              </p>
-              <p className="text-xs 0">{comment.email}</p>
-              <p className="text-sm  mt-1">{comment.comment}</p>
-              <p className="text-xs 0 mt-1">
-                {new Date(comment.timestamp).toLocaleString()}
+              <p className="text-sm font-semibold">{comment.name}</p>
+              <p className="text-xs">{comment.email}</p>
+              <p className="text-sm mt-1">{comment.comment}</p>
+              <p className="text-xs mt-1">
+                {comment.timestamp?.toDate
+                  ? comment.timestamp.toDate().toLocaleString()
+                  : 'Just now'}
               </p>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-sm ">No comments yet.</p>
+        <p className="text-sm">No comments yet.</p>
       )}
-      
-        {/* Comment Form */}
+
+      {/* Comment Form */}
       <form onSubmit={handleSubmit} className="space-y-3 mt-6 mb-6">
         <input
           type="text"
@@ -123,8 +143,6 @@ export default function Comments() {
           Add Comment
         </button>
       </form>
-      
-      
     </div>
   );
 }

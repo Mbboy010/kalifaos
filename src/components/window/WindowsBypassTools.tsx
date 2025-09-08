@@ -278,7 +278,7 @@ export default function WindowsBypassTools() {
       {/* See More */}
       <div className="mt-8 flex justify-start max-w-4xl w-full mx-auto">
         <Link
-          href="/windows-tools"
+          href="/windows-tools?list_page=1"
           className="flex items-center gap-2 text-blue-500 hover:underline text-sm"
         >
           <ArrowRight className="w-5 h-5" />

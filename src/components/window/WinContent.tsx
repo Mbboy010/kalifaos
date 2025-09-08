@@ -1,7 +1,7 @@
 // app/components/windows/WindowsBypassTools.tsx
-'use client';
+"use client";
 
-import WinContentSkeleton from './WinContentSkeleton';
+import WinContentSkeleton from "./WinContentSkeleton";
 import {
   MoreVertical,
   Share2,
@@ -9,14 +9,22 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-} from 'lucide-react';
-import Link from 'next/link';
-import { useAppSelector } from '../redux/hooks';
-import { useState, useEffect } from 'react';
+} from "lucide-react";
+import Link from "next/link";
+import { useAppSelector } from "../redux/hooks";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Firebase
-import { db } from '@/server/firebaseApi';
-import { collection, getDocs } from 'firebase/firestore';
+import { db } from "@/server/firebaseApi";
+import {
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+} from "firebase/firestore";
 
 type Tool = {
   id: string;
@@ -32,30 +40,34 @@ export default function WinContent() {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const itemsPerPage = 5;
-  const [currentPage, setCurrentPage] = useState(1);
   const [tools, setTools] = useState<Tool[]>([]);
-  const [paginatedTools, setPaginatedTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [totalDocs, setTotalDocs] = useState(0);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentPage = Number(searchParams.get("page")) || 1;
 
   // ---- Format Price ----
   const formatPrice = (price: string) => {
     const num = Number(price);
     if (isNaN(num)) return price;
-    if (num === 0) return 'Free';
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
+    if (num === 0) return "Free";
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
     }).format(num);
   };
 
-  // ---- Format Date (WhatsApp style) ----
+  // ---- Format Date ----
   const formatDate = (dateStr: string) => {
-    if (!dateStr) return '';
+    if (!dateStr) return "";
     const now = new Date();
     const date = new Date(dateStr);
-    const diff = Math.floor((now.getTime() - date.getTime()) / 1000); // in seconds
+    const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (diff < 5) return 'now';
+    if (diff < 5) return "now";
     if (diff < 60) return `${diff}s ago`;
 
     const minutes = Math.floor(diff / 60);
@@ -74,38 +86,93 @@ export default function WinContent() {
     return `${years}y ago`;
   };
 
-  // Fetch from Firestore
-  useEffect(() => {
-    const fetchTools = async () => {
+  // ---- Fetch total docs for pagination ----
+  const fetchTotalDocs = useCallback(async () => {
+    const snapshot = await getDocs(
+      query(collection(db, "Windows-tools"), orderBy("date", "desc"))
+    );
+    setTotalDocs(snapshot.size);
+  }, []);
+
+  // ---- Fetch tools by page ----
+  const fetchPage = useCallback(
+    async (page: number) => {
+      setLoading(true);
+      setError(null);
+
       try {
-        const querySnapshot = await getDocs(collection(db, 'Windows-tools'));
-        const toolsData: Tool[] = querySnapshot.docs.map((doc) => ({
+        // If page is out of range → show error
+        const totalPages = Math.ceil(totalDocs / itemsPerPage);
+        if (page < 1 || (totalPages > 0 && page > totalPages)) {
+          setTools([]);
+          setError("This page does not exist.");
+          setLoading(false);
+          return;
+        }
+
+        let q = query(
+          collection(db, "Windows-tools"),
+          orderBy("date", "desc"),
+          limit(itemsPerPage)
+        );
+
+        if (page > 1) {
+          const prevSnapshot = await getDocs(
+            query(
+              collection(db, "Windows-tools"),
+              orderBy("date", "desc"),
+              limit((page - 1) * itemsPerPage)
+            )
+          );
+
+          const lastVisible = prevSnapshot.docs[prevSnapshot.docs.length - 1];
+          if (lastVisible) {
+            q = query(
+              collection(db, "Windows-tools"),
+              orderBy("date", "desc"),
+              startAfter(lastVisible),
+              limit(itemsPerPage)
+            );
+          }
+        }
+
+        const snapshot = await getDocs(q);
+        const toolsData: Tool[] = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         })) as Tool[];
+
+        // If no results → page doesn't exist
+        if (toolsData.length === 0) {
+          setError("This page does not exist.");
+        }
+
         setTools(toolsData);
-      } catch (error) {
-        console.error('Error fetching tools:', error);
+      } catch (err) {
+        console.error("Error fetching tools:", err);
+        setError("Failed to load tools. Try again.");
       } finally {
         setLoading(false);
       }
-    };
+    },
+    [itemsPerPage, totalDocs]
+  );
 
-    fetchTools();
-  }, []);
-
-  // Update pagination slice
   useEffect(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    setPaginatedTools(tools.slice(start, end));
-  }, [currentPage, tools]);
+    fetchTotalDocs();
+    fetchPage(currentPage);
+  }, [currentPage, fetchPage, fetchTotalDocs]);
 
-  const totalPages = Math.ceil(tools.length / itemsPerPage);
+  // ---- Handle page change ----
+  const handlePageChange = (page: number) => {
+    router.push(`?page=${page}`);
+  };
+
+  const totalPages = Math.ceil(totalDocs / itemsPerPage);
 
   const handleShare = async (toolId: string, title: string) => {
     const url =
-      typeof window !== 'undefined'
+      typeof window !== "undefined"
         ? `${window.location.origin}/windows-tools/${toolId}`
         : `/windows-tools/${toolId}`;
     try {
@@ -113,24 +180,15 @@ export default function WinContent() {
         await navigator.share({ title, url });
       } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(url);
-        alert('Link copied to clipboard');
+        alert("Link copied to clipboard");
       } else {
         alert(url);
       }
     } catch {
-      // cancelled
     } finally {
       setOpenMenuId(null);
     }
   };
-
-  useEffect(() => {
-    if (openMenuId) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-  }, [openMenuId]);
 
   const handleReport = (toolId: string) => {
     alert(`Thanks, your report for item ${toolId} has been noted.`);
@@ -139,19 +197,21 @@ export default function WinContent() {
 
   return (
     <div className="flex min-h-screen flex-col pt-20 p-6">
-      {/* Loading */}
-      {loading && (
-         <WinContentSkeleton />
+      {loading && <WinContentSkeleton />}
+
+      {/* Error & Empty Page */}
+      {!loading && error && (
+        <p className="text-center text-red-500 font-medium py-6">{error}</p>
       )}
 
       {/* Tools List */}
       <div className="flex flex-col gap-4 max-w-4xl w-full mx-auto">
-        {paginatedTools.map((tool, index) => (
+        {tools.map((tool, index) => (
           <div
             key={tool.id}
             className="relative flex items-center gap-4 p-4 rounded-lg shadow-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors animate-fade-in"
             style={{
-              backgroundColor: isColor ? '#d7d7d719' : '#72727236',
+              backgroundColor: isColor ? "#d7d7d719" : "#72727236",
               animationDelay: `${(index + 1) * 100}ms`,
             }}
           >
@@ -174,7 +234,6 @@ export default function WinContent() {
               </div>
             </Link>
 
-            {/* 3-dots menu */}
             <div className="absolute right-2 top-3">
               <button
                 onClick={(e) => {
@@ -193,118 +252,53 @@ export default function WinContent() {
       </div>
 
       {/* Pagination */}
-      {!loading && tools.length > 0 && (
+      {!loading && !error && tools.length > 0 && (
         <div className="flex justify-center mt-6 space-x-2">
           <button
-            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
             className="px-3 py-2 rounded-full border disabled:opacity-50 flex items-center"
             style={{
-              backgroundColor: isColor ? '#d7d7d719' : '#72727236',
+              backgroundColor: isColor ? "#d7d7d719" : "#72727236",
             }}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          {Array.from({ length: totalPages }, (_, i) => (
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
-              key={i + 1}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-2 rounded-full border transition ${
-                currentPage === i + 1
-                  ? 'bg-blue-500 text-white border-blue-500'
-                  : ''
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-3 py-2 rounded-full border ${
+                page === currentPage
+                  ? "bg-blue-500 text-white"
+                  : "hover:bg-gray-200 dark:hover:bg-gray-700"
               }`}
               style={{
-                backgroundColor: isColor ? '#d7d7d719' : '#72727236',
+                backgroundColor:
+                  page === currentPage
+                    ? "#2563eb"
+                    : isColor
+                    ? "#d7d7d719"
+                    : "#72727236",
               }}
             >
-              {i + 1}
+              {page}
             </button>
           ))}
 
           <button
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
             className="px-3 py-2 rounded-full border disabled:opacity-50 flex items-center"
             style={{
-              backgroundColor: isColor ? '#d7d7d719' : '#72727236',
+              backgroundColor: isColor ? "#d7d7d719" : "#72727236",
             }}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       )}
-
-      {/* Bottom Modal */}
-      {openMenuId && (
-        <div
-          onClick={() => setOpenMenuId(null)}
-          className="fixed inset-0 bg-black/40 z-40 flex justify-center items-end"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: isColor ? '#76767625' : '#ffffff3f',
-            }}
-            className="w-full max-w-md shadow-md backdrop-blur-md rounded-t-2xl border-t border-blue-500 p-4 animate-slide-up"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h4 className="font-semibold text-sm">Options</h4>
-              <button
-                onClick={() => setOpenMenuId(null)}
-                className="p-1 rounded"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <button
-              onClick={() =>
-                handleShare(
-                  openMenuId!,
-                  tools.find((t) => t.id === openMenuId)?.title || ''
-                )
-              }
-              className="w-full flex items-center gap-2 px-3 py-3 text-sm rounded"
-            >
-              <Share2 className="w-4 h-4" /> Share
-            </button>
-            <button
-              onClick={() => handleReport(openMenuId!)}
-              className="w-full flex items-center gap-2 px-3 py-3 text-sm rounded"
-            >
-              <Flag className="w-4 h-4" /> Report
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Disclaimer */}
-      <div
-        style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
-        className="mt-8 sm:mt-12 p-4 sm:p-6 rounded-lg text-xs sm:text-sm max-w-3xl w-full mx-auto border border-gray-700"
-      >
-        <p>
-          Use these tools responsibly and only on devices you legally own.
-          Kalifa OS is not responsible for any misuse or device issues.
-        </p>
-      </div>
-
-      {/* Animations */}
-      <style jsx>{`
-        .animate-slide-up {
-          animation: slide-up 0.3s ease-out;
-        }
-        @keyframes slide-up {
-          from {
-            transform: translateY(100%);
-          }
-          to {
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   );
 }

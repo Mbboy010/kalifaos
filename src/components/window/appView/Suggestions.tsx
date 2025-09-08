@@ -51,7 +51,7 @@ export default function Suggestions({ currentToolId }: { currentToolId: string }
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="w-[180px] h-[220px] flex-shrink-0 rounded-lg bg-gray-200 animate-pulse"
+              className="w-[180px] h-[200px] flex-shrink-0 rounded-lg bg-gray-200 animate-pulse"
             />
           ))}
         </div>
@@ -70,7 +70,7 @@ export default function Suggestions({ currentToolId }: { currentToolId: string }
           <Link
             key={tool.id}
             href={`/windows-tools/${tool.id}`}
-            className="w-[180px] h-[220px] flex-shrink-0 flex flex-col items-center justify-between p-4 rounded-xl shadow-m hover:shadow-lg hover:-translate-y-1 transition-all animate-fade-in"
+            className=" h-[200px] flex-shrink-0 flex flex-col items-center justify-between p-2 rounded-xl shadow-m hover:shadow-lg hover:-translate-y-1 transition-all animate-fade-in"
             style={{ animationDelay: `${(index + 1) * 100}ms` }}
           >
             <img

@@ -14,6 +14,8 @@ import {
   Shield,
   Star,
   X,
+  AlertTriangle,
+  Home,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -44,7 +46,7 @@ function SkeletonLoader() {
     <div className="container mx-auto px-4 py-6 animate-pulse">
       <div className="flex mt-16 flex-col gap-6 my-6">
         <div className="flex flex-row items-center gap-4">
-          <div className="w-24 h-24 bg-gray-300 rounded-xl"></div>
+          <div className="w-32 h-24 bg-gray-300 rounded-xl"></div>
           <div className="flex flex-col gap-2 w-full">
             <div className="h-4 bg-gray-300 rounded w-1/3"></div>
             <div className="h-4 bg-gray-300 rounded w-1/4"></div>
@@ -102,7 +104,6 @@ function formatDescription(text: string) {
   return formatted;
 }
 
-// ✅ Format downloads into K, M, B
 function formatDownloads(num: number): string {
   if (num < 1000) return num.toString();
   if (num < 1_000_000) return (num / 1000).toFixed(2).replace(/\.00$/, "") + "k";
@@ -135,9 +136,12 @@ export default function AppView() {
                 ? data.createdAt.toDate().toLocaleDateString()
                 : String(data.createdAt ?? ""),
           } as Tool);
+        } else {
+          setTool(null);
         }
       } catch (error) {
         console.error("Error fetching tool:", error);
+        setTool(null);
       } finally {
         setLoading(false);
       }
@@ -146,10 +150,22 @@ export default function AppView() {
     if (id) fetchTool();
   }, [id]);
 
+  // Fullscreen back button
   useEffect(() => {
     if (fullscreen) {
       document.body.style.overflow = "hidden";
       setTimeout(() => setAnimate(true), 10);
+
+      window.history.pushState({ fullscreen: true }, "");
+      const handlePopState = () => setFullscreen(null);
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+        if (window.history.state?.fullscreen) {
+          window.history.back();
+        }
+      };
     } else {
       document.body.style.overflow = "";
       setAnimate(false);
@@ -181,7 +197,6 @@ export default function AppView() {
     }
   };
 
-  // ✅ Handle paid purchase with Opay
   const handleBuy = async () => {
     if (!tool) return;
 
@@ -198,7 +213,7 @@ export default function AppView() {
 
       const data = await res.json();
       if (data?.paymentUrl) {
-        window.location.href = data.paymentUrl; // redirect to Opay checkout
+        window.location.href = data.paymentUrl;
       } else {
         alert("Payment initialization failed");
       }
@@ -209,7 +224,27 @@ export default function AppView() {
   };
 
   if (loading) return <SkeletonLoader />;
-  if (!tool) return <div className="container mx-auto px-4 py-6 text-center">Tool not found.</div>;
+
+  // Custom Not Found
+  if (!tool) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center min-h-[70vh] px-4">
+        <AlertTriangle className="w-16 h-16 text-red-500 mb-4" />
+        <h2 className="text-2xl font-bold mb-2">
+          Content Not Found
+        </h2>
+        <p className=" mb-6">
+          The tool you are looking for is not available or has been deleted.
+        </p>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 text-white shadow hover:bg-blue-700 transition"
+        >
+          <Home className="w-5 h-5" /> Back to Home
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -225,13 +260,15 @@ export default function AppView() {
           />
           <div className="flex flex-col h-full gap-2 text-[1rem]">
             <div className="flex items-center gap-2">
-              <Download className="w-5 h-5 text-indigo-500" /> Downloads: {formatDownloads(tool.downloads)}
+              <Download className="w-5 h-5 text-indigo-500" /> Downloads:{" "}
+              {formatDownloads(tool.downloads)}
             </div>
             <div className="flex items-center gap-2">
               <Star className="w-5 h-4 text-yellow-500" /> Rating: {tool.rating}
             </div>
             <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-green-500" /> Security: {tool.security}
+              <Shield className="w-5 h-5 text-green-500" /> Security:{" "}
+              {tool.security}
             </div>
           </div>
         </div>
@@ -241,7 +278,8 @@ export default function AppView() {
           <p className="text-3xl text-blue-500 font-bold mb-3">{tool.title}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm ">
             <div className="flex items-center gap-2">
-              <Tag className="w-4 h-4 text-blue-500" /> Price: {formatPrice(tool.price)}
+              <Tag className="w-4 h-4 text-blue-500" /> Price:{" "}
+              {formatPrice(tool.price)}
             </div>
             <div className="flex items-center gap-2">
               <HardDrive className="w-4 h-4 text-green-500" /> Size: {tool.size}
@@ -250,10 +288,12 @@ export default function AppView() {
               <Monitor className="w-4 h-4 text-purple-500" /> System: {tool.os}
             </div>
             <div className="flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-orange-500" /> Arch: {tool.architecture}
+              <Cpu className="w-4 h-4 text-orange-500" /> Arch:{" "}
+              {tool.architecture}
             </div>
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-red-500" /> Date: {tool.createdAt}
+              <Calendar className="w-4 h-4 text-red-500" /> Date:{" "}
+              {tool.createdAt}
             </div>
           </div>
         </div>
@@ -302,9 +342,15 @@ export default function AppView() {
           <ReactMarkdown
             rehypePlugins={[rehypeRaw]}
             components={{
-              h1: ({ children }) => <p className="text-2xl font-bold mt-6 mb-3">{children}</p>,
-              h2: ({ children }) => <p className="text-xl font-semibold mt-5 mb-2">{children}</p>,
-              h3: ({ children }) => <p className="text-lg font-semibold mt-4 mb-2">{children}</p>,
+              h1: ({ children }) => (
+                <p className="text-2xl font-bold mt-6 mb-3">{children}</p>
+              ),
+              h2: ({ children }) => (
+                <p className="text-xl font-semibold mt-5 mb-2">{children}</p>
+              ),
+              h3: ({ children }) => (
+                <p className="text-lg font-semibold mt-4 mb-2">{children}</p>
+              ),
               p: ({ children }) => <p className="leading-relaxed">{children}</p>,
             }}
           >

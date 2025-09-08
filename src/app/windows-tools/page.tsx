@@ -1,14 +1,14 @@
 // app/windows/page.tsx
 import type { Metadata } from "next";
-import WinCom from "../../components/window/WinCom"; // ✅ make sure path matches your component
-
-type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
-};
+import WinCom from "../../components/window/WinCom"; // ✅ ensure correct path
 
 // 🔹 Dynamic Metadata for Windows Tools
-export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const currentPage = Number(searchParams.page) || 1;
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined };
+}): Promise<Metadata> {
+  const currentPage = Number(searchParams?.page ?? 1);
 
   return {
     title: `Windows Tools Page ${currentPage}`,

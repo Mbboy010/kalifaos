@@ -1,13 +1,9 @@
-// app/windows/page.tsx
+// app/windows-tools/page.tsx
 import type { Metadata } from "next";
-import WinCom from "../../components/window/WinCom"; // ✅ ensure correct path
+import WinCom from "../../components/window/WinCom"; // ✅ make sure path is correct
 
 // 🔹 Dynamic Metadata for Windows Tools
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams?: { [key: string]: string | string[] | undefined };
-}): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: any): Promise<Metadata> {
   const currentPage = Number(searchParams?.page ?? 1);
 
   return {
@@ -16,7 +12,7 @@ export async function generateMetadata({
     openGraph: {
       title: `Windows Tools - Page ${currentPage}`,
       description: `Page ${currentPage} of Windows bypass tools and utilities for different devices.`,
-      url: `/windows?page=${currentPage}`,
+      url: `/windows-tools?page=${currentPage}`,
     },
   };
 }

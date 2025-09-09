@@ -16,10 +16,10 @@ interface ResultItem {
 }
 
 const dummyResults: ResultItem[] = [
-  { id: 1, title: 'Samsung FRP Tool', image: 'https://source.unsplash.com/80x80/?samsung,phone' },
-  { id: 2, title: 'Infinix System App Remover', image: 'https://source.unsplash.com/80x80/?infinix,android' },
-  { id: 3, title: 'Tecno Windows Bypass Tool', image: 'https://source.unsplash.com/80x80/?windows,computer' },
-  { id: 4, title: 'Universal Lock Screen Fixer', image: 'https://source.unsplash.com/80x80/?lock,security' },
+  { id: 1, title: 'Samsung FRP Tool', image: 'https://images.unsplash.com/photo-1622782914767-404fb9ab3f57?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fG1vYmlsZXxlbnwwfHwwfHx8MA%3D%3D' },
+  { id: 2, title: 'Infinix System App Remover', image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9iaWxlfGVufDB8fDB8fHww' },
+  { id: 3, title: 'Tecno Windows Bypass Tool', image: 'https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8bW9iaWxlfGVufDB8fDB8fHww' },
+  { id: 4, title: 'Universal Lock Screen Fixer', image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9iaWxlfGVufDB8fDB8fHww' },
 ];
 
 export default function SearchBar({ darkMode, open, onClose }: SearchBarProps) {
@@ -43,7 +43,7 @@ export default function SearchBar({ darkMode, open, onClose }: SearchBarProps) {
       {/* Search Input */}
       <form
         onSubmit={handleSearch}
-        className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-2"
+        className="flex items-center bg-gray-800/40 rounded-full px-3 py-2"
       >
         <input
           type="text"
@@ -62,12 +62,12 @@ export default function SearchBar({ darkMode, open, onClose }: SearchBarProps) {
 
       {/* Results */}
       {search && (
-        <div className="mt-3 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-3 space-y-2 max-h-60 overflow-y-auto">
+        <div className="mt-3 rounded-lg  p-3 space-y-2 max-h-60 overflow-y-auto">
           {filteredResults.length > 0 ? (
             filteredResults.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                className="flex items-center bg-black/20 space-x-3 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
               >
                 <img
                   src={item.image}

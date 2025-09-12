@@ -1,70 +1,86 @@
-// app/search/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppSelector } from "../../components/redux/hooks";
-import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/server/firebaseApi"; // ✅ your config
+import { Download } from "lucide-react"; // 👈 download icon
 
-// ✅ Define type with optional route
 interface Tool {
   id: string;
   title: string;
   image: string;
-  route?: string;
+  link?: string; // 👈 Firebase download link for mobile
 }
-
-const mockWindowsTools: Tool[] = [
-  {
-    id: "1",
-    title: "Windows FRP Tool v1.0",
-    image:
-      "https://images.unsplash.com/photo-1587202372775-98927a6d68e0?w=800&auto=format&fit=crop&q=60",
-  },
-  {
-    id: "2",
-    title: "Bypass Pro v2.3",
-    image:
-      "https://images.unsplash.com/photo-1593642532400-2682810df593?w=800&auto=format&fit=crop&q=60",
-  },
-  {
-    id: "3",
-    title: "UnlockMate v1.5",
-    image:
-      "https://images.unsplash.com/photo-1550525811-e5869dd03032?w=800&auto=format&fit=crop&q=60",
-  },
-];
-
-const mockMobileTools: Tool[] = [
-  {
-    id: "frp-tools",
-    title: "FRP Tools APK",
-    image:
-      "https://images.unsplash.com/photo-1622782914767-404fb9ab3f57?w=800&auto=format&fit=crop&q=60",
-    route: "/frp-tools-apk-download",
-  },
-  {
-    id: "system-apps",
-    title: "System Apps",
-    image:
-      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop&q=60",
-    route: "/system-apps",
-  },
-  {
-    id: "settings",
-    title: "Settings & Lock Screen",
-    image:
-      "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=800&auto=format&fit=crop&q=60",
-    route: "/bypass-frp-setting",
-  },
-];
 
 export default function SearchCon() {
   const isColor = useAppSelector((state) => state.color.value);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [activeTab, setActiveTab] = useState<"windows" | "mobile">("windows");
+  const [query, setQuery] = useState<string>("");
 
-  const results = activeTab === "windows" ? mockWindowsTools : mockMobileTools;
+  const [windowsTools, setWindowsTools] = useState<Tool[]>([]);
+  const [mobileTools, setMobileTools] = useState<Tool[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Swipe detection
+  // ✅ Fetch both collections from Firestore
+  useEffect(() => {
+    const fetchTools = async () => {
+      setLoading(true);
+      try {
+        const [windowsSnap, mobileSnap] = await Promise.all([
+          getDocs(collection(db, "Windows-tools")),
+          getDocs(collection(db, "download")), // 👈 mobile tools
+        ]);
+
+        const winTools: Tool[] = windowsSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<Tool, "id">),
+        }));
+
+        const mobTools: Tool[] = mobileSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<Tool, "id">),
+        }));
+
+        setWindowsTools(winTools);
+        setMobileTools(mobTools);
+      } catch (error) {
+        console.error("❌ Error fetching tools:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTools();
+  }, []);
+
+  // ✅ On page load, check query params
+  useEffect(() => {
+    const type = searchParams.get("type");
+    const q = searchParams.get("query") || "";
+    if (type === "mobile") setActiveTab("mobile");
+    else setActiveTab("windows");
+    setQuery(q);
+  }, [searchParams]);
+
+  // ✅ Update URL when tab changes
+  const handleTabChange = (tab: "windows" | "mobile") => {
+    setActiveTab(tab);
+    const params = new URLSearchParams();
+    if (query) params.set("query", query);
+    params.set("type", tab);
+    router.push(`?${params.toString()}`);
+  };
+
+  const results = (activeTab === "windows" ? windowsTools : mobileTools).filter(
+    (item) => item.title.toLowerCase().includes(query.toLowerCase())
+  );
+
+  // --- Swipe detection ---
   let touchStartX = 0;
   let touchEndX = 0;
 
@@ -79,15 +95,12 @@ export default function SearchCon() {
 
   const handleSwipe = () => {
     const swipeDistance = touchEndX - touchStartX;
-
-    if (Math.abs(swipeDistance) < 50) return; // ignore tiny swipes
+    if (Math.abs(swipeDistance) < 50) return;
 
     if (swipeDistance < 0 && activeTab === "windows") {
-      // swipe left → go to mobile
-      setActiveTab("mobile");
+      handleTabChange("mobile");
     } else if (swipeDistance > 0 && activeTab === "mobile") {
-      // swipe right → go to windows
-      setActiveTab("windows");
+      handleTabChange("windows");
     }
   };
 
@@ -100,7 +113,7 @@ export default function SearchCon() {
       {/* Toggle Tabs */}
       <div className="flex mt-16 justify-between mb-6">
         <button
-          onClick={() => setActiveTab("windows")}
+          onClick={() => handleTabChange("windows")}
           className={`flex-1 py-2 text-center font-semibold rounded-l-lg transition-all ${
             activeTab === "windows"
               ? "bg-blue-500 text-white"
@@ -110,7 +123,7 @@ export default function SearchCon() {
           Windows
         </button>
         <button
-          onClick={() => setActiveTab("mobile")}
+          onClick={() => handleTabChange("mobile")}
           className={`flex-1 py-2 text-center font-semibold rounded-r-lg transition-all ${
             activeTab === "mobile"
               ? "bg-blue-500 text-white"
@@ -123,35 +136,53 @@ export default function SearchCon() {
 
       {/* Results */}
       <div className="space-y-3">
-        {results.length > 0 ? (
-          results.map((item) => (
-            <Link
-              key={item.id}
-              href={
-                activeTab === "windows"
-                  ? `/windows-tools/${item.id}`
-                  : item.route || "#"
-              }
-              className="flex items-center space-x-3 p-3 rounded-md cursor-pointer transition-colors bg-black/5 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-gray-800"
-              style={{ backgroundColor: isColor ? "#d7d7d719" : "#72727236" }}
-            >
-              <img
-                src={item.image}
-                alt={item.title}
-                className="w-12 h-12 rounded-md object-cover"
-              />
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                {item.title}
-              </span>
-            </Link>
-          ))
+        {loading ? (
+          <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+            Loading...
+          </p>
+        ) : results.length > 0 ? (
+          results.map((item) =>
+            activeTab === "windows" ? (
+              // --- Windows item navigates ---
+              <div
+                key={item.id}
+                onClick={() => router.push(`/windows-tools/${item.id}`)}
+                className="flex items-center space-x-3 p-3 rounded-md cursor-pointer transition-colors bg-black/5 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-gray-800"
+                style={{ backgroundColor: isColor ? "#d7d7d719" : "#72727236" }}
+              >
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className="w-12 h-12 rounded-md object-cover"
+                />
+                <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  {item.title}
+                </span>
+              </div>
+            ) : (
+              // --- Mobile item downloads ---
+              <a
+                key={item.id}
+                href={item.link}
+                download
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 p-3 rounded-md transition-colors bg-black/5 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-gray-800"
+                style={{ backgroundColor: isColor ? "#d7d7d719" : "#72727236" }}
+              >
+                <Download className="w-12 h-12 text-blue-500" />
+                <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  {item.title}
+                </span>
+              </a>
+            )
+          )
         ) : (
           <p className="text-sm text-center text-gray-500 dark:text-gray-400">
             No results found
           </p>
         )}
       </div>
-
     </div>
   );
 }

@@ -115,7 +115,7 @@ export default function FrpCon() {
                 disabled={loading[element.title]}
               >
                 <div
-                  
+
                   className="flex items-center p-2 "
                 >
                   <div className="p-1 mr-2">

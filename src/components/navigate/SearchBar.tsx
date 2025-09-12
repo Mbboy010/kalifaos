@@ -1,7 +1,9 @@
 'use client';
 
 import { Search } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/server/firebaseApi'; // ✅ using your config
 
 interface SearchBarProps {
   darkMode: boolean;
@@ -10,31 +12,71 @@ interface SearchBarProps {
 }
 
 interface ResultItem {
-  id: number;
+  id: string;
   title: string;
   image: string;
+  type: 'window' | 'mobile';
 }
-
-const dummyResults: ResultItem[] = [
-  { id: 1, title: 'Samsung FRP Tool', image: 'https://images.unsplash.com/photo-1622782914767-404fb9ab3f57?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fG1vYmlsZXxlbnwwfHwwfHx8MA%3D%3D' },
-  { id: 2, title: 'Infinix System App Remover', image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9iaWxlfGVufDB8fDB8fHww' },
-  { id: 3, title: 'Tecno Windows Bypass Tool', image: 'https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8bW9iaWxlfGVufDB8fDB8fHww' },
-  { id: 4, title: 'Universal Lock Screen Fixer', image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9iaWxlfGVufDB8fDB8fHww' },
-];
 
 export default function SearchBar({ darkMode, open, onClose }: SearchBarProps) {
   const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<'window' | 'mobile'>('window');
+  const [results, setResults] = useState<ResultItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSearch = (e: React.FormEvent) => {
+  // 🔹 Fetch both collections
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [windowsSnap, mobileSnap] = await Promise.all([
+          getDocs(collection(db, 'Windows-tools')),
+          getDocs(collection(db, 'download')),
+        ]);
+
+        const windowsTools: ResultItem[] = windowsSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<ResultItem, 'id' | 'type'>),
+          type: 'window',
+        }));
+
+        const mobileTools: ResultItem[] = mobileSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<ResultItem, 'id' | 'type'>),
+          type: 'mobile',
+        }));
+
+        setResults([...windowsTools, ...mobileTools]);
+      } catch (error) {
+        console.error('❌ Error fetching tools:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleSearch = (e: React.FormEvent, type: 'window' | 'mobile' = 'window') => {
     e.preventDefault();
     if (!search.trim()) return;
     onClose();
-    window.location.href = `/search?query=${encodeURIComponent(search)}`;
+    window.location.href = `/search?query=${encodeURIComponent(search)}&type=${type}`;
   };
 
-  const filteredResults = dummyResults.filter((item) =>
-    item.title.toLowerCase().includes(search.toLowerCase())
+  const filteredResults = results.filter(
+    (item) =>
+      item.title.toLowerCase().includes(search.toLowerCase()) &&
+      item.type === activeTab
   );
+
+  const windowCount = results.filter(
+    (i) => i.title.toLowerCase().includes(search.toLowerCase()) && i.type === 'window'
+  ).length;
+
+  const mobileCount = results.filter(
+    (i) => i.title.toLowerCase().includes(search.toLowerCase()) && i.type === 'mobile'
+  ).length;
 
   if (!open) return null;
 
@@ -42,7 +84,7 @@ export default function SearchBar({ darkMode, open, onClose }: SearchBarProps) {
     <div className="w-full px-4 pb-3 animate-slide-down">
       {/* Search Input */}
       <form
-        onSubmit={handleSearch}
+        onSubmit={(e) => handleSearch(e, activeTab)}
         className="flex items-center bg-gray-800/40 rounded-full px-3 py-2"
       >
         <input
@@ -50,20 +92,20 @@ export default function SearchBar({ darkMode, open, onClose }: SearchBarProps) {
           placeholder="Search..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className={`flex-1 bg-transparent outline-none text-sm ${
-            darkMode ? 'text-white' : 'text-gray-800'
-          }`}
+          className="flex-1 placeholder:text-gray-200 bg-transparent outline-none text-sm text-white"
           autoFocus
         />
         <button type="submit">
-          <Search className="w-5 h-5 ml-2" />
+          <Search className="w-5 text-white h-5 ml-2 " />
         </button>
       </form>
 
       {/* Results */}
       {search && (
-        <div className="mt-3 rounded-lg  p-3 space-y-2 max-h-60 overflow-y-auto">
-          {filteredResults.length > 0 ? (
+        <div className="mt-3 rounded-lg p-3 space-y-2 max-h-60 overflow-y-auto">
+          {loading ? (
+            <p className="text-sm text-center text-gray-400">Loading...</p>
+          ) : filteredResults.length > 0 ? (
             filteredResults.map((item) => (
               <div
                 key={item.id}
@@ -92,6 +134,42 @@ export default function SearchBar({ darkMode, open, onClose }: SearchBarProps) {
               No results found
             </p>
           )}
+        </div>
+      )}
+
+      {/* Bottom Tabs */}
+      {search && (
+        <div className="flex justify-around mt-3 border-t border-gray-600 pt-2">
+          <button
+            onClick={() => {
+              setActiveTab('window');
+              handleSearch(new Event('submit') as any, 'window');
+            }}
+            className={`text-sm px-3 py-1 rounded-md ${
+              activeTab === 'window'
+                ? 'bg-blue-600 text-white'
+                : darkMode
+                ? 'text-gray-300'
+                : 'text-gray-700'
+            }`}
+          >
+            Window FRP Tools ({windowCount})
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('mobile');
+              handleSearch(new Event('submit') as any, 'mobile');
+            }}
+            className={`text-sm px-3 py-1 rounded-md ${
+              activeTab === 'mobile'
+                ? 'bg-blue-600 text-white'
+                : darkMode
+                ? 'text-gray-300'
+                : 'text-gray-700'
+            }`}
+          >
+            Mobile FRP Tools ({mobileCount})
+          </button>
         </div>
       )}
 

@@ -1,18 +1,13 @@
 import Search from "../../components/search/Search";
 import React from "react";
-import type { Metadata, ResolvingMetadata } from "next";
+import type { Metadata } from "next";
 
-type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
-};
-
-// ✅ Use correct typing for Next.js App Router
+// ✅ Use `any` for searchParams to avoid type errors
 export async function generateMetadata(
-  { searchParams }: Props,
-  parent: ResolvingMetadata
+  { searchParams }: any
 ): Promise<Metadata> {
-  const query = typeof searchParams.query === "string" ? searchParams.query : "";
-  const type = typeof searchParams.type === "string" ? searchParams.type : "windows";
+  const query = typeof searchParams?.query === "string" ? searchParams.query : "";
+  const type = typeof searchParams?.type === "string" ? searchParams.type : "windows";
 
   const sectionName = type === "mobile" ? "Mobile Tools" : "Windows Tools";
 

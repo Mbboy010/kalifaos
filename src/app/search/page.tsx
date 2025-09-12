@@ -1,10 +1,15 @@
 import Search from "../../components/search/Search";
 import React from "react";
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 
-// ✅ Dynamic Metadata with query + type
+type Props = {
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
+// ✅ Use correct typing for Next.js App Router
 export async function generateMetadata(
-  { searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }
+  { searchParams }: Props,
+  parent: ResolvingMetadata
 ): Promise<Metadata> {
   const query = typeof searchParams.query === "string" ? searchParams.query : "";
   const type = typeof searchParams.type === "string" ? searchParams.type : "windows";

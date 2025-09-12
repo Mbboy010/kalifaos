@@ -104,7 +104,7 @@ export default function SearchBar({ darkMode, open, onClose }: SearchBarProps) {
       
       {/* Bottom Tabs */}
       {search && (
-        <div className="flex justify-around mt-3 border-b border-gray-600 pt-2">
+        <div className="flex justify-around mb-3 border-b border-gray-600 pb-2">
           <button
             onClick={() => {
               setActiveTab('window');

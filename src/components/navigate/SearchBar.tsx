@@ -99,6 +99,44 @@ export default function SearchBar({ darkMode, open, onClose }: SearchBarProps) {
           <Search className="w-5 text-white h-5 ml-2 " />
         </button>
       </form>
+      
+      
+      
+      {/* Bottom Tabs */}
+      {search && (
+        <div className="flex justify-around mt-3 border-b border-gray-600 pt-2">
+          <button
+            onClick={() => {
+              setActiveTab('window');
+              handleSearch(new Event('submit') as any, 'window');
+            }}
+            className={`text-sm px-3 py-1 rounded-md ${
+              activeTab === 'window'
+                ? 'bg-blue-600 text-white'
+                : darkMode
+                ? 'text-gray-300'
+                : 'text-gray-700'
+            }`}
+          >
+            Window FRP Tools ({windowCount})
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('mobile');
+              handleSearch(new Event('submit') as any, 'mobile');
+            }}
+            className={`text-sm px-3 py-1 rounded-md ${
+              activeTab === 'mobile'
+                ? 'bg-blue-600 text-white'
+                : darkMode
+                ? 'text-gray-300'
+                : 'text-gray-700'
+            }`}
+          >
+            Mobile FRP Tools ({mobileCount})
+          </button>
+        </div>
+      )}
 
       {/* Results */}
       {search && (
@@ -137,41 +175,6 @@ export default function SearchBar({ darkMode, open, onClose }: SearchBarProps) {
         </div>
       )}
 
-      {/* Bottom Tabs */}
-      {search && (
-        <div className="flex justify-around mt-3 border-t border-gray-600 pt-2">
-          <button
-            onClick={() => {
-              setActiveTab('window');
-              handleSearch(new Event('submit') as any, 'window');
-            }}
-            className={`text-sm px-3 py-1 rounded-md ${
-              activeTab === 'window'
-                ? 'bg-blue-600 text-white'
-                : darkMode
-                ? 'text-gray-300'
-                : 'text-gray-700'
-            }`}
-          >
-            Window FRP Tools ({windowCount})
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('mobile');
-              handleSearch(new Event('submit') as any, 'mobile');
-            }}
-            className={`text-sm px-3 py-1 rounded-md ${
-              activeTab === 'mobile'
-                ? 'bg-blue-600 text-white'
-                : darkMode
-                ? 'text-gray-300'
-                : 'text-gray-700'
-            }`}
-          >
-            Mobile FRP Tools ({mobileCount})
-          </button>
-        </div>
-      )}
 
       <style jsx>{`
         .animate-slide-down {

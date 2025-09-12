@@ -2,13 +2,9 @@ import Search from "../../components/search/Search";
 import React from "react";
 import type { Metadata } from "next";
 
-interface SearchPageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
-}
-
 // ✅ Dynamic Metadata with query + type
 export async function generateMetadata(
-  { searchParams }: SearchPageProps
+  { searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }
 ): Promise<Metadata> {
   const query = typeof searchParams.query === "string" ? searchParams.query : "";
   const type = typeof searchParams.type === "string" ? searchParams.type : "windows";

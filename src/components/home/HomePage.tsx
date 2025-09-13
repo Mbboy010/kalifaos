@@ -1,6 +1,7 @@
 // app/components/home/HomePage.tsx
 'use client';
 
+import YouTubeVideos from './YouTubeVideos';
 import WindowsBypassTools from '../window/WindowsBypassTools';
 import FrpLanding from './FrpLanding';
 import AdBanner from '../google/AdBanner';
@@ -60,7 +61,7 @@ export default function HomePage() {
       
       <FrpLanding />
       <WindowsBypassTools />
-
+      <YouTubeVideos />
       {/* Features */}
       <section id="features" className="py-16">
         <div className="max-w-6xl mx-auto px-4">

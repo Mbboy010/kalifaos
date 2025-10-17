@@ -1,6 +1,7 @@
 // app/components/home/HomePage.tsx
 'use client';
 
+import ModernBypassSolutions from './ModernBypassSolutions';
 import YouTubeVideos from './YouTubeVideos';
 import WindowsBypassTools from '../window/WindowsBypassTools';
 import FrpLanding from './FrpLanding';
@@ -85,7 +86,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
+          
+      <ModernBypassSolutions />
+          
       {/* How It Works */}
       <section id="how-it-works" className="py-16">
         <div className="max-w-6xl mx-auto px-4">

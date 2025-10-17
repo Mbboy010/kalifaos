@@ -4,56 +4,73 @@
 import { Youtube } from 'lucide-react';
 import { useAppSelector } from '../redux/hooks';
 import Iframe from 'react-iframe';
+import { useState, useEffect } from 'react';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { db } from '@/firebase/config'; // Adjust path to your Firebase config
 
 interface Video {
   id: string;
   title: string;
-  url: string; // raw YouTube link
+  link: string; // Changed from url to link
 }
 
-// ✅ Function to convert YouTube URL to embed link
-function convertToEmbedUrl(url: string): string {
+// ✅ Function to convert YouTube link to embed link
+function convertToEmbedUrl(link: string): string {
   try {
-    // Handle both youtu.be and youtube.com/watch?v= formats
     const shortRegex = /youtu\.be\/([a-zA-Z0-9_-]{11})/;
     const longRegex = /v=([a-zA-Z0-9_-]{11})/;
 
     let videoId: string | null = null;
 
-    if (shortRegex.test(url)) {
-      videoId = url.match(shortRegex)?.[1] || null;
-    } else if (longRegex.test(url)) {
-      videoId = url.match(longRegex)?.[1] || null;
+    if (shortRegex.test(link)) {
+      videoId = link.match(shortRegex)?.[1] || null;
+    } else if (longRegex.test(link)) {
+      videoId = link.match(longRegex)?.[1] || null;
     }
 
-    return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : link;
   } catch (err) {
-    console.error('Invalid YouTube URL:', url);
-    return url;
+    console.error('Invalid YouTube link:', link);
+    return link;
   }
 }
 
 export default function YouTubeVideos() {
   const isColor = useAppSelector((state) => state.color.value);
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data from search results (use normal YouTube links)
-  const videos: Video[] = [
-    {
-      id: '1',
-      title: 'Kalifa OS - FRP Bypass Tutorial',
-      url: 'https://youtu.be/sEfi1v9jDOs?si=6MoarXscET8VNo2S',
-    },
-    {
-      id: '2',
-      title: 'Android System Apps Guide',
-      url: 'https://www.youtube.com/watch?v=L_28vTfPGXs&si=MM_z1YVVu-ZrRMq3',
-    },
-    {
-      id: '3',
-      title: 'Kali Linux for Mobile Unlocking',
-      url: 'https://youtu.be/5j9zgV1e8bU?si=HL8qwEvhnC8_lnKK',
-    },
-  ];
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        // Query Firebase to get the last 4 videos, ordered by id descending
+        const videosQuery = query(
+          collection(db, 'youtube-videos'), // Updated collection name
+          orderBy('id', 'desc'),
+          limit(4)
+        );
+        const querySnapshot = await getDocs(videosQuery);
+        
+        const videosData: Video[] = querySnapshot.docs.map(doc => ({
+          id: doc.data().id,
+          title: doc.data().title,
+          link: doc.data().link // Changed from url to link
+        }));
+
+        setVideos(videosData);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching videos:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchVideos();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center p-6">Loading videos...</div>;
+  }
 
   return (
     <div className="flex flex-col p-6">
@@ -78,7 +95,7 @@ export default function YouTubeVideos() {
           >
             <div className="aspect-video">
               <Iframe
-                url={convertToEmbedUrl(video.url)} // ✅ Converts automatically
+                url={convertToEmbedUrl(video.link)} // Changed from video.url to video.link
                 width="100%"
                 height="100%"
                 className="w-full h-full"

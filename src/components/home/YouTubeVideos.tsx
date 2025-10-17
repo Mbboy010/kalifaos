@@ -6,7 +6,7 @@ import { useAppSelector } from '../redux/hooks';
 import Iframe from 'react-iframe';
 import { useState, useEffect } from 'react';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
-import { db } from '@/firebase/config'; // Adjust path to your Firebase config
+import { db } from '@/server/firebaseApi'; // Adjust path to your Firebase config
 
 interface Video {
   id: string;

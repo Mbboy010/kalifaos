@@ -1,5 +1,6 @@
 // app/components/about/AboutCon.tsx
 'use client';
+
 import React from 'react';
 import { 
   Mail, 
@@ -202,7 +203,8 @@ export default function AboutCon() {
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 transition-colors ${
                   isColor ? 'bg-slate-800 group-hover:bg-slate-700' : 'bg-white shadow-sm'
                 } ${contact.color}`}>
-                  {React.cloneElement(contact.icon as React.ReactElement, { size: 20 })}
+                  {/* FIX: Explicitly cast icon to ReactElement<any> to allow 'size' prop */}
+                  {React.cloneElement(contact.icon as React.ReactElement<any>, { size: 20 })}
                 </div>
                 <h3 className={`text-sm font-bold opacity-50 mb-1 ${isColor ? 'text-slate-400' : 'text-slate-500'}`}>
                   {contact.label}

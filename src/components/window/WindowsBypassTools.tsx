@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, MoreVertical, Share2, Flag, X } from 'lucide-react';
+import { ArrowRight, MoreVertical, Share2, Flag, X, Terminal, Clock, HardDrive, Cpu, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { useAppSelector } from '../redux/hooks';
 import { useState, useEffect } from 'react';
@@ -19,20 +19,17 @@ interface Tool {
 }
 
 export default function WindowsBypassTools() {
+  // Logic: isColor = true (Dark Mode), isColor = false (Light Mode)
   const isColor = useAppSelector((state) => state.color.value);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [tools, setTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Helper: convert various date representations to millis
+  // --- HELPER FUNCTIONS ---
   const getTimeFromValue = (v: any): number => {
     if (!v) return 0;
     if (typeof v?.toDate === 'function') {
-      try {
-        return v.toDate().getTime();
-      } catch {
-        return 0;
-      }
+      try { return v.toDate().getTime(); } catch { return 0; }
     }
     if (typeof v === 'object' && typeof v.seconds === 'number') {
       return v.seconds * 1000 + Math.floor((v.nanoseconds || 0) / 1e6);
@@ -42,40 +39,34 @@ export default function WindowsBypassTools() {
     return Number.isNaN(t) ? 0 : t;
   };
 
-  // Price formatting (₦) and Free when 0
   const formatPrice = (price: any) => {
     if (price === undefined || price === null || price === '') return '';
     const raw = typeof price === 'number' ? price : Number(String(price).replace(/[^0-9.-]+/g, ''));
     if (Number.isNaN(raw)) return String(price);
-    if (raw === 0) return 'Free';
+    if (raw === 0) return 'FREE_ACCESS';
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: 'NGN',
     }).format(raw);
   };
 
-  // WhatsApp-style relative date
   const formatDate = (value: any) => {
     const now = Date.now();
     const then = getTimeFromValue(value);
     if (!then) return '';
     const diffSec = Math.floor((now - then) / 1000);
-
-    if (diffSec < 5) return 'now';
+    if (diffSec < 5) return 'just now';
     if (diffSec < 60) return `${diffSec}s ago`;
     const minutes = Math.floor(diffSec / 60);
-    if (minutes < 60) return `${minutes}min ago`;
+    if (minutes < 60) return `${minutes}m ago`;
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h ago`;
     const days = Math.floor(hours / 24);
     if (days < 30) return `${days}d ago`;
-    const months = Math.floor(days / 30);
-    if (months < 12) return `${months}mo ago`;
-    const years = Math.floor(months / 12);
-    return `${years}y ago`;
+    return `${Math.floor(days / 30)}mo ago`;
   };
 
-  // Fetch from Firestore: sort newest first and keep only latest 5
+  // --- DATA FETCHING ---
   useEffect(() => {
     const fetchTools = async () => {
       try {
@@ -103,225 +94,219 @@ export default function WindowsBypassTools() {
         setLoading(false);
       }
     };
-
     fetchTools();
   }, []);
 
   const handleShare = async (toolId: string, title: string) => {
-    const url =
-      typeof window !== 'undefined'
-        ? `${window.location.origin}/windows-tools/${toolId}`
-        : `/windows-tools/${toolId}`;
-
+    const url = typeof window !== 'undefined' ? `${window.location.origin}/windows-tools/${toolId}` : `/windows-tools/${toolId}`;
     try {
-      if (navigator.share) {
-        await navigator.share({ title, url });
-      } else if (navigator.clipboard) {
+      if (navigator.share) await navigator.share({ title, url });
+      else {
         await navigator.clipboard.writeText(url);
         alert('Link copied to clipboard');
-      } else {
-        alert(url);
       }
-    } catch {
-      // cancelled
-    } finally {
-      setOpenMenuId(null);
-    }
+    } catch { /* cancelled */ } finally { setOpenMenuId(null); }
   };
 
-  useEffect(() => {
-    if (openMenuId) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-  }, [openMenuId]);
-
   const handleReport = (toolId: string) => {
-    alert(`Thanks, your report for item ${toolId} has been noted.`);
+    alert(`Report logged for item ID: ${toolId}`);
     setOpenMenuId(null);
   };
 
-  // Skeleton Card Component
+  // --- SKELETON COMPONENT (Cyber Scan Style) ---
   const SkeletonCard = () => (
-    <div
-      className="flex items-center gap-4 p-4 rounded-lg shadow-md"
-      style={{
-        backgroundColor: isColor ? '#d7d7d719' : '#72727236',
-      }}
-    >
-      <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
-      <div className="flex flex-col flex-1 min-w-0 gap-2">
-        <div className="h-5 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-        <div className="h-4 w-1/2 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-        <div className="h-4 w-1/3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-        <div className="h-4 w-1/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-      </div>
-      <div className="absolute right-2 top-3">
-        <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+    <div className={`relative overflow-hidden p-4 rounded-xl border ${
+      isColor ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'
+    }`}>
+      {/* Shimmer Effect */}
+      <div className={`absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent`}></div>
+      
+      <div className="flex items-center gap-4">
+        <div className={`w-16 h-16 rounded-lg ${isColor ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
+        <div className="flex-1 space-y-3">
+          <div className={`h-4 w-3/4 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
+          <div className="flex gap-2">
+            <div className={`h-3 w-16 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
+            <div className={`h-3 w-16 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
+          </div>
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div className="flex flex-col p-6">
-      {/* Header */}
-      <div className="flex items-center w-full mb-8 sm:mb-12">
-        <h2 className="text-3xl sm:text-3xl md:text-4xl font-bold text-left">
-          Window Bypass Tools
+    <div className={`w-full py-16 px-4 transition-colors duration-300 ${
+      isColor ? 'bg-[#0a0a0a] text-slate-200' : 'bg-slate-50 text-slate-900'
+    }`}>
+      
+      {/* --- HEADER --- */}
+      <div className="max-w-4xl mx-auto mb-10">
+        <div className={`flex items-center gap-2 text-xs font-mono mb-2 ${
+          isColor ? 'text-cyan-500' : 'text-blue-600'
+        }`}>
+          <Terminal size={14} />
+          <span>/bin/windows_utilities</span>
+        </div>
+        <h2 className={`text-3xl md:text-4xl font-bold ${isColor ? 'text-white' : 'text-slate-900'}`}>
+          Windows <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600">Bypass Tools</span>
         </h2>
       </div>
 
-      {/* Tools List or Skeleton */}
+      {/* --- TOOLS LIST --- */}
       <div className="flex flex-col gap-4 max-w-4xl w-full mx-auto">
         {loading ? (
-          // Render 5 skeleton cards during loading
-          Array.from({ length: 5 }).map((_, index) => (
-            <SkeletonCard key={index} />
-          ))
+          Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)
         ) : tools.length === 0 ? (
-          <p className="text-center text-sm text-gray-500">No tools available.</p>
+          <div className={`text-center py-10 rounded-xl border border-dashed ${
+            isColor ? 'border-slate-800 text-slate-500' : 'border-slate-300 text-slate-500'
+          }`}>
+            <AlertTriangle className="mx-auto w-8 h-8 mb-2 opacity-50" />
+            No tools currently indexed in database.
+          </div>
         ) : (
           tools.map((tool, index) => (
             <div
               key={tool.id}
-              className="relative flex items-center gap-4 p-4 rounded-lg shadow-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors animate-fade-in"
-              style={{
-                backgroundColor: isColor ? '#d7d7d719' : '#72727236',
-                animationDelay: `${(index + 1) * 100}ms`,
-              }}
+              className={`group relative flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 animate-fade-in hover:scale-[1.01] ${
+                isColor 
+                  ? 'bg-slate-900/40 border-slate-800 hover:border-cyan-500/50 hover:bg-slate-900 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]' 
+                  : 'bg-white border-slate-200 hover:border-blue-300 hover:shadow-lg'
+              }`}
+              style={{ animationDelay: `${index * 100}ms` }}
             >
-              <Link
-                href={`/windows-tools/${tool.id}`}
-                className="flex items-center gap-4 flex-1"
-              >
-                <img
-                  src={tool.image}
-                  alt={tool.title}
-                  className="w-20 h-20 object-cover rounded-md"
-                />
+              <Link href={`/windows-tools/${tool.id}`} className="flex items-center gap-5 flex-1 relative z-10">
+                {/* Image Container */}
+                <div className={`relative w-20 h-20 rounded-lg overflow-hidden border ${
+                  isColor ? 'border-slate-700 bg-slate-950' : 'border-slate-100 bg-slate-100'
+                }`}>
+                  <img
+                    src={tool.image}
+                    alt={tool.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  {/* Status Dot */}
+                  <div className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full shadow-[0_0_5px_#22c55e]"></div>
+                </div>
+
+                {/* Content */}
                 <div className="flex flex-col flex-1 min-w-0">
-                  <h3 className="text-base font-semibold truncate">
+                  <h3 className={`text-lg font-bold truncate mb-2 ${
+                    isColor ? 'text-white group-hover:text-cyan-400' : 'text-slate-900 group-hover:text-blue-600'
+                  }`}>
                     {tool.title}
                   </h3>
-                  <p className="text-sm">Price: {formatPrice(tool.price)}</p>
-                  <p className="text-sm">Size: {tool.size}</p>
-                  <p className="text-sm">Date: {formatDate(tool.date)}</p>
+                  
+                  {/* Metadata Row */}
+                  <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
+                     <span className={`flex items-center gap-1 px-2 py-0.5 rounded ${
+                        isColor ? 'bg-slate-800 text-cyan-400' : 'bg-blue-50 text-blue-600'
+                     }`}>
+                        <Cpu size={12} /> {formatPrice(tool.price)}
+                     </span>
+                     <span className={`flex items-center gap-1 ${isColor ? 'text-slate-500' : 'text-slate-500'}`}>
+                        <HardDrive size={12} /> {tool.size}
+                     </span>
+                     <span className={`flex items-center gap-1 ${isColor ? 'text-slate-500' : 'text-slate-500'}`}>
+                        <Clock size={12} /> {formatDate(tool.date)}
+                     </span>
+                  </div>
                 </div>
               </Link>
 
-              {/* 3-dots menu top-right */}
-              <div className="absolute right-2 top-3">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpenMenuId(tool.id);
-                  }}
-                  aria-haspopup="menu"
-                  aria-expanded={openMenuId === tool.id}
-                  className="p-2 rounded-full focus:outline-none"
-                >
-                  <MoreVertical className="w-5 h-5" />
-                </button>
-              </div>
+              {/* Action Menu Button */}
+              <button
+                onClick={(e) => { e.stopPropagation(); setOpenMenuId(tool.id); }}
+                className={`p-2 rounded-lg transition-colors z-20 ${
+                  isColor 
+                    ? 'text-slate-400 hover:text-white hover:bg-slate-800' 
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <MoreVertical className="w-5 h-5" />
+              </button>
             </div>
           ))
         )}
       </div>
 
-      {/* Bottom Modal */}
+      {/* --- SEE MORE LINK --- */}
+      <div className="max-w-4xl mx-auto mt-8">
+        <Link
+          href="/windows-tools?list_page=1"
+          className={`inline-flex items-center gap-2 text-sm font-bold tracking-wide uppercase transition-all ${
+            isColor ? 'text-cyan-500 hover:text-cyan-400 hover:tracking-widest' : 'text-blue-600 hover:text-blue-700 hover:tracking-widest'
+          }`}
+        >
+          <span>View Archive</span>
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+
+      {/* --- DISCLAIMER --- */}
+      <div className={`mt-12 p-5 rounded-lg border text-xs font-mono max-w-4xl mx-auto ${
+        isColor 
+          ? 'bg-red-950/10 border-red-900/30 text-red-400/80' 
+          : 'bg-orange-50 border-orange-200 text-orange-800'
+      }`}>
+        <p className="flex items-start gap-3">
+          <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <span>
+            LEGAL WARNING: All tools provided here are for educational and repair purposes only. 
+            Kalifa OS assumes no liability for hardware damage or misuse.
+          </span>
+        </p>
+      </div>
+
+      {/* --- BOTTOM SHEET MODAL --- */}
       {openMenuId && (
         <div
           onClick={() => setOpenMenuId(null)}
-          className="fixed inset-0 bg-black/40 z-40 flex justify-center items-end"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-end animate-in fade-in duration-200"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: isColor ? '#76767625' : '#ffffff3f',
-            }}
-            className="w-full shadow-md backdrop-blur-md max-w-md rounded-t-2xl border-t border-blue-500 p-4 animate-slide-up"
+            className={`w-full max-w-md rounded-t-2xl border-t p-6 animate-in slide-in-from-bottom duration-300 ${
+              isColor 
+                ? 'bg-[#0f0f0f] border-cyan-500/50 text-slate-200 shadow-[0_-5px_30px_rgba(0,0,0,0.8)]' 
+                : 'bg-white border-blue-500 text-slate-900 shadow-2xl'
+            }`}
           >
-            <div className="flex justify-between items-center mb-4">
-              <h4 className="font-semibold text-sm">Options</h4>
-              <button
-                onClick={() => setOpenMenuId(null)}
-                className="p-1 rounded"
-              >
+            {/* Modal Header */}
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h4 className="font-bold text-lg">Tool Options</h4>
+                <p className="text-xs font-mono opacity-50">ID: {openMenuId}</p>
+              </div>
+              <button onClick={() => setOpenMenuId(null)} className="p-2 rounded-full hover:bg-white/10">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <button
-              onClick={() => {
-                handleShare(
-                  openMenuId!,
-                  tools.find((t) => t.id === openMenuId)?.title || ''
-                );
-              }}
-              className="w-full flex items-center gap-2 px-3 py-3 text-sm rounded"
-            >
-              <Share2 className="w-4 h-4" />
-              Share
-            </button>
-            <button
-              onClick={() => handleReport(openMenuId!)}
-              className="w-full flex items-center gap-2 px-3 py-3 text-sm rounded"
-            >
-              <Flag className="w-4 h-4" />
-              Report
-            </button>
+            {/* Modal Actions */}
+            <div className="space-y-3">
+              <button
+                onClick={() => handleShare(openMenuId!, tools.find((t) => t.id === openMenuId)?.title || '')}
+                className={`w-full flex items-center gap-4 px-4 py-4 rounded-xl font-medium transition-all ${
+                  isColor ? 'bg-slate-900 hover:bg-cyan-900/20 hover:text-cyan-400' : 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
+                }`}
+              >
+                <Share2 className="w-5 h-5" />
+                Share Link
+              </button>
+              
+              <button
+                onClick={() => handleReport(openMenuId!)}
+                className={`w-full flex items-center gap-4 px-4 py-4 rounded-xl font-medium transition-all ${
+                  isColor ? 'bg-slate-900 hover:bg-red-900/20 hover:text-red-400' : 'bg-slate-100 hover:bg-red-50 hover:text-red-600'
+                }`}
+              >
+                <Flag className="w-5 h-5" />
+                Report Issue
+              </button>
+            </div>
           </div>
         </div>
       )}
-
-      {/* See More */}
-      <div className="mt-8 flex justify-start max-w-4xl w-full mx-auto">
-        <Link
-          href="/windows-tools?list_page=1"
-          className="flex items-center gap-2 text-blue-500 hover:underline text-sm"
-        >
-          <ArrowRight className="w-5 h-5" />
-          See More
-        </Link>
-      </div>
-
-      {/* Disclaimer */}
-      <div
-        style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
-        className="mt-8 sm:mt-12 p-4 sm:p-6 rounded-lg text-xs sm:text-sm max-w-3xl w-full mx-auto border border-gray-700"
-      >
-        <p>
-          Use these tools responsibly and only on devices you legally own.
-          Kalifa OS is not responsible for any misuse or device issues.
-        </p>
-      </div>
-
-      {/* Animations */}
-      <style jsx>{`
-        .animate-slide-up {
-          animation: slide-up 0.3s ease-out;
-        }
-        @keyframes slide-up {
-          from {
-            transform: translateY(100%);
-          }
-          to {
-            transform: translateY(0);
-          }
-        }
-        .animate-pulse {
-          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.5;
-          }
-        }
-      `}</style>
     </div>
   );
 }

@@ -1,156 +1,265 @@
 // app/components/home/HomePage.tsx
 'use client';
 
-import ModernBypassSolutions from './ModernBypassSolutions';
 import YouTubeVideos from './YouTubeVideos';
 import WindowsBypassTools from '../window/WindowsBypassTools';
 import FrpLanding from './FrpLanding';
-import AdBanner from '../google/AdBanner';
-import { Smartphone, Shield, Zap, Unlock, HelpCircle } from 'lucide-react';
+import { Smartphone, Shield, Zap, HelpCircle, Terminal, Cpu, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAppSelector, useAppDispatch } from '../redux/hooks';
+import { useAppSelector } from '../redux/hooks';
 import { useState } from 'react';
 
-
 export default function HomePage() {
+  // Logic Update: isColor = true (Dark Mode), isColor = false (Light Mode)
   const isColor = useAppSelector((state) => state.color.value);
   const [selectedPrice, setSelectedPrice] = useState<string>('');
 
   const handlePrice = (price: string, name: string): void => {
     setSelectedPrice(price);
-    const phoneNumber = '2349013644892'; // Replace with Kalifa OS's number
-    const message = `Hello, I need help unlocking my device.\n\nI saw that the current price is ${price} for ${name}, and I want you to proceed with the full unlock.\n\nService by: Kalifa OS`;
+    const phoneNumber = '2349013644892';
+    const message = `Hello Kalifaos Admin,\n\nI need access to the ${name} plan (${price}).\nRequest ID: ${Math.floor(Math.random() * 100000)}\n\nInitiating unlock protocol...`;
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
 
   return (
-    <div className="container min-h-full">
-      {/* Hero Section */}
-      <section className="max-w-6xl  mx-auto px-4 pb-20 pt-20 text-center">
-        <h1 className="text-4xl mt-12 md:text-5xl font-bold mb-4">
-          Unlock Your Device in <span className="text-blue-600">Minutes</span>
-        </h1>
-        <p className="text-xl mb-8 max-w-2xl mx-auto">
-          Bypass Mobile offers fast, secure, and reliable solutions to unlock your phone from any carrier or bypass FRP locks.
-        </p>
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <Link
-            href="/try-free"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium"
-          >
-            Try Now for Free
-          </Link>
-          <Link
-            href="/learn-more"
-            className="border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-400 transition font-medium"
-          >
-            Learn More
-          </Link>
-        </div>
-        <div className="mt-12">
-          <Image
-            src="/Bypass.jpg"
-            alt="Bypass Mobile Demo"
-            width={768}
-            height={432}
-            className="rounded-xl shadow-lg mx-auto w-full max-w-3xl"
-          />
-        </div>
-      </section>
+    <div className={`min-h-screen font-sans selection:bg-cyan-500/30 transition-colors duration-300 ${
+      isColor ? 'bg-[#0a0a0a] text-slate-200' : 'bg-slate-50 text-slate-900'
+    }`}>
       
-      <FrpLanding />
-      <WindowsBypassTools />
-      <YouTubeVideos />
-      {/* Features */}
-      <section id="features" className="py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Choose Us?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { icon: <Smartphone className="w-10 h-10 text-blue-600" />, title: 'Device Unlocking', desc: 'Remove carrier locks from any phone.' },
-              { icon: <Shield className="w-10 h-10 text-blue-600" />, title: 'FRP Bypass', desc: 'Bypass Google Factory Reset Protection.' },
-              { icon: <Zap className="w-10 h-10 text-blue-600" />, title: 'Fast & Secure', desc: '100% safe with instant results.' },
-            ].map((feature, index) => (
-              <div
-                key={index}
-                style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
-                className="p-6 rounded-xl text-center"
-              >
-                <div className="flex justify-center mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p>{feature.desc}</p>
-              </div>
-            ))}
+      {/* --- HERO SECTION --- */}
+      <section className="relative pt-32 pb-20 overflow-hidden">
+        {/* Background Grid Effect */}
+        <div className="absolute inset-0 z-0 opacity-20 pointer-events-none" 
+             style={{ 
+               backgroundImage: `radial-gradient(${isColor ? '#06b6d4' : '#2563eb'} 1px, transparent 1px)`, 
+               backgroundSize: '40px 40px' 
+             }}>
+        </div>
+
+        <div className="container max-w-7xl mx-auto px-4 relative z-10 text-center">
+          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-mono mb-6 animate-pulse ${
+            isColor ? 'border-cyan-500/30 bg-cyan-950/20 text-cyan-400' : 'border-blue-200 bg-blue-50 text-blue-600'
+          }`}>
+            <span className={`w-2 h-2 rounded-full ${isColor ? 'bg-cyan-500' : 'bg-blue-600'}`}></span>
+            SYSTEM ONLINE: KALIFAOS v2.0
+          </div>
+          
+          <h1 className={`text-5xl md:text-7xl font-bold tracking-tight mb-6 ${isColor ? 'text-white' : 'text-slate-900'}`}>
+            Root. Flash. <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">Unlock.</span>
+          </h1>
+          
+          <p className={`text-xl mb-10 max-w-2xl mx-auto font-light leading-relaxed ${isColor ? 'text-slate-400' : 'text-slate-600'}`}>
+            Advanced mobile diagnostics and firmware solutions. Bypass FRP, unlock bootloaders, and restore devices with professional-grade tools.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link
+              href="#tools-access"
+              className={`group relative px-8 py-4 font-bold rounded-xl overflow-hidden transition-all flex items-center justify-center gap-2 ${
+                isColor 
+                  ? 'bg-cyan-600 text-white hover:bg-cyan-500 hover:shadow-[0_0_20px_rgba(6,182,212,0.5)]' 
+                  : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200'
+              }`}
+            >
+              <Terminal size={20} /> Initialize Tools
+            </Link>
+            
+            <Link
+              href="/docs"
+              className={`px-8 py-4 border rounded-xl transition-all flex items-center justify-center gap-2 font-medium ${
+                isColor
+                  ? 'border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white'
+                  : 'border-slate-300 text-slate-700 hover:bg-white hover:border-slate-400 hover:shadow-sm'
+              }`}
+            >
+              <Cpu size={20} /> View Documentation
+            </Link>
+          </div>
+
+          {/* Hero Image / Dashboard Preview */}
+          <div className={`mt-16 relative mx-auto max-w-5xl rounded-xl border p-2 shadow-2xl backdrop-blur-sm ${
+            isColor ? 'border-slate-800 bg-slate-900/50' : 'border-slate-200 bg-white/50'
+          }`}>
+            <div className={`absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent ${!isColor && 'hidden'}`}></div>
+            <Image
+              src="/Bypass.jpg"
+              alt="Kalifaos Dashboard Interface"
+              width={1200}
+              height={675}
+              className="rounded-lg opacity-90"
+              priority
+            />
           </div>
         </div>
       </section>
+
+      {/* --- STATS / TRUST INDICATORS --- */}
+      <div className={`border-y backdrop-blur ${
+        isColor ? 'border-slate-800 bg-slate-900/30' : 'border-slate-200 bg-white/60'
+      }`}>
+        <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[
+            { label: 'Devices Supported', value: '5,000+' },
+            { label: 'Success Rate', value: '99.9%' },
+            { label: 'Active Users', value: '12k+' },
+            { label: 'Uptime', value: '100%' },
+          ].map((stat, i) => (
+            <div key={i}>
+              <div className={`text-3xl font-bold mb-1 ${isColor ? 'text-white' : 'text-slate-900'}`}>{stat.value}</div>
+              <div className={`text-sm font-mono uppercase tracking-wider ${isColor ? 'text-slate-500' : 'text-slate-500'}`}>{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* --- CORE TOOLS COMPONENTS --- */}
+      <div className="relative z-20 -mt-10 pt-10">
+        <FrpLanding />
+      </div>
+
+      <section className={`py-20 ${isColor ? 'bg-gradient-to-b from-[#0a0a0a] to-slate-900' : 'bg-slate-50'}`}>
+        <WindowsBypassTools />
+      </section>
+
+      {/* --- FEATURES GRID --- */}
+      <section id="features" className="py-24 relative">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${isColor ? 'text-white' : 'text-slate-900'}`}>System Capabilities</h2>
+            <div className={`h-1 w-20 mx-auto rounded-full ${isColor ? 'bg-cyan-600' : 'bg-blue-600'}`}></div>
+          </div>
           
-      <ModernBypassSolutions />
-          
-      {/* How It Works */}
-      <section id="how-it-works" className="py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { step: '1', title: 'Enter IMEI', desc: 'Provide your device\'s IMEI number.' },
-              { step: '2', title: 'Make Payment', desc: 'Choose a plan and complete payment.' },
-              { step: '3', title: 'Receive Unlock Code', desc: 'Get your unlock code via email.' },
-            ].map((item, index) => (
+              { icon: <Smartphone className="w-8 h-8" />, title: 'IMEI Repair', desc: 'Advanced diagnostics for carrier unlocking and network repair.' },
+              { icon: <Shield className="w-8 h-8" />, title: 'FRP Protocol', desc: 'Secure Google account removal for Samsung, Xiaomi, and more.' },
+              { icon: <Zap className="w-8 h-8" />, title: 'Instant Flash', desc: 'High-speed firmware deployment with zero latency.' },
+            ].map((feature, index) => (
               <div
                 key={index}
-                style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
-                className="p-6 rounded-xl shadow-sm"
+                className={`group p-8 rounded-2xl border transition-all duration-300 relative overflow-hidden ${
+                  isColor 
+                    ? 'border-slate-800 bg-slate-900/50 hover:bg-slate-800/80 hover:border-cyan-500/30' 
+                    : 'border-slate-200 bg-white hover:shadow-xl hover:border-blue-200'
+                }`}
               >
-                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <span className="font-bold">{item.step}</span>
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold mb-2 text-center">{item.title}</h3>
-                <p className="text-center">{item.desc}</p>
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform ${
+                  isColor ? 'bg-slate-800 text-cyan-400' : 'bg-blue-50 text-blue-600'
+                }`}>
+                  {feature.icon}
+                </div>
+                <h3 className={`text-xl font-bold mb-3 ${isColor ? 'text-white' : 'text-slate-900'}`}>{feature.title}</h3>
+                <p className={`leading-relaxed ${isColor ? 'text-slate-400' : 'text-slate-600'}`}>{feature.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Pricing Plans</h2>
+      {/* --- HOW IT WORKS (Timeline Style) --- */}
+      <section className={`py-24 border-y ${
+        isColor ? 'bg-slate-900/30 border-slate-800' : 'bg-slate-100 border-slate-200'
+      }`}>
+        <div className="max-w-5xl mx-auto px-4">
+          <h2 className={`text-3xl font-bold text-center mb-16 ${isColor ? 'text-white' : 'text-slate-900'}`}>Execution Sequence</h2>
+          <div className="relative">
+             {/* Connector Line */}
+            <div className={`hidden md:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0 ${
+              isColor ? 'bg-slate-800' : 'bg-slate-300'
+            }`}></div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
+              {[
+                { step: '01', title: 'Input Data', desc: 'Submit Device IMEI or Serial.' },
+                { step: '02', title: 'Processing', desc: 'Server validates & generates token.' },
+                { step: '03', title: 'Unlock', desc: 'Receive code via secure channel.' },
+              ].map((item, index) => (
+                <div key={index} className={`p-6 rounded-xl border text-center shadow-xl ${
+                  isColor 
+                    ? 'bg-[#0a0a0a] border-slate-800' 
+                    : 'bg-white border-slate-200'
+                }`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-mono font-bold text-lg mx-auto mb-4 border ${
+                    isColor 
+                      ? 'bg-cyan-900/20 text-cyan-400 border-cyan-500/20' 
+                      : 'bg-blue-50 text-blue-600 border-blue-100'
+                  }`}>
+                    {item.step}
+                  </div>
+                  <h3 className={`text-lg font-bold mb-2 ${isColor ? 'text-white' : 'text-slate-900'}`}>{item.title}</h3>
+                  <p className={`text-sm ${isColor ? 'text-slate-500' : 'text-slate-600'}`}>{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- PRICING (Hacker Plan Style) --- */}
+      <section id="pricing" className="py-24">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className={`text-3xl font-bold text-center mb-12 ${isColor ? 'text-white' : 'text-slate-900'}`}>Access Passes</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { name: 'Basic', price: 'N5,000', desc: 'Single device unlock', features: ['IMEI Check', '24h Support'] },
-              { name: 'Pro', price: 'N13,000', desc: 'Multiple devices', features: ['3 Unlocks', 'Priority Support'] },
-              { name: 'Enterprise', price: 'N49,000', desc: 'Unlimited unlocks', features: ['Bulk IMEI', 'VIP Support'] },
+              { name: 'Standard', price: 'N5,000', label: 'Single Use', features: ['1 Device Unlock', 'Standard Speed', 'Email Support'] },
+              { name: 'Developer', price: 'N13,000', label: 'Most Popular', features: ['3 Device Unlocks', 'Priority Queue', 'Direct WhatsApp Support'] },
+              { name: 'Root Admin', price: 'N49,000', label: 'Enterprise', features: ['Unlimited Unlocks', 'API Access', '24/7 VIP Channel'] },
             ].map((plan, index) => (
               <div
                 key={index}
-                className={`border rounded-xl p-6 ${index === 1 ? 'border-blue-600 shadow-lg' : 'border-gray-200 shadow-lg'}`}
+                className={`relative flex flex-col p-8 rounded-2xl border transition-all duration-300 ${
+                  index === 1 
+                    ? (isColor 
+                        ? 'border-cyan-500 bg-slate-900/80 shadow-[0_0_40px_rgba(6,182,212,0.15)] scale-105 z-10' 
+                        : 'border-blue-500 bg-white shadow-xl scale-105 z-10')
+                    : (isColor 
+                        ? 'border-slate-800 bg-slate-900/30 hover:border-slate-600' 
+                        : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md')
+                }`}
               >
-                <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
-                <p className="text-3xl font-bold mb-4">{plan.price}</p>
-                <p className="mb-4">{plan.desc}</p>
-                <ul className="space-y-2 mb-6">
+                {index === 1 && (
+                  <div className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide ${
+                    isColor ? 'bg-cyan-600 text-white' : 'bg-blue-600 text-white'
+                  }`}>
+                    Recommended
+                  </div>
+                )}
+                
+                <h3 className={`text-lg font-mono font-bold mb-2 ${
+                  index === 1 
+                    ? (isColor ? 'text-cyan-400' : 'text-blue-600') 
+                    : (isColor ? 'text-slate-300' : 'text-slate-700')
+                }`}>
+                  {plan.name}
+                </h3>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className={`text-4xl font-bold ${isColor ? 'text-white' : 'text-slate-900'}`}>{plan.price}</span>
+                  <span className="text-slate-500 text-sm">/param</span>
+                </div>
+                
+                <ul className="space-y-4 mb-8 flex-1">
                   {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-center">
-                      <span className="w-4 h-4 bg-blue-100 rounded-full mr-2 flex items-center justify-center">
-                        <svg className="w-2 h-2 text-blue-600" fill="currentColor" viewBox="0 0 8 8">
-                          <path d="M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z" />
-                        </svg>
-                      </span>
+                    <li key={i} className={`flex items-start text-sm ${isColor ? 'text-slate-300' : 'text-slate-600'}`}>
+                      <ChevronRight className={`w-4 h-4 mr-2 mt-0.5 flex-shrink-0 ${isColor ? 'text-cyan-500' : 'text-blue-500'}`} />
                       {feature}
                     </li>
                   ))}
                 </ul>
+                
                 <button
-                  onClick={() => handlePrice(plan.price, plan.desc)}
-                  className={`w-full py-2 rounded-md ${
-                    index === 1 ? 'bg-blue-600 text-white' : isColor ? 'bg-gray-700 text-white' : 'bg-[#72727236]'
-                  } hover:opacity-90 transition`}
+                  onClick={() => handlePrice(plan.price, plan.name)}
+                  className={`w-full py-3 rounded-lg font-bold text-sm uppercase tracking-wide transition-all ${
+                    index === 1 
+                      ? (isColor ? 'bg-cyan-600 text-white hover:bg-cyan-500' : 'bg-blue-600 text-white hover:bg-blue-700')
+                      : (isColor ? 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white' : 'bg-slate-100 text-slate-800 hover:bg-slate-200')
+                  }`}
                 >
-                  Buy Now
+                  Acquire Access
                 </button>
               </div>
             ))}
@@ -158,72 +267,39 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Tools & Access */}
-      <section id="tools-access" className="py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-8">Tools & Local Access</h2>
-          <p className="text-lg text-center mb-6 max-w-3xl mx-auto">
-            On this website, we provide powerful bypass tools that help you securely download required files and software.
-            Additionally, we offer access to your local application environment to enhance performance and enable direct device interaction.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-            <div
-              style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
-              className="p-4 rounded-lg shadow-sm"
-            >
-              <div className="flex items-start space-x-4">
-                <Unlock className="w-10 h-10 text-blue-600 mt-1" />
-                <div>
-                  <h3 className="text-xl font-semibold">Bypass Tools</h3>
-                  <p>
-                    Get access to tools that allow downloading bypass software directly, without complications.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div
-              style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
-              className="p-4 rounded-lg shadow-sm"
-            >
-              <div className="flex items-start space-x-4">
-                <Smartphone className="w-10 h-10 text-blue-600 mt-1" />
-                <div>
-                  <h3 className="text-xl font-semibold">Local App Access</h3>
-                  <p>
-                    Our system integrates with your local app, allowing a smoother unlocking experience and better device control.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section id="faq" className="pt-16 pb-16">
+      {/* --- FAQ SECTION --- */}
+      <section className={`py-20 ${isColor ? 'bg-slate-900/20' : 'bg-slate-50'}`}>
         <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">FAQ</h2>
+          <h2 className={`text-2xl font-bold text-center mb-10 font-mono ${isColor ? 'text-white' : 'text-slate-900'}`}>
+            /var/log/faq
+          </h2>
           <div className="space-y-4">
             {[
-              { question: 'Is this legal?', answer: 'Unlocking is legal in most countries, but check local laws.' },
-              { question: 'How long does it take?', answer: 'Typically 1-24 hours depending on the device.' },
-              { question: 'Do you offer refunds?', answer: 'Yes, if we fail to unlock your device.' },
+              { question: 'Is the bypass permanent?', answer: 'Yes. Once unlocked, your device remains unlocked even after updates.' },
+              { question: 'Do I need a PC?', answer: 'Most tools require a Windows PC, but we offer some APKs for direct mobile use.' },
+              { question: 'Is it safe?', answer: 'Our tools operate in a sandbox environment to ensure zero risk to your hardware.' },
             ].map((faq, index) => (
-              <div
-                key={index}
-                style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
-                className="p-4 rounded-lg shadow-sm"
-              >
-                <div className="flex items-center cursor-pointer">
-                  <HelpCircle className="w-5 h-5 text-blue-600 mr-2" />
-                  <h3 className="font-medium">{faq.question}</h3>
+              <div key={index} className={`border rounded-lg p-5 ${
+                isColor 
+                  ? 'bg-[#0f0f0f] border-slate-800 text-slate-200' 
+                  : 'bg-white border-slate-200 text-slate-800 shadow-sm'
+              }`}>
+                <div className="flex items-center font-medium mb-2">
+                  <HelpCircle className={`w-5 h-5 mr-3 ${isColor ? 'text-cyan-500' : 'text-blue-600'}`} />
+                  {faq.question}
                 </div>
-                <p className="mt-2 pl-7">{faq.answer}</p>
+                <p className={`text-sm pl-8 leading-relaxed ${isColor ? 'text-slate-500' : 'text-slate-600'}`}>{faq.answer}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* --- VIDEO FEED --- */}
+      <div className="py-20">
+        <YouTubeVideos />
+      </div>
+
     </div>
   );
 }

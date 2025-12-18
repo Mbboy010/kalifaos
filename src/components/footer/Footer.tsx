@@ -1,9 +1,12 @@
+// app/components/layout/Footer.tsx
 'use client';
 
-import { Cpu, Unlock, Mail, Youtube, Linkedin, Facebook, Shield, MessageCircle } from 'lucide-react';
+import { Unlock, Mail, Youtube, Facebook, MessageCircle, Terminal, Heart, ShieldCheck, Power } from 'lucide-react';
 import Link from 'next/link';
+import { useAppSelector } from '../redux/hooks';
 
 export default function Footer() {
+  const isColor = useAppSelector((state) => state.color.value);
   const currentYear: number = new Date().getFullYear();
 
   type FooterColumn = {
@@ -18,35 +21,35 @@ export default function Footer() {
 
   const footerColumns: FooterColumn[] = [
     {
-      title: 'Quick Links',
+      title: 'Navigation',
       links: [
         { name: 'Home', to: '/' },
-        { name: 'FRP Tools apk', to: '/frp-tools-apk-download' },
-        { name: 'System apps', to: '/system-apps' },
-        { name: 'Windows tools', to: '/windows-tools?list_page=1' },
-        { name: 'About', to: '/about' },
+        { name: 'FRP APK Vault', to: '/frp-tools-apk-download' },
+        { name: 'System Apps', to: '/system-apps' },
+        { name: 'Windows Utilities', to: '/windows-tools?list_page=1' },
       ],
     },
     {
-      title: 'Legal',
+      title: 'Legal Protocols',
       links: [
         { name: 'Terms of Service', to: '/terms' },
         { name: 'Privacy Policy', to: '/privacy' },
+        { name: 'Disclaimer', to: '/disclaimer' },
       ],
     },
     {
-      title: 'Contact Us',
+      title: 'Direct Line',
       links: [
         {
           name: 'Kalifaos763@gmail.com',
           to: 'mailto:Kalifaos763@gmail.com',
-          icon: <Mail className="w-4 h-4 mr-2" />,
+          icon: <Mail className="w-3 h-3 mr-2" />,
           external: true,
         },
         {
           name: 'WhatsApp Support',
           to: 'https://wa.me/2349013644892',
-          icon: <MessageCircle className="w-4 h-4 mr-2" />,
+          icon: <MessageCircle className="w-3 h-3 mr-2" />,
           external: true,
         },
       ],
@@ -54,33 +57,63 @@ export default function Footer() {
   ];
 
   const socialLinks = [
-    { icon: <Youtube className="w-5 h-5" />, to: 'https://youtube.com/@kalifaos?si=Ew2nW16T7Y4IjGTo', label: 'YouTube' },
-    {
-      icon: <Facebook className="w-5 h-5" />,
-      to: 'https://www.facebook.com/share/1CfnPzT4jk/?mibextid=wwXIfr',
-      label: 'Facebook',
-    },
+    { icon: <Youtube className="w-5 h-5" />, to: 'https://youtube.com/@kalifaos', label: 'YouTube' },
+    { icon: <Facebook className="w-5 h-5" />, to: 'https://facebook.com', label: 'Facebook' },
   ];
 
   return (
-    <footer className="bg-gray-900 w-screen border-t border-blue-500 text-white pt-12 pb-2">
-      <div className=" flex flex-col justify-center items-center mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="container grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* Brand Column */}
-          <div>
-            <Link href="/" className="flex items-center space-x-2 mb-4">
-              <Unlock className="text-blue-600 w-6 h-6" />
-              <span className="font-bold text-xl">KALIFA OS</span>
+    <footer className={`w-full border-t transition-colors duration-300 relative overflow-hidden ${
+      isColor 
+        ? 'bg-[#050505] border-slate-800 text-slate-400' 
+        : 'bg-slate-50 border-slate-200 text-slate-600'
+    }`}>
+      
+      {/* Decorative Top Glow */}
+      <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent ${!isColor && 'hidden'}`}></div>
+
+      <div className="max-w-7xl mx-auto px-6 pt-16 pb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+          
+          {/* --- Brand Column --- */}
+          <div className="space-y-6">
+            <Link href="/" className="flex items-center space-x-2 group">
+              <div className={`p-2 rounded-lg transition-colors ${
+                isColor ? 'bg-slate-900 group-hover:bg-cyan-900/30 text-cyan-500' : 'bg-blue-100 text-blue-600'
+              }`}>
+                <Unlock className="w-6 h-6" />
+              </div>
+              <span className={`font-bold text-xl tracking-tight ${isColor ? 'text-white' : 'text-slate-900'}`}>
+                KALIFA OS
+              </span>
             </Link>
-            <p className="text-white mb-4">
-              The next-generation operating system for modern computing.
+            
+            <p className="text-sm leading-relaxed max-w-xs">
+              Advanced firmware solutions for the modern era. Unlocking potential, one device at a time.
             </p>
+
+            {/* Status Badge */}
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono border ${
+              isColor 
+                ? 'bg-green-950/20 border-green-900 text-green-500' 
+                : 'bg-green-50 border-green-200 text-green-700'
+            }`}>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              SYSTEM ONLINE
+            </div>
+
             <div className="flex space-x-4">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
                   href={social.to}
-                  className="text-white hover:text-gray-400 transition"
+                  className={`p-2 rounded-full transition-all duration-300 hover:-translate-y-1 ${
+                    isColor 
+                      ? 'bg-slate-900 hover:bg-cyan-600 hover:text-white text-slate-400' 
+                      : 'bg-white hover:bg-blue-600 hover:text-white text-slate-500 shadow-sm'
+                  }`}
                   aria-label={social.label}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -91,32 +124,30 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Dynamic Columns */}
+          {/* --- Dynamic Link Columns --- */}
           {footerColumns.map((column, index) => (
             <div key={index}>
-              <h3 className="font-semibold text-lg mb-4 text-white">{column.title}</h3>
-              <ul className="space-y-2">
+              <h3 className={`font-bold text-sm uppercase tracking-wider mb-6 ${
+                isColor ? 'text-slate-200' : 'text-slate-900'
+              }`}>
+                {column.title}
+              </h3>
+              <ul className="space-y-3">
                 {column.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
-                    {link.external ? (
-                      <a
-                        href={link.to}
-                        className="flex items-center text-white hover:text-gray-400 transition"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {link.icon && link.icon}
-                        {link.name}
-                      </a>
-                    ) : (
-                      <Link
-                        href={link.to}
-                        className="flex items-center text-white hover:text-gray-400 transition"
-                      >
-                        {link.icon && link.icon}
-                        {link.name}
-                      </Link>
-                    )}
+                    <Link
+                      href={link.to}
+                      target={link.external ? "_blank" : undefined}
+                      className={`text-sm flex items-center transition-all duration-200 hover:translate-x-1 ${
+                        isColor 
+                          ? 'hover:text-cyan-400' 
+                          : 'hover:text-blue-600'
+                      }`}
+                    >
+                      {link.icon && link.icon}
+                      {!link.icon && <span className="w-1.5 h-1.5 rounded-full bg-slate-700 mr-2 opacity-50 group-hover:bg-cyan-500"></span>}
+                      {link.name}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -124,15 +155,24 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* Copyright */}
-        <div className="border-t border-gray-800 pt-6 text-center text-white">
-          <p>© {currentYear} Kalifa OS. All rights reserved.</p>
-        </div>
+        {/* --- Bottom Bar --- */}
+        <div className={`pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4 ${
+          isColor ? 'border-slate-800' : 'border-slate-200'
+        }`}>
+          <div className="flex items-center gap-2 text-xs opacity-60">
+             <ShieldCheck size={14} />
+             <p>© {currentYear} Kalifa OS. Secured & Encrypted.</p>
+          </div>
 
-        <div className="text-center mt-2 mb-1 text-white">
-          <p className="font-mono text-[10px] uppercase">
-            developed by <span className="text-blue-500">mbboy</span>
-          </p>
+          {/* Developer Signature */}
+          <div className={`text-xs font-mono px-4 py-2 rounded-lg border ${
+            isColor 
+              ? 'bg-slate-900/50 border-slate-800 text-slate-500' 
+              : 'bg-slate-100 border-slate-200 text-slate-600'
+          }`}>
+             <span className="opacity-50">git commit -m </span>
+             <span className={isColor ? 'text-cyan-500' : 'text-blue-600'}>"developed by mbboy"</span>
+          </div>
         </div>
       </div>
     </footer>

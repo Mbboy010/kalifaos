@@ -1,6 +1,6 @@
 // app/components/about/AboutCon.tsx
 'use client';
-
+import React from 'react';
 import { 
   Mail, 
   Facebook, 

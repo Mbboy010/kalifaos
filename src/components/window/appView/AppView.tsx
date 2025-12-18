@@ -27,7 +27,7 @@ import rehypeRaw from "rehype-raw";
 import { db } from "@/server/firebaseApi";
 import { doc, getDoc, updateDoc, increment, Timestamp } from "firebase/firestore";
 import { useParams } from "next/navigation";
-import { useAppSelector } from "@/redux/hooks";
+import { useAppSelector } from "../../redux/hooks";
 
 interface Tool {
   id: string;

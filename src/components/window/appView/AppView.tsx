@@ -198,7 +198,7 @@ export default function AppView() {
     }`}>
       
       {/* --- HERO / HEADER SECTION --- */}
-      <div className={`relative pt-24 pb-12 border-b ${isColor ? 'bg-slate-900/30 border-slate-800' : 'bg-white border-slate-200'}`}>
+      <div className={`relative pt-5 pb-12 border-b ${isColor ? 'bg-slate-900/30 border-slate-800' : 'bg-white border-slate-200'}`}>
         <div className="container mx-auto px-4">
           
           {/* Breadcrumb */}

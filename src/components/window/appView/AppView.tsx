@@ -2,7 +2,7 @@
 
 import Comments from "./Comments";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import React,{ useEffect, useState } from "react";
 import Suggestions from "./Suggestions";
 import {
   Download,

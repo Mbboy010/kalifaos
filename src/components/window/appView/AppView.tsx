@@ -2,7 +2,7 @@
 
 import Comments from "./Comments";
 import Link from "next/link";
-import React,{ useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Suggestions from "./Suggestions";
 import {
   Download,
@@ -296,7 +296,8 @@ export default function AppView() {
               isColor ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'
             }`}>
               <div className={`mb-2 ${item.color} opacity-80`}>
-                {React.cloneElement(item.icon as React.ReactElement, { size: 20 })}
+                {/* FIXED: Added <any> to cloneElement to support 'size' prop */}
+                {React.cloneElement(item.icon as React.ReactElement<any>, { size: 20 })}
               </div>
               <div className="text-xs uppercase opacity-50 font-bold tracking-wider mb-1">{item.label}</div>
               <div className={`font-mono font-bold ${isColor ? 'text-slate-200' : 'text-slate-800'}`}>{item.value}</div>

@@ -48,15 +48,6 @@ const OrbitingDotsSpinner = () => {
         }`}>
           PROCESSING
         </span>
-        <div className="flex gap-1">
-           {[...Array(3)].map((_, i) => (
-             <div 
-               key={i} 
-               className={`w-1 h-1 rounded-full ${isColor ? 'bg-slate-600' : 'bg-slate-400'}`}
-               style={{ animation: `bounce 1s infinite ${i * 0.2}s` }}
-             ></div>
-           ))}
-        </div>
       </div>
 
     </div>

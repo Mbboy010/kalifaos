@@ -21,7 +21,7 @@ export default function Loading() {
   }, [pathname]);
 
   return (
-    <div className="flex justify-center items-center w-full h-[100vh]">
+    <div className="flex justify-center items-center w-full h-[75vh]">
       <OrbitingDotsSpinner />
     </div>
   );

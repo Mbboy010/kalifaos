@@ -11,6 +11,7 @@ import {
   orderBy,
   onSnapshot,
 } from 'firebase/firestore';
+import { MessageSquare, Send, User, Hash, Clock, Terminal, AlertCircle } from 'lucide-react';
 
 interface Comment {
   id: string;
@@ -21,6 +22,7 @@ interface Comment {
 }
 
 export default function Comments({ contentId }: { contentId: string }) {
+  // Logic: isColor = true (Dark Mode), isColor = false (Light Mode)
   const isColor = useAppSelector((state) => state.color.value);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +45,7 @@ export default function Comments({ contentId }: { contentId: string }) {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...(doc.data() as Omit<Comment, 'id'>), // ✅ Fix: exclude duplicate id
+        ...(doc.data() as Omit<Comment, 'id'>),
       }));
       setComments(data);
       setLoading(false);
@@ -63,7 +65,6 @@ export default function Comments({ contentId }: { contentId: string }) {
   // 🔹 Handle form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!formData.name || !formData.email || !formData.comment) return;
 
     try {
@@ -73,7 +74,6 @@ export default function Comments({ contentId }: { contentId: string }) {
         comment: formData.comment,
         timestamp: serverTimestamp(),
       });
-
       setFormData({ name: '', email: '', comment: '' });
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -81,68 +81,163 @@ export default function Comments({ contentId }: { contentId: string }) {
   };
 
   return (
-    <div className="mt-8">
-      <h2 className="text-xl font-semibold mb-4">User Comments</h2>
+    <div className={`mt-12 rounded-2xl border p-6 md:p-8 transition-colors duration-300 ${
+      isColor 
+        ? 'bg-[#0f0f0f] border-slate-800' 
+        : 'bg-white border-slate-200 shadow-sm'
+    }`}>
+      
+      {/* --- HEADER --- */}
+      <div className="flex items-center gap-3 mb-8 border-b border-dashed border-slate-700/50 pb-4">
+        <Terminal className={isColor ? 'text-cyan-500' : 'text-blue-600'} />
+        <h2 className={`text-lg font-mono font-bold uppercase tracking-wider ${
+          isColor ? 'text-slate-200' : 'text-slate-800'
+        }`}>
+          /var/log/user_feedback
+        </h2>
+        <span className={`text-xs ml-auto px-2 py-1 rounded font-mono ${
+          isColor ? 'bg-slate-800 text-slate-500' : 'bg-slate-100 text-slate-500'
+        }`}>
+          Count: {comments.length}
+        </span>
+      </div>
 
-      {/* Comment List */}
-      {loading ? (
-        <p className="text-sm text-gray-500">Loading comments...</p>
-      ) : comments.length > 0 ? (
-        <div className="space-y-4">
-          {comments.map((comment) => (
+      {/* --- COMMENT FEED --- */}
+      <div className="space-y-6 mb-12 max-h-[600px] overflow-y-auto custom-scrollbar pr-2">
+        {loading ? (
+          <div className="flex items-center gap-2 opacity-50 font-mono text-sm">
+            <span className="animate-pulse">_</span> Loading data stream...
+          </div>
+        ) : comments.length > 0 ? (
+          comments.map((comment) => (
             <div
               key={comment.id}
-              className="p-4 rounded-lg border border-gray-300 dark:border-gray-700"
-              style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }}
+              className={`relative group rounded-lg p-5 border-l-2 transition-all hover:bg-opacity-50 ${
+                isColor 
+                  ? 'bg-slate-900/40 border-l-cyan-500/50 border-t border-r border-b border-transparent hover:border-slate-700' 
+                  : 'bg-slate-50 border-l-blue-500 border-t border-r border-b border-slate-100'
+              }`}
             >
-              <p className="text-sm font-semibold">{comment.name}</p>
-              <p className="text-xs">{comment.email}</p>
-              <p className="text-sm mt-1">{comment.comment}</p>
-              <p className="text-xs mt-1">
-                {comment.timestamp?.toDate
-                  ? comment.timestamp.toDate().toLocaleString()
-                  : 'Just now'}
+              {/* User Meta */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded flex items-center justify-center ${
+                    isColor ? 'bg-slate-800 text-cyan-400' : 'bg-blue-100 text-blue-600'
+                  }`}>
+                    <User size={16} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className={`text-sm font-bold ${isColor ? 'text-slate-200' : 'text-slate-800'}`}>
+                      {comment.name}
+                    </span>
+                    <span className="text-[10px] opacity-50 font-mono">{comment.email}</span>
+                  </div>
+                </div>
+                
+                {/* Timestamp */}
+                <div className={`flex items-center gap-1 text-[10px] font-mono opacity-50 ${
+                  isColor ? 'text-slate-400' : 'text-slate-500'
+                }`}>
+                  <Clock size={10} />
+                  {comment.timestamp?.toDate
+                    ? comment.timestamp.toDate().toLocaleString()
+                    : 'Syncing...'}
+                </div>
+              </div>
+
+              {/* Message Content */}
+              <p className={`text-sm leading-relaxed font-mono ${
+                isColor ? 'text-slate-400' : 'text-slate-600'
+              }`}>
+                <span className="opacity-30 mr-2 select-none">{'>'}</span>
+                {comment.comment}
               </p>
             </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-sm">No comments yet.</p>
-      )}
+          ))
+        ) : (
+          <div className={`text-center py-8 border border-dashed rounded-lg ${
+             isColor ? 'border-slate-800 text-slate-600' : 'border-slate-300 text-slate-400'
+          }`}>
+            <Hash className="mx-auto mb-2 opacity-50" />
+            <p className="text-sm font-mono">No log entries found. Be the first to write.</p>
+          </div>
+        )}
+      </div>
 
-      {/* Comment Form */}
-      <form onSubmit={handleSubmit} className="space-y-3 mt-6 mb-6">
-        <input
-          type="text"
-          name="name"
-          placeholder="Your Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-700 bg-transparent"
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Your Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-700 bg-transparent"
-        />
-        <textarea
-          name="comment"
-          placeholder="Write a comment..."
-          value={formData.comment}
-          onChange={handleChange}
-          className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-700 bg-transparent"
-          rows={3}
-        />
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-        >
-          Add Comment
-        </button>
-      </form>
+      {/* --- INPUT TERMINAL --- */}
+      <div className={`rounded-xl p-6 border ${
+        isColor ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
+      }`}>
+        <h3 className={`text-sm font-bold uppercase mb-4 flex items-center gap-2 ${
+           isColor ? 'text-slate-400' : 'text-slate-600'
+        }`}>
+          <MessageSquare size={14} /> Initialize Transmission
+        </h3>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Name Input */}
+            <div className="relative">
+               <input
+                type="text"
+                name="name"
+                placeholder="Agent Name"
+                value={formData.name}
+                onChange={handleChange}
+                className={`w-full p-3 pl-10 rounded-lg bg-transparent border outline-none font-mono text-sm transition-all ${
+                  isColor 
+                    ? 'border-slate-700 text-white focus:border-cyan-500 focus:bg-slate-800' 
+                    : 'border-slate-300 text-slate-900 focus:border-blue-500 focus:bg-white'
+                }`}
+              />
+              <User size={14} className="absolute left-3 top-3.5 opacity-50" />
+            </div>
+
+            {/* Email Input */}
+            <div className="relative">
+              <input
+                type="email"
+                name="email"
+                placeholder="Secure Email"
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full p-3 pl-10 rounded-lg bg-transparent border outline-none font-mono text-sm transition-all ${
+                  isColor 
+                    ? 'border-slate-700 text-white focus:border-cyan-500 focus:bg-slate-800' 
+                    : 'border-slate-300 text-slate-900 focus:border-blue-500 focus:bg-white'
+                }`}
+              />
+              <div className="absolute left-3 top-3.5 opacity-50 text-[10px]">@</div>
+            </div>
+          </div>
+
+          {/* Comment Area */}
+          <textarea
+            name="comment"
+            placeholder="Input data packet content..."
+            value={formData.comment}
+            onChange={handleChange}
+            className={`w-full p-3 rounded-lg bg-transparent border outline-none font-mono text-sm transition-all min-h-[100px] ${
+              isColor 
+                ? 'border-slate-700 text-white focus:border-cyan-500 focus:bg-slate-800' 
+                : 'border-slate-300 text-slate-900 focus:border-blue-500 focus:bg-white'
+            }`}
+          />
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className={`w-full sm:w-auto px-6 py-3 rounded-lg font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 transition-all transform active:scale-95 ${
+              isColor 
+                ? 'bg-cyan-600 text-white hover:bg-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)]' 
+                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg'
+            }`}
+          >
+            <Send size={16} />
+            Transmit Data
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

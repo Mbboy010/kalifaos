@@ -43,7 +43,7 @@ export default function BypassFrpSetting() {
   ];
 
   return (
-    <div className={`min-h-screen pt-24 pb-12 transition-colors duration-300 ${
+    <div className={`min-h-screen pt-5 pb-12 transition-colors duration-300 ${
       isColor ? 'bg-[#0a0a0a] text-slate-200' : 'bg-slate-50 text-slate-900'
     }`}>
       

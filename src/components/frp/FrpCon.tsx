@@ -72,7 +72,7 @@ export default function FrpCon() {
   // --- SKELETON LOADER ---
   if (isFetching) {
     return (
-      <div className={`max-w-4xl mx-auto px-4 py-20 min-h-screen ${isColor ? 'text-slate-200' : 'text-slate-800'}`}>
+      <div className={`max-w-4xl mx-auto px-4 py-7 min-h-screen ${isColor ? 'text-slate-200' : 'text-slate-800'}`}>
          <div className="flex flex-col items-center justify-center space-y-4">
             <div className={`relative w-16 h-16 border-2 border-dashed rounded-full animate-spin ${
               isColor ? 'border-cyan-500' : 'border-blue-600'

@@ -106,7 +106,7 @@ export default function SearchCon() {
   // --- SKELETON LOADING STATE ---
   if (loading) {
     return (
-      <div className={`min-h-screen pt-24 pb-12 flex flex-col items-center justify-center gap-4 ${isColor ? 'text-slate-200' : 'text-slate-800'}`}>
+      <div className={`min-h-screen pt-5 pb-12 flex flex-col items-center justify-center gap-4 ${isColor ? 'text-slate-200' : 'text-slate-800'}`}>
          <div className={`relative w-16 h-16 border-2 border-dashed rounded-full animate-spin ${
             isColor ? 'border-cyan-500' : 'border-blue-600'
          }`}></div>

@@ -173,7 +173,8 @@ export default function TermsCon() {
                   <div className={`w-12 h-12 rounded-lg flex items-center justify-center border ${
                     isColor ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-100'
                   } ${term.color}`}>
-                    {React.cloneElement(term.icon as React.ReactElement, { size: 24 })}
+                    {/* FIXED: Cast to ReactElement<any> to allow 'size' prop */}
+                    {React.cloneElement(term.icon as React.ReactElement<any>, { size: 24 })}
                   </div>
                 </div>
 

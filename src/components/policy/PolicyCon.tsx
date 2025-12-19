@@ -1,9 +1,9 @@
-// app/privacy/page.tsx
+// app/privacy/page.tsx (or src/components/policy/PolicyCon.tsx)
 'use client';
 
 import React from 'react';
 import { Shield, Lock, Database, User, Server, Mail, EyeOff, Terminal, CheckCircle2, AlertOctagon } from 'lucide-react';
-import { useAppSelector } from '../redux/hooks';
+import { useAppSelector } from '../../redux/hooks'; // Adjust path based on your folder structure
 
 export default function PolicyCon() {
   const isColor = useAppSelector((state) => state.color.value); // True = Dark Mode
@@ -179,7 +179,8 @@ export default function PolicyCon() {
                     <div className={`p-3 rounded-xl relative z-10 ${
                        isColor ? 'bg-slate-900 text-cyan-400 border border-slate-700' : 'bg-blue-50 text-blue-600 border border-blue-100'
                     }`}>
-                       {React.cloneElement(section.icon as React.ReactElement, { size: 24 })}
+                       {/* FIX: Cast to ReactElement<any> to allow 'size' prop */}
+                       {React.cloneElement(section.icon as React.ReactElement<any>, { size: 24 })}
                     </div>
                     <div>
                        <span className={`text-[10px] font-mono font-bold opacity-50 block mb-1 ${isColor ? 'text-cyan-500' : 'text-blue-600'}`}>

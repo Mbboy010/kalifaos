@@ -1,121 +1,225 @@
 // app/terms/page.tsx
 'use client';
 
-import { ShieldCheck, User, Lock, Palette, Code, Globe, Gavel, Mail } from 'lucide-react';
+import { 
+  ShieldCheck, 
+  User, 
+  Lock, 
+  FileText, 
+  Code, 
+  Globe, 
+  Gavel, 
+  Mail, 
+  Terminal, 
+  AlertTriangle, 
+  CheckCircle2,
+  Copyright
+} from 'lucide-react';
 import Link from 'next/link';
-import { useAppSelector, useAppDispatch } from '../redux/hooks';
-
-
+import { useAppSelector } from '../redux/hooks';
+import React from 'react';
 
 export default function TermsCon() {
-  const isColor = useAppSelector((state) => state.color.value);
+  const isColor = useAppSelector((state) => state.color.value); // True = Dark Mode
   const currentYear = new Date().getFullYear();
 
+  // Define Terms Data Structure for cleaner mapping
+  const termsData = [
+    {
+      id: '01',
+      title: 'Acceptance of Terms',
+      icon: <CheckCircle2 />,
+      color: 'text-green-500',
+      borderColor: 'border-green-500',
+      content: (
+        <p>
+          By initializing a connection to Kalifa OS services, you explicitly agree to be bound by these Terms of Service and our{' '}
+          <Link href="/privacy" className={`font-bold hover:underline ${isColor ? 'text-cyan-400' : 'text-blue-600'}`}>
+            Privacy Protocol
+          </Link>
+          . If you do not consent to these protocols, terminate your session immediately.
+        </p>
+      )
+    },
+    {
+      id: '02',
+      title: 'User Responsibilities',
+      icon: <User />,
+      color: 'text-blue-500',
+      borderColor: 'border-blue-500',
+      content: (
+        <ul className="space-y-2">
+          {[
+            'You must be at least 13 years old to operate this system.',
+            'You are the sole guardian of your account credentials.',
+            'Utilization of this service for illicit activities is strictly prohibited.',
+            'Attempts to breach, disrupt, or reverse-engineer system architecture are forbidden.'
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-2">
+              <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${isColor ? 'bg-blue-500' : 'bg-blue-600'}`}></span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      )
+    },
+    {
+      id: '03',
+      title: 'Intellectual Property',
+      icon: <Copyright />,
+      color: 'text-purple-500',
+      borderColor: 'border-purple-500',
+      content: (
+        <p>
+          All source code, visual assets, and trademarks within this platform remain the exclusive property of Kalifa OS. Unauthorized reproduction, distribution, or creation of derivative works is a violation of international copyright law.
+        </p>
+      )
+    },
+    {
+      id: '04',
+      title: 'Service Modifications',
+      icon: <Code />,
+      color: 'text-cyan-500',
+      borderColor: 'border-cyan-500',
+      content: (
+        <p>
+          We reserve the right to patch, modify, or decommission any service module at any time without prior notification. Continued usage following system updates constitutes acceptance of revised terms.
+        </p>
+      )
+    },
+    {
+      id: '05',
+      title: 'Limitation of Liability',
+      icon: <AlertTriangle />,
+      color: 'text-red-500',
+      borderColor: 'border-red-500',
+      content: (
+        <p>
+          Kalifa OS assumes zero liability for indirect, incidental, or consequential hardware damages resulting from the use of our unlocking tools. Your total remedy is limited strictly to the transaction amount paid for the specific service.
+        </p>
+      )
+    },
+    {
+      id: '06',
+      title: 'Governing Law',
+      icon: <Gavel />,
+      color: 'text-orange-500',
+      borderColor: 'border-orange-500',
+      content: (
+        <p>
+          These protocols are governed by the judicial laws of Nigeria. Any legal disputes arising from these terms shall be resolved exclusively within this jurisdiction, disregarding conflict of law provisions.
+        </p>
+      )
+    }
+  ];
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      {/* Header */}
-      <div className="text-center mb-12">
-        <div
-          className={`inline-flex mt-12 mb-4 items-center justify-center p-4 rounded-full ${
-            isColor ? 'bg-[#b9d4ff40]' : 'bg-[#b9d4ff6c]'
-          }`}
-        >
-          <ShieldCheck className="w-10 h-10 text-indigo-500" />
+    <div className={`min-h-screen pt-24 pb-20 transition-colors duration-300 ${
+      isColor ? 'bg-[#0a0a0a] text-slate-200' : 'bg-slate-50 text-slate-900'
+    }`}>
+      
+      <div className="max-w-4xl mx-auto px-4">
+        
+        {/* --- HEADER --- */}
+        <div className="text-center mb-16">
+          
+          <div className={`flex items-center justify-center gap-2 text-xs font-mono mb-6 opacity-60 ${isColor ? 'text-cyan-500' : 'text-blue-600'}`}>
+            <Terminal size={12} />
+            <span className="tracking-widest">/ROOT/SYSTEM/LEGAL/TERMS_OF_SERVICE</span>
+          </div>
+
+          <div className={`relative inline-flex items-center justify-center p-6 rounded-2xl mb-6 ${
+             isColor ? 'bg-slate-900 border border-slate-800' : 'bg-white border border-slate-200 shadow-sm'
+          }`}>
+             <FileText className={`w-12 h-12 ${isColor ? 'text-cyan-500' : 'text-blue-600'}`} />
+             {/* Decor */}
+             <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${isColor ? 'bg-green-500' : 'bg-green-600'}`}></div>
+          </div>
+          
+          <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${isColor ? 'text-white' : 'text-slate-900'}`}>
+            Terms of <span className={isColor ? 'text-cyan-500' : 'text-blue-600'}>Engagement</span>
+          </h1>
+          
+          <p className={`text-lg max-w-2xl mx-auto leading-relaxed mb-4 ${isColor ? 'text-slate-400' : 'text-slate-600'}`}>
+            Review the operating parameters for Kalifa OS. Understanding your responsibilities and our legal framework is mandatory for service access.
+          </p>
+
+          <div className={`inline-block px-4 py-1.5 rounded-full text-xs font-mono border ${
+             isColor ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-600'
+          }`}>
+             LAST_REVISION: {new Date().toLocaleDateString().replace(/\//g, '.')}
+          </div>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">Terms of Service</h1>
-        <p className="text-lg mb-3">
-          Review Kalifa OS’s Terms of Service. Understand your responsibilities, our intellectual property rights, and legal terms for using our device unlocking services.
-        </p>
-        <p className="text-blue-500">
-          Last Updated: {new Date().toLocaleDateString()}
-        </p>
-      </div>
 
-      {/* Sections */}
-      <div className="space-y-6">
-        <section style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }} className="p-6 rounded-xl">
-          <div className="flex items-center gap-3 mb-4">
-            <ShieldCheck className="w-8 h-8 text-indigo-500" />
-            <h2 className="text-2xl font-semibold text-indigo-500">1. Acceptance of Terms</h2>
-          </div>
-          <p>
-            By accessing or using our services, you agree to be bound by these Terms of Service and our{' '}
-            <Link href="/privacy" className="text-indigo-500 hover:underline font-medium">
-              Privacy Policy
-            </Link>
-            . If you do not agree, you may not use our services.
-          </p>
-        </section>
+        {/* --- TERMS GRID --- */}
+        <div className="space-y-6">
+          {termsData.map((term, index) => (
+            <section 
+              key={index} 
+              className={`group relative overflow-hidden rounded-xl border-l-4 p-6 md:p-8 transition-all duration-300 hover:translate-x-1 ${
+                isColor 
+                  ? `bg-[#0f0f0f] border-y border-r border-slate-800 ${term.borderColor.replace('border-', 'border-l-')}` 
+                  : `bg-white border-y border-r border-slate-200 shadow-sm ${term.borderColor.replace('border-', 'border-l-')}`
+              }`}
+            >
+              {/* Hover Background Gradient */}
+              <div className={`absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity pointer-events-none ${
+                 term.color.replace('text-', 'bg-')
+              }`}></div>
 
-        <section style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }} className="p-6 rounded-xl">
-          <div className="flex items-center gap-3 mb-4">
-            <User className="w-8 h-8 text-purple-500" />
-            <h2 className="text-2xl font-semibold text-purple-500">2. User Responsibilities</h2>
-          </div>
-          <ul className="list-disc pl-6 space-y-2">
-            <li>You must be at least 13 years old to use our services</li>
-            <li>You are responsible for maintaining the confidentiality of your account</li>
-            <li>You agree not to use the service for any illegal activities</li>
-            <li>You will not attempt to disrupt or compromise our systems</li>
-          </ul>
-        </section>
+              <div className="flex flex-col sm:flex-row gap-6">
+                {/* Icon Column */}
+                <div className="flex-shrink-0">
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center border ${
+                    isColor ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-100'
+                  } ${term.color}`}>
+                    {React.cloneElement(term.icon as React.ReactElement, { size: 24 })}
+                  </div>
+                </div>
 
-        <section style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }} className="p-6 rounded-xl">
-          <div className="flex items-center gap-3 mb-4">
-            <Palette className="w-8 h-8 text-amber-500" />
-            <h2 className="text-2xl font-semibold text-amber-500">3. Intellectual Property</h2>
-          </div>
-          <p>
-            All content and trademarks on this platform are the property of Kalifa OS or its licensors. You may not
-            reproduce, distribute, or create derivative works without explicit permission.
-          </p>
-        </section>
+                {/* Content Column */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className={`font-mono text-xs font-bold opacity-50 ${isColor ? 'text-slate-400' : 'text-slate-500'}`}>
+                      0{index + 1} //
+                    </span>
+                    <h2 className={`text-xl font-bold ${isColor ? 'text-white' : 'text-slate-900'}`}>
+                      {term.title}
+                    </h2>
+                  </div>
+                  
+                  <div className={`leading-relaxed text-sm md:text-base ${isColor ? 'text-slate-400' : 'text-slate-600'}`}>
+                    {term.content}
+                  </div>
+                </div>
+              </div>
+            </section>
+          ))}
+        </div>
 
-        <section style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }} className="p-6 rounded-xl">
-          <div className="flex items-center gap-3 mb-4">
-            <Code className="w-8 h-8 text-emerald-500" />
-            <h2 className="text-2xl font-semibold text-emerald-500">4. Service Modifications</h2>
-          </div>
-          <p>
-            We reserve the right to modify or discontinue any service at any time without notice. We may also revise these
-            terms periodically, with continued use constituting acceptance.
-          </p>
-        </section>
+        {/* --- CONTACT FOOTER --- */}
+        <div className={`mt-12 rounded-2xl p-8 border text-center ${
+           isColor ? 'bg-slate-900 border-slate-800' : 'bg-blue-50 border-blue-100'
+        }`}>
+           <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-4 ${
+              isColor ? 'bg-cyan-900/20 text-cyan-400' : 'bg-blue-200 text-blue-700'
+           }`}>
+              <Mail size={24} />
+           </div>
+           <h3 className={`text-lg font-bold mb-2 ${isColor ? 'text-white' : 'text-slate-900'}`}>Legal Inquiries</h3>
+           <p className={`text-sm mb-4 ${isColor ? 'text-slate-400' : 'text-slate-600'}`}>
+             For clarification regarding these protocols, establish contact via secure channel.
+           </p>
+           <a 
+             href="mailto:support@kalifaos.com" 
+             className={`inline-flex items-center gap-2 font-bold hover:underline ${
+                isColor ? 'text-cyan-400' : 'text-blue-600'
+             }`}
+           >
+             support@kalifaos.com <Globe size={14} />
+           </a>
+        </div>
 
-        <section style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }} className="p-6 rounded-xl">
-          <div className="flex items-center gap-3 mb-4">
-            <Lock className="w-8 h-8 text-rose-500" />
-            <h2 className="text-2xl font-semibold text-rose-500">5. Limitation of Liability</h2>
-          </div>
-          <p>
-            Kalifa OS shall not be liable for any indirect, incidental, or consequential damages resulting from use of our
-            services. Our total liability is limited to the amount you paid to use the service.
-          </p>
-        </section>
-
-        <section style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }} className="p-6 rounded-xl">
-          <div className="flex items-center gap-3 mb-4">
-            <Gavel className="w-8 h-8 text-sky-500" />
-            <h2 className="text-2xl font-semibold text-sky-500">6. Governing Law</h2>
-          </div>
-          <p>
-            These terms shall be governed by the laws of Nigeria without regard to conflict of law provisions.
-          </p>
-        </section>
-
-        <section style={{ backgroundColor: isColor ? '#d7d7d719' : '#72727236' }} className="p-6 rounded-xl">
-          <div className="flex items-center gap-3 mb-4">
-            <Mail className="w-8 h-8 text-indigo-500" />
-            <h2 className="text-2xl font-semibold text-indigo-500">7. Contact Us</h2>
-          </div>
-          <p>
-            For questions about these Terms, please contact us at{' '}
-            <a href="mailto:support@kalifaos.com" className="text-indigo-500 hover:underline font-medium">
-              support@kalifaos.com
-            </a>
-            .
-          </p>
-        </section>
       </div>
     </div>
   );

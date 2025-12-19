@@ -123,13 +123,13 @@ export default function HomePage() {
         <WindowsBypassTools />
       </section>
       
-      
+    <div className="container max-w-7xl mx-auto px-4 relative z-10 text-center">
       <div className={`mt-16 relative mx-auto max-w-5xl rounded-xl border p-2 shadow-2xl backdrop-blur-sm ${
             isColor ? 'border-slate-800 bg-slate-900/50' : 'border-slate-200 bg-white/50'
           }`}>
             <div className={`absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent ${!isColor && 'hidden'}`}></div>
             <Image
-              src="/Bypass.jpg"
+              src="/W.png"
               alt="Kalifaos WindowsBypassTools"
               width={1200}
               height={675}
@@ -137,6 +137,7 @@ export default function HomePage() {
               priority
             />
           </div>
+       </div>
       
       
 

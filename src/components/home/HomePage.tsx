@@ -122,6 +122,23 @@ export default function HomePage() {
       <section className={`py-20 ${isColor ? 'bg-gradient-to-b from-[#0a0a0a] to-slate-900' : 'bg-slate-50'}`}>
         <WindowsBypassTools />
       </section>
+      
+      
+      <div className={`mt-16 relative mx-auto max-w-5xl rounded-xl border p-2 shadow-2xl backdrop-blur-sm ${
+            isColor ? 'border-slate-800 bg-slate-900/50' : 'border-slate-200 bg-white/50'
+          }`}>
+            <div className={`absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent ${!isColor && 'hidden'}`}></div>
+            <Image
+              src="/Bypass.jpg"
+              alt="Kalifaos WindowsBypassTools"
+              width={1200}
+              height={675}
+              className="rounded-lg opacity-90"
+              priority
+            />
+          </div>
+      
+      
 
       {/* --- FEATURES GRID --- */}
       <section id="features" className="py-24 relative">

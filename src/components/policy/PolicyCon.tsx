@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { Shield, Lock, Database, User, Server, Mail, EyeOff, Terminal, CheckCircle2, AlertOctagon } from 'lucide-react';
-import { useAppSelector } from '../../redux/hooks'; // Adjust path based on your folder structure
+import { useAppSelector } from '../redux/hooks'; // Adjust path based on your folder structure
 
 export default function PolicyCon() {
   const isColor = useAppSelector((state) => state.color.value); // True = Dark Mode

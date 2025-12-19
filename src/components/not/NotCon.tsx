@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAppSelector } from './redux/hooks'; // Adjust path if needed
+import { useAppSelector } from '../redux/hooks'; // Adjust path if needed
 
 export default function NotCon() {
   const router = useRouter();

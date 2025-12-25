@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   
   // ✅ 2. FACEBOOK / WHATSAPP / LINKEDIN CONFIGURATION
   openGraph: {
-    title: "Kalifa Os - #1 Mobile & PC Bypass Tools in Zaria",
+    title: "Kalifa Os - Mobile & PC Bypass Tools in Zaria",
     description: "Get the latest unlocking software, FRP bypass tools, and mobile tech services at PZ Zaria, Kaduna. Visit Kalifa Os now.",
     url: "https://kalifaos.site",
     siteName: "Kalifa Os",

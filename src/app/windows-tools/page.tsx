@@ -2,22 +2,22 @@ import type { Metadata } from "next";
 import WinCom from "../../components/window/WinCom";
 import Script from "next/script";
 
+// ✅ Fix 1: Define searchParams as a Promise
 type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 // 🔹 Dynamic Metadata for Windows Tools
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const currentPage = Number(searchParams?.page ?? 1);
+  // ✅ Fix 2: Await searchParams
+  const resolvedParams = await searchParams;
+  const currentPage = Number(resolvedParams?.page ?? 1);
 
   return {
-    // ✅ Result: "Kalifa Os - Windows Tools Page 1"
     title: `Windows Tools Page ${currentPage}`,
     
-    // ✅ Description lists high-demand tools to catch search traffic
     description: `Page ${currentPage}: Download essential Windows PC tools for mobile repair. Get USB Drivers (MTK, SPD, Qualcomm), Odin Flash Tool, Miracle Box, and FRP Unlockers from Kalifa Os Zaria.`,
     
-    // ✅ Keywords targeting PC technicians
     keywords: [
       "Samsung Odin Download",
       "MTK USB Drivers Windows",
@@ -30,7 +30,6 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       "Kalifa Os PC Tools"
     ],
 
-    // ✅ Social Share Preview
     openGraph: {
       title: `Windows Mobile Repair Tools - Page ${currentPage}`,
       description: "Download verified PC software for flashing and unlocking Samsung, Tecno, and Infinix phones.",
@@ -55,8 +54,6 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       images: ["/opengraph-image.png"],
     },
     
-    // ✅ SEO Best Practice for Pagination:
-    // Prevents Google from getting confused by "Page 2", "Page 3" duplicate content issues
     robots: {
       index: true,
       follow: true,
@@ -65,10 +62,12 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 }
 
 // 🔹 Page Component
-export default function WindowsPage({ searchParams }: Props) {
-  const currentPage = Number(searchParams?.page ?? 1);
+// ✅ Fix 3: Make component async
+export default async function WindowsPage({ searchParams }: Props) {
+  // ✅ Fix 4: Await searchParams
+  const resolvedParams = await searchParams;
+  const currentPage = Number(resolvedParams?.page ?? 1);
 
-  // ✅ CollectionPage Schema: Tells Google "This is a library of PC Software"
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -86,7 +85,7 @@ export default function WindowsPage({ searchParams }: Props) {
         '@type': 'SoftwareApplication',
         name: 'MTK/Qualcomm/SPD Drivers',
         operatingSystem: 'WINDOWS',
-        applicationCategory: 'Driver' // Specific category for Drivers
+        applicationCategory: 'Driver' 
       },
       {
         '@type': 'SoftwareApplication',

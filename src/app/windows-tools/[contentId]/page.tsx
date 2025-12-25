@@ -2,6 +2,7 @@ import { db } from '@/server/firebaseApi';
 import { doc, getDoc } from 'firebase/firestore';
 import AppCom from '../../../components/window/appView/AppCom';
 import Script from 'next/script';
+import type { Metadata } from 'next'; // ✅ Added missing import
 
 interface PageProps {
   params: Promise<{ contentId: string }>;
@@ -11,16 +12,21 @@ interface PageProps {
 // 1. HELPER: Fetch Data (Used in both Metadata & Page)
 // ---------------------------------------------------------
 async function getToolData(contentId: string) {
-  const docRef = doc(db, 'Windows-tools', contentId);
-  const snapshot = await getDoc(docRef);
-  return snapshot.exists() ? snapshot.data() : null;
+  try {
+    const docRef = doc(db, 'Windows-tools', contentId);
+    const snapshot = await getDoc(docRef);
+    return snapshot.exists() ? snapshot.data() : null;
+  } catch (error) {
+    console.error("Error fetching tool data:", error);
+    return null;
+  }
 }
 
 // ==============================
 // 📌 Dynamic Metadata
 // ==============================
-export async function generateMetadata({ params }: PageProps) {
-  const { contentId } = await params;
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { contentId } = await params; // ✅ Await params (Next.js 15 standard)
   const data = await getToolData(contentId);
 
   const toolName = data?.title || 'Windows Repair Tool';
@@ -28,12 +34,9 @@ export async function generateMetadata({ params }: PageProps) {
   const toolImage = data?.ogImage || data?.image || '/opengraph-image.png';
 
   return {
-    // ✅ Result: "Kalifa Os - Odin Flash Tool" (if data.title is 'Odin Flash Tool')
+    metadataBase: new URL('https://kalifaos.site'), // ✅ Fixes URL warnings
     title: toolName,
-    
     description: toolDesc,
-    
-    // ✅ Dynamic Keywords: Mix of generic terms + the specific tool name
     keywords: [
       toolName,
       `${toolName} download`,
@@ -42,11 +45,10 @@ export async function generateMetadata({ params }: PageProps) {
       "Mobile Repair Software",
       "Kalifa Os Tools"
     ],
-
     openGraph: {
       title: `${toolName} - Free Download`,
       description: toolDesc,
-      url: `https://kalifaos.site/windows-tools/${contentId}`,
+      url: `/windows-tools/${contentId}`, // ✅ Simplified URL
       images: [
         {
           url: toolImage,
@@ -57,7 +59,6 @@ export async function generateMetadata({ params }: PageProps) {
       ],
       type: 'website',
     },
-    
     twitter: {
       card: 'summary_large_image',
       title: `${toolName} - Download`,
@@ -71,9 +72,8 @@ export async function generateMetadata({ params }: PageProps) {
 // 📌 Page Component
 // ==============================
 export default async function ContentPage({ params }: PageProps) {
-  const { contentId } = await params;
+  const { contentId } = await params; // ✅ Await params here too
   
-  // ✅ Fetch data again for the Schema (Server Components handle this fast)
   const data = await getToolData(contentId);
 
   // Fallbacks if data is missing
@@ -82,8 +82,6 @@ export default async function ContentPage({ params }: PageProps) {
   const toolImage = data?.ogImage || data?.image || 'https://kalifaos.site/logo.png';
   const toolFileUrl = data?.downloadUrl || `https://kalifaos.site/windows-tools/${contentId}`;
 
-  // ✅ SoftwareApplication Schema: The "Secret Weapon" for Download Sites
-  // This tells Google: "This page contains a downloadable Windows program."
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
@@ -93,25 +91,18 @@ export default async function ContentPage({ params }: PageProps) {
     description: toolDesc,
     image: toolImage,
     url: `https://kalifaos.site/windows-tools/${contentId}`,
-    
-    // Optional: If you have a download link in your DB, put it here
     downloadUrl: toolFileUrl,
-    
     offers: {
       '@type': 'Offer',
-      price: '0', // Free
+      price: '0',
       priceCurrency: 'NGN',
       availability: 'https://schema.org/InStock'
     },
-    
-    // ⭐ Star Rating: You can make this dynamic if you have ratings in DB, 
-    // otherwise hardcoding a high rating helps CTR.
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: data?.rating || '4.8', 
       ratingCount: data?.ratingCount || '350'
     },
-    
     author: {
       '@type': 'Organization',
       name: 'Kalifa Os'
@@ -120,7 +111,6 @@ export default async function ContentPage({ params }: PageProps) {
 
   return (
     <>
-      {/* ✅ Inject Structured Data */}
       <Script
         id={`product-jsonld-${contentId}`}
         type="application/ld+json"
@@ -128,7 +118,6 @@ export default async function ContentPage({ params }: PageProps) {
       />
 
       <div className="container mx-auto min-h-screen">
-        {/* Pass data to AppCom if it accepts props, otherwise it fetches inside */}
         <AppCom />
       </div>
     </>

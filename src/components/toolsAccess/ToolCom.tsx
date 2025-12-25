@@ -12,7 +12,7 @@ import {
   Database
 } from 'lucide-react';
 import Link from 'next/link';
-import { useAppSelector } from '@/redux/hooks'; // Adjust path as needed
+import { useAppSelector } from '../redux/hooks'; // Adjust path as needed
 
 export default function ToolCom() {
   const isColor = useAppSelector((state) => state.color.value); // True = Dark Mode

@@ -13,7 +13,7 @@ import {
   FolderOpen
 } from 'lucide-react';
 import Link from 'next/link';
-import { useAppSelector } from '@/redux/hooks'; // Adjust path as needed
+import { useAppSelector } from '../redux/hooks'; // Adjust path as needed
 
 // Dummy data for documentation structure
 const docCategories = [

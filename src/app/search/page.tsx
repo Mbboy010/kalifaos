@@ -3,20 +3,22 @@ import React from "react";
 import type { Metadata } from "next";
 import Script from "next/script";
 
+// ✅ Fix 1: Define searchParams as a Promise
 type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-// ✅ Dynamic Metadata Generator
+// ✅ Fix 2: Await searchParams inside generateMetadata
 export async function generateMetadata(
   { searchParams }: Props
 ): Promise<Metadata> {
-  const query = typeof searchParams?.query === "string" ? searchParams.query : "";
-  const type = typeof searchParams?.type === "string" ? searchParams.type : "windows";
+  const resolvedSearchParams = await searchParams; // 🔹 Await here
+  
+  const query = typeof resolvedSearchParams?.query === "string" ? resolvedSearchParams.query : "";
+  const type = typeof resolvedSearchParams?.type === "string" ? resolvedSearchParams.type : "windows";
 
   const sectionName = type === "mobile" ? "Mobile Tools" : "Windows Tools";
 
-  // If a user searches, we want a specific title. If just browsing, a generic one.
   const pageTitle = query
     ? `Search results for "${query}" - Kalifa Os`
     : `Search ${sectionName} - Kalifa Os`;
@@ -28,19 +30,17 @@ export async function generateMetadata(
   return {
     title: pageTitle,
     description,
-    // ✅ Preventing "Search within Search" penalties
     robots: {
-      index: false, // Don't show this search page in Google results
-      follow: true, // BUT do follow the links to the actual tool pages
+      index: false,
+      follow: true,
     },
     keywords: [
       "Kalifa OS Search",
       "Find Firmware",
       "Search Bypass Tools",
-      query, // Dynamic keyword based on what they searched
+      query,
       `${type} tools download`
     ],
-    // ✅ Dynamic Social Sharing (looks great on WhatsApp/Facebook)
     openGraph: {
       title: pageTitle,
       description: description,
@@ -65,12 +65,12 @@ export async function generateMetadata(
   };
 }
 
-// ✅ Updated Component to accept searchParams for JSON-LD
-export default function Page({ searchParams }: Props) {
-  const query = typeof searchParams?.query === "string" ? searchParams.query : "";
+// ✅ Fix 3: Make component async and await searchParams
+export default async function Page({ searchParams }: Props) {
+  const resolvedSearchParams = await searchParams; // 🔹 Await here
+  
+  const query = typeof resolvedSearchParams?.query === "string" ? resolvedSearchParams.query : "";
 
-  // ✅ SearchResultsPage Schema
-  // This helps Google understand that this page is a collection of results
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SearchResultsPage',
@@ -111,6 +111,7 @@ export default function Page({ searchParams }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div>
+        {/* Pass the query down to Search component if needed, or it can read from useSearchParams() client-side */}
         <Search />
       </div>
     </>

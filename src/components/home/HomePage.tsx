@@ -56,7 +56,7 @@ export default function HomePage() {
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link
-              href="#tools-access"
+              href="/tools-access"
               className={`group relative px-8 py-4 font-bold rounded-xl overflow-hidden transition-all flex items-center justify-center gap-2 ${
                 isColor 
                   ? 'bg-cyan-600 text-white hover:bg-cyan-500 hover:shadow-[0_0_20px_rgba(6,182,212,0.5)]' 

@@ -273,7 +273,7 @@ export default function AppView() {
                     }`}
                   >
                     <Download size={20} />
-                    <span>Initialize Download</span>
+                    <span>Download</span>
                   </a>
                 )}
               </div>
@@ -337,15 +337,15 @@ export default function AppView() {
             )}
 
             {/* DESCRIPTION */}
-            <section className={`rounded-2xl p-6 border ${
+            <section className={`rounded-2xl py-6  ${
               isColor ? 'bg-[#0f0f0f] border-slate-800' : 'bg-white border-slate-200 shadow-sm'
             }`}>
-              <div className="flex items-center gap-2 mb-6 border-b border-dashed border-slate-700/50 pb-4">
+              <div className="flex mx-4 items-center gap-2 mb-6 border-b border-dashed border-slate-700/50 pb-4">
                 <Terminal size={18} className={isColor ? 'text-cyan-500' : 'text-blue-600'} />
-                <h3 className="font-mono font-bold uppercase tracking-widest text-sm">/var/log/readme.md</h3>
+                <h3 className="font-mono font-bold uppercase tracking-widest text-sm">/var/log/description</h3>
               </div>
               
-              <div className={`prose max-w-none ${isColor ? 'prose-invert prose-p:text-slate-400 prose-headings:text-slate-200' : 'prose-slate'}`}>
+              <div className={`prose mx-4 max-w-none ${isColor ? 'prose-invert prose-p:text-slate-400 prose-headings:text-slate-200' : 'prose-slate'}`}>
                 <ReactMarkdown
                   rehypePlugins={[rehypeRaw]}
                   components={{

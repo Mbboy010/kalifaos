@@ -174,9 +174,9 @@ export default function WindowsBypassTools() {
               }`}
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <Link href={`/windows-tools/${tool.id}`} className="flex items-center gap-5 flex-1 relative z-10">
+              <Link href={`/windows-tools/${tool.id}`} className="flex items-center gap-4 flex-1 relative z-10 min-w-0">
                 {/* Image Container */}
-                <div className={`relative w-20 h-20 rounded-lg overflow-hidden border ${
+                <div className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border shrink-0 ${
                   isColor ? 'border-slate-700 bg-slate-950' : 'border-slate-100 bg-slate-100'
                 }`}>
                   <img
@@ -190,24 +190,25 @@ export default function WindowsBypassTools() {
 
                 {/* Content */}
                 <div className="flex flex-col flex-1 min-w-0">
-                  <h3 className={`text-lg font-bold truncate mb-2 ${
+                  {/* --- UPDATED TITLE SECTION --- */}
+                  <h3 className={`text-base md:text-lg font-bold truncate mb-1 md:mb-2 w-full max-w-[160px] xs:max-w-[200px] sm:max-w-none ${
                     isColor ? 'text-white group-hover:text-cyan-400' : 'text-slate-900 group-hover:text-blue-600'
                   }`}>
                     {tool.title}
                   </h3>
                   
                   {/* Metadata Row */}
-                  <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
-                     <span className={`flex items-center gap-1 px-2 py-0.5 rounded ${
+                  <div className="flex flex-wrap items-center gap-2 md:gap-3 text-[10px] md:text-xs font-mono">
+                     <span className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${
                         isColor ? 'bg-slate-800 text-cyan-400' : 'bg-blue-50 text-blue-600'
                      }`}>
-                        <Cpu size={12} /> {formatPrice(tool.price)}
+                        <Cpu size={10} className="md:w-3 md:h-3" /> {formatPrice(tool.price)}
                      </span>
                      <span className={`flex items-center gap-1 ${isColor ? 'text-slate-500' : 'text-slate-500'}`}>
-                        <HardDrive size={12} /> {tool.size}
+                        <HardDrive size={10} className="md:w-3 md:h-3" /> {tool.size}
                      </span>
                      <span className={`flex items-center gap-1 ${isColor ? 'text-slate-500' : 'text-slate-500'}`}>
-                        <Clock size={12} /> {formatDate(tool.date)}
+                        <Clock size={10} className="md:w-3 md:h-3" /> {formatDate(tool.date)}
                      </span>
                   </div>
                 </div>
@@ -216,7 +217,7 @@ export default function WindowsBypassTools() {
               {/* Action Menu Button */}
               <button
                 onClick={(e) => { e.stopPropagation(); setOpenMenuId(tool.id); }}
-                className={`p-2 rounded-lg transition-colors z-20 ${
+                className={`p-2 rounded-lg transition-colors z-20 shrink-0 ${
                   isColor 
                     ? 'text-slate-400 hover:text-white hover:bg-slate-800' 
                     : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'

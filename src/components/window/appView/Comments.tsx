@@ -95,11 +95,6 @@ export default function Comments({ contentId }: { contentId: string }) {
         }`}>
           /var/log/user_feedback
         </h2>
-        <span className={`text-xs ml-auto px-2 py-1 rounded font-mono ${
-          isColor ? 'bg-slate-800 text-slate-500' : 'bg-slate-100 text-slate-500'
-        }`}>
-          Count: {comments.length}
-        </span>
       </div>
 
       {/* --- COMMENT FEED --- */}

@@ -80,9 +80,10 @@ function formatDescription(text: string) {
     .replace(/\[red\](.*?)\[\/red\]/g, '<span class="text-red-500 font-bold">$1</span>')
     .replace(/\[green\](.*?)\[\/green\]/g, '<span class="text-green-500 font-bold">$1</span>')
     .replace(/\[blue\](.*?)\[\/blue\]/g, '<span class="text-blue-500 font-bold">$1</span>')
+    .replace(/\[yellow\](.*?)\[\/yellow\]/g, '<span class="text-yellow-500 font-bold">$1</span>') // Added yellow support
     .replace(
       /\[img\](.*?)\[\/img\]/g,
-      '<img src="$1" alt="tool image" class="rounded-lg shadow-md my-4 border border-slate-700/50" />'
+      '<img src="$1" alt="tool image" class="rounded-lg shadow-md my-4 border border-slate-700/50 max-w-full h-auto" />'
     );
   return formatted;
 }
@@ -336,8 +337,8 @@ export default function AppView() {
               </section>
             )}
 
-            {/* DESCRIPTION */}
-            <section className={`rounded-2xl py-6  ${
+            {/* DESCRIPTION (FIXED) */}
+            <section className={`rounded-2xl py-6 border ${
               isColor ? 'bg-[#0f0f0f] border-slate-800' : 'bg-white border-slate-200 shadow-sm'
             }`}>
               <div className="flex mx-4 items-center gap-2 mb-6 border-b border-dashed border-slate-700/50 pb-4">
@@ -345,12 +346,17 @@ export default function AppView() {
                 <h3 className="font-mono font-bold uppercase tracking-widest text-sm">/var/log/description</h3>
               </div>
               
-              <div className={`prose mx-4 max-w-none ${isColor ? 'prose-invert prose-p:text-slate-400 prose-headings:text-slate-200' : 'prose-slate'}`}>
+              {/* Added break-words, w-full, max-w-full to prevent overflow */}
+              <div className={`prose w-full max-w-full px-4 break-words overflow-hidden ${
+                isColor 
+                  ? 'prose-invert prose-p:text-slate-400 prose-headings:text-slate-200 prose-a:text-blue-400 prose-li:text-slate-400' 
+                  : 'prose-slate'
+              }`}>
                 <ReactMarkdown
                   rehypePlugins={[rehypeRaw]}
                   components={{
                     h1: ({ children }) => <h2 className="text-2xl font-bold border-l-4 border-cyan-500 pl-4 my-6">{children}</h2>,
-                    img: ({ ...props }) => <img {...props} className="rounded-lg border border-slate-700/50 shadow-lg" />,
+                    img: ({ ...props }) => <img {...props} className="rounded-lg border border-slate-700/50 shadow-lg max-w-full h-auto" />,
                   }}
                 >
                   {formatDescription(tool.description)}

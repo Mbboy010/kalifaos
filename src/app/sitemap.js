@@ -65,7 +65,7 @@ function sitemap() {
                     windowsToolsUrls = snapshot.docs.map(function (doc) { return ({
                         url: "".concat(baseUrl, "/windows-tools/").concat(doc.id),
                         lastModified: new Date(),
-                        changeFrequency: 'weekly',
+                        changeFrequency: 'daily',
                         priority: 0.9,
                     }); });
                     return [3 /*break*/, 4];
@@ -84,61 +84,61 @@ function sitemap() {
                         {
                             url: "".concat(baseUrl, "/about"),
                             lastModified: new Date(),
-                            changeFrequency: 'monthly',
+                            changeFrequency: 'daily',
                             priority: 0.8,
                         },
                         {
                             url: "".concat(baseUrl, "/contact"),
                             lastModified: new Date(),
-                            changeFrequency: 'monthly',
+                            changeFrequency: 'daily',
                             priority: 0.8,
                         },
                         {
                             url: "".concat(baseUrl, "/docs"),
                             lastModified: new Date(),
-                            changeFrequency: 'weekly',
+                            changeFrequency: 'daily',
                             priority: 0.8,
                         },
                         {
                             url: "".concat(baseUrl, "/frp-tools-apk-download"),
                             lastModified: new Date(),
-                            changeFrequency: 'weekly',
+                            changeFrequency: 'daily',
                             priority: 0.9,
                         },
                         {
                             url: "".concat(baseUrl, "/pricing"),
                             lastModified: new Date(),
-                            changeFrequency: 'yearly',
+                            changeFrequency: 'daily',
                             priority: 0.6,
                         },
                         {
                             url: "".concat(baseUrl, "/privacy"),
                             lastModified: new Date(),
-                            changeFrequency: 'yearly',
+                            changeFrequency: 'daily',
                             priority: 0.5,
                         },
                         {
                             url: "".concat(baseUrl, "/setting-and-lock-screen"),
                             lastModified: new Date(),
-                            changeFrequency: 'monthly',
+                            changeFrequency: 'daily',
                             priority: 0.7,
                         },
                         {
                             url: "".concat(baseUrl, "/system-apps"),
                             lastModified: new Date(),
-                            changeFrequency: 'monthly',
+                            changeFrequency: 'daily',
                             priority: 0.7,
                         },
                         {
                             url: "".concat(baseUrl, "/terms"),
                             lastModified: new Date(),
-                            changeFrequency: 'yearly',
+                            changeFrequency: 'daily',
                             priority: 0.5,
                         },
                         {
                             url: "".concat(baseUrl, "/tools-access"),
                             lastModified: new Date(),
-                            changeFrequency: 'monthly',
+                            changeFrequency: 'daily',
                             priority: 0.6,
                         },
                         {

@@ -3,55 +3,41 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
-  
-  // Get the hostname from the headers (e.g., 'admin.kalifaos.site', 'kalifaos.vercel.app', 'localhost:3000')
   const hostname = req.headers.get('host') || '';
 
-  // ==========================================
-  // 1. REDIRECT: .vercel.app -> .site
-  // ==========================================
+  // 1. Redirect .vercel.app to the main .site domain
   if (hostname.includes('.vercel.app')) {
-    // Force redirect any Vercel URL to your primary custom domain
     const targetUrl = new URL(url.pathname + url.search, 'https://kalifaos.site');
-    return NextResponse.redirect(targetUrl, 301); // 301 Permanent Redirect is best for SEO
+    return NextResponse.redirect(targetUrl, 301);
   }
 
-  // ==========================================
-  // 2. REWRITE: Subdomain Routing
-  // ==========================================
-  
-  // Clean the hostname (remove port numbers for local testing)
   const cleanHostname = hostname.replace(/:\d+$/, '');
-  
-  // Define your base domain depending on the environment
   const isProduction = process.env.NODE_ENV === 'production';
   const baseDomain = isProduction ? 'kalifaos.site' : 'localhost';
 
-  // Extract the subdomain (if any)
+  // 2. Extract the subdomain
   let subdomain = '';
   if (cleanHostname.endsWith(`.${baseDomain}`)) {
     subdomain = cleanHostname.replace(`.${baseDomain}`, '');
   }
 
-  // Check if it's one of your target subdomains
-  const validSubdomains = ['admin', 'app', 'auth'];
-
-  if (validSubdomains.includes(subdomain)) {
-    // Rewrite the URL internally to point to a specific folder
-    // E.g., admin.kalifaos.site/dashboard -> kalifaos.site/admin/dashboard
-    url.pathname = `/${subdomain}${url.pathname}`;
-    return NextResponse.rewrite(url);
+  // 3. FALLBACK LOGIC: 
+  // If the subdomain is NOT 'admin' and NOT 'auth', default to 'app'
+  // This handles the naked domain (kalifaos.site) and any other subdomain.
+  if (subdomain !== 'admin' && subdomain !== 'auth') {
+    subdomain = 'app';
   }
 
-  // If it's the main domain (or an unknown subdomain), proceed as normal
-  return NextResponse.next();
+  // 4. Perform the internal rewrite
+  // Example: kalifaos.site/home -> internally points to app/app/home/page.tsx
+  // Example: admin.kalifaos.site/ -> internally points to app/admin/page.tsx
+  url.pathname = `/${subdomain}${url.pathname}`;
+  
+  return NextResponse.rewrite(url);
 }
 
-// ==========================================
-// 3. CONFIGURATION
-// ==========================================
 export const config = {
-  // Only run middleware on actual pages, skip static files, images, and API routes to save execution time
+  // Ignore static files, images, and API routes
   matcher: [
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
   ],

@@ -5,9 +5,10 @@ var server_1 = require("next/server");
 function middleware(req) {
     var url = req.nextUrl.clone();
     var hostname = req.headers.get('host') || '';
+    var pathname = url.pathname;
     // 1. Redirect .vercel.app to the main .site domain
     if (hostname.includes('.vercel.app')) {
-        var targetUrl = new URL(url.pathname + url.search, 'https://kalifaos.site');
+        var targetUrl = new URL(pathname + url.search, 'https://kalifaos.site');
         return server_1.NextResponse.redirect(targetUrl, 301);
     }
     var cleanHostname = hostname.replace(/:\d+$/, '');
@@ -18,21 +19,31 @@ function middleware(req) {
     if (cleanHostname.endsWith(".".concat(baseDomain))) {
         subdomain = cleanHostname.replace(".".concat(baseDomain), '');
     }
-    // 3. FALLBACK LOGIC: 
-    // If the subdomain is NOT 'admin' and NOT 'auth', default to 'app'
-    // This handles the naked domain (kalifaos.site) and any other subdomain.
-    if (subdomain !== 'admin' && subdomain !== 'auth') {
+    // 3. Normalized Fallback
+    // If no subdomain (naked domain), we treat it as 'app'
+    if (!subdomain || (subdomain !== 'admin' && subdomain !== 'auth' && subdomain !== 'app')) {
         subdomain = 'app';
     }
-    // 4. Perform the internal rewrite
-    // Example: kalifaos.site/home -> internally points to app/app/home/page.tsx
-    // Example: admin.kalifaos.site/ -> internally points to app/admin/page.tsx
-    url.pathname = "/".concat(subdomain).concat(url.pathname);
+    // 4. Prevent Path Leaking & Force Subdomain Branding
+    // If someone visits kalifaos.site/admin, redirect to admin.kalifaos.site/
+    var pathPrefix = pathname.split('/')[1]; // Gets the first part of the path
+    var validSubdomains = ['admin', 'auth', 'app'];
+    if (validSubdomains.includes(pathPrefix)) {
+        // If the path starts with a subdomain name but we aren't on that subdomain
+        if (subdomain !== pathPrefix) {
+            var newProtocol = isProduction ? 'https' : 'http';
+            var targetUrl = new URL(pathname.replace("/".concat(pathPrefix), '') + url.search, "".concat(newProtocol, "://").concat(pathPrefix, ".").concat(baseDomain));
+            return server_1.NextResponse.redirect(targetUrl);
+        }
+    }
+    // 5. Internal Rewrite
+    // This maps the subdomain to the actual folder inside /app
+    // E.g., admin.kalifaos.site/settings -> /admin/settings
+    url.pathname = "/".concat(subdomain).concat(pathname);
     return server_1.NextResponse.rewrite(url);
 }
 exports.middleware = middleware;
 exports.config = {
-    // Ignore static files, images, and API routes
     matcher: [
         '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
     ],

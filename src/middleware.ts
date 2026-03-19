@@ -4,10 +4,11 @@ import type { NextRequest } from 'next/server';
 export function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const hostname = req.headers.get('host') || '';
+  const pathname = url.pathname;
 
   // 1. Redirect .vercel.app to the main .site domain
   if (hostname.includes('.vercel.app')) {
-    const targetUrl = new URL(url.pathname + url.search, 'https://kalifaos.site');
+    const targetUrl = new URL(pathname + url.search, 'https://kalifaos.site');
     return NextResponse.redirect(targetUrl, 301);
   }
 
@@ -21,23 +22,38 @@ export function middleware(req: NextRequest) {
     subdomain = cleanHostname.replace(`.${baseDomain}`, '');
   }
 
-  // 3. FALLBACK LOGIC: 
-  // If the subdomain is NOT 'admin' and NOT 'auth', default to 'app'
-  // This handles the naked domain (kalifaos.site) and any other subdomain.
-  if (subdomain !== 'admin' && subdomain !== 'auth') {
+  // 3. Normalized Fallback
+  // If no subdomain (naked domain), we treat it as 'app'
+  if (!subdomain || (subdomain !== 'admin' && subdomain !== 'auth' && subdomain !== 'app')) {
     subdomain = 'app';
   }
 
-  // 4. Perform the internal rewrite
-  // Example: kalifaos.site/home -> internally points to app/app/home/page.tsx
-  // Example: admin.kalifaos.site/ -> internally points to app/admin/page.tsx
-  url.pathname = `/${subdomain}${url.pathname}`;
+  // 4. Prevent Path Leaking & Force Subdomain Branding
+  // If someone visits kalifaos.site/admin, redirect to admin.kalifaos.site/
+  const pathPrefix = pathname.split('/')[1]; // Gets the first part of the path
+  const validSubdomains = ['admin', 'auth', 'app'];
+
+  if (validSubdomains.includes(pathPrefix)) {
+    // If the path starts with a subdomain name but we aren't on that subdomain
+    if (subdomain !== pathPrefix) {
+        const newProtocol = isProduction ? 'https' : 'http';
+        const targetUrl = new URL(
+            pathname.replace(`/${pathPrefix}`, '') + url.search, 
+            `${newProtocol}://${pathPrefix}.${baseDomain}`
+        );
+        return NextResponse.redirect(targetUrl);
+    }
+  }
+
+  // 5. Internal Rewrite
+  // This maps the subdomain to the actual folder inside /app
+  // E.g., admin.kalifaos.site/settings -> /admin/settings
+  url.pathname = `/${subdomain}${pathname}`;
   
   return NextResponse.rewrite(url);
 }
 
 export const config = {
-  // Ignore static files, images, and API routes
   matcher: [
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
   ],

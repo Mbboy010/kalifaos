@@ -6,48 +6,57 @@ export function middleware(req: NextRequest) {
   const hostname = req.headers.get('host') || '';
   const pathname = url.pathname;
 
-  // 1. Redirect .vercel.app to the main .site domain
-  if (hostname.includes('.vercel.app')) {
-    const targetUrl = new URL(pathname + url.search, 'https://kalifaos.site');
-    return NextResponse.redirect(targetUrl, 301);
-  }
-
-  const cleanHostname = hostname.replace(/:\d+$/, '');
   const isProduction = process.env.NODE_ENV === 'production';
-  const baseDomain = isProduction ? 'kalifaos.site' : 'localhost';
+  const baseDomain = isProduction ? 'kalifaos.site' : 'localhost:3000';
+  const protocol = isProduction ? 'https' : 'http';
 
-  // 2. Extract the subdomain
-  let subdomain = '';
-  if (cleanHostname.endsWith(`.${baseDomain}`)) {
-    subdomain = cleanHostname.replace(`.${baseDomain}`, '');
+  // ==========================================
+  // 1. FORCED REDIRECTS (Naked Domain -> app.)
+  // ==========================================
+  // If user hits kalifaos.vercel.app OR kalifaos.site directly
+  if (hostname === 'kalifaos.vercel.app' || hostname === 'kalifaos.site') {
+    return NextResponse.redirect(
+      new URL(pathname + url.search, `${protocol}://app.${baseDomain}`),
+      301
+    );
   }
 
-  // 3. Normalized Fallback
-  // If no subdomain (naked domain), we treat it as 'app'
-  if (!subdomain || (subdomain !== 'admin' && subdomain !== 'auth' && subdomain !== 'app')) {
+  // ==========================================
+  // 2. SUBDOMAIN EXTRACTION
+  // ==========================================
+  const cleanHostname = hostname.replace(/:\d+$/, '');
+  let subdomain = '';
+  
+  // Logic to pull subdomain from the host string
+  if (cleanHostname.endsWith(`.${baseDomain.split(':')[0]}`)) {
+    subdomain = cleanHostname.replace(`.${baseDomain.split(':')[0]}`, '');
+  }
+
+  // ==========================================
+  // 3. ROUTE VALIDATION & FALLBACK
+  // ==========================================
+  // If it's not a known dashboard/auth area, default it to 'app'
+  const validSubdomains = ['admin', 'auth', 'app'];
+  if (!validSubdomains.includes(subdomain)) {
     subdomain = 'app';
   }
 
-  // 4. Prevent Path Leaking & Force Subdomain Branding
-  // If someone visits kalifaos.site/admin, redirect to admin.kalifaos.site/
-  const pathPrefix = pathname.split('/')[1]; // Gets the first part of the path
-  const validSubdomains = ['admin', 'auth', 'app'];
+  // ==========================================
+  // 4. PATH-BASED SUBDOMAIN CORRECTION
+  // ==========================================
+  // If someone is on app.kalifaos.site but types /admin in the URL
+  const pathPrefix = pathname.split('/')[1]; 
 
-  if (validSubdomains.includes(pathPrefix)) {
-    // If the path starts with a subdomain name but we aren't on that subdomain
-    if (subdomain !== pathPrefix) {
-        const newProtocol = isProduction ? 'https' : 'http';
-        const targetUrl = new URL(
-            pathname.replace(`/${pathPrefix}`, '') + url.search, 
-            `${newProtocol}://${pathPrefix}.${baseDomain}`
-        );
-        return NextResponse.redirect(targetUrl);
-    }
+  if (validSubdomains.includes(pathPrefix) && subdomain !== pathPrefix) {
+    return NextResponse.redirect(
+      new URL(pathname.replace(`/${pathPrefix}`, '') + url.search, `${protocol}://${pathPrefix}.${baseDomain}`)
+    );
   }
 
-  // 5. Internal Rewrite
-  // This maps the subdomain to the actual folder inside /app
-  // E.g., admin.kalifaos.site/settings -> /admin/settings
+  // ==========================================
+  // 5. INTERNAL REWRITE
+  // ==========================================
+  // This maps the hostname to your /app/app/ folder, /app/admin/ folder, etc.
   url.pathname = `/${subdomain}${pathname}`;
   
   return NextResponse.rewrite(url);
@@ -55,6 +64,14 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - Public files with extensions (e.g. .png, .jpg, .svg)
+     */
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
   ],
 };

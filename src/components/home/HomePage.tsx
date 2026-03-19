@@ -95,24 +95,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* --- STATS / TRUST INDICATORS --- */}
-      <div className={`border-y backdrop-blur ${
-        isColor ? 'border-slate-800 bg-slate-900/30' : 'border-slate-200 bg-white/60'
-      }`}>
-        <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {[
-            { label: 'Devices Supported', value: '5,000+' },
-            { label: 'Success Rate', value: '99.9%' },
-            { label: 'Active Users', value: '12k+' },
-            { label: 'Uptime', value: '100%' },
-          ].map((stat, i) => (
-            <div key={i}>
-              <div className={`text-3xl font-bold mb-1 ${isColor ? 'text-white' : 'text-slate-900'}`}>{stat.value}</div>
-              <div className={`text-sm font-mono uppercase tracking-wider ${isColor ? 'text-slate-500' : 'text-slate-500'}`}>{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+
 
       {/* --- CORE TOOLS COMPONENTS --- */}
       <div className="relative z-20 -mt-10 pt-10">
@@ -218,72 +201,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* --- PRICING (Hacker Plan Style) --- */}
-      <section id="pricing" className="py-24">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className={`text-3xl font-bold text-center mb-12 ${isColor ? 'text-white' : 'text-slate-900'}`}>Access Passes</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { name: 'Standard', price: 'N5,000', label: 'Single Use', features: ['1 Device Unlock', 'Standard Speed', 'Email Support'] },
-              { name: 'Developer', price: 'N13,000', label: 'Most Popular', features: ['3 Device Unlocks', 'Priority Queue', 'Direct WhatsApp Support'] },
-              { name: 'Root Admin', price: 'N49,000', label: 'Enterprise', features: ['Unlimited Unlocks', 'API Access', '24/7 VIP Channel'] },
-            ].map((plan, index) => (
-              <div
-                key={index}
-                className={`relative flex flex-col p-8 rounded-2xl border transition-all duration-300 ${
-                  index === 1 
-                    ? (isColor 
-                        ? 'border-cyan-500 bg-slate-900/80 shadow-[0_0_40px_rgba(6,182,212,0.15)] scale-105 z-10' 
-                        : 'border-blue-500 bg-white shadow-xl scale-105 z-10')
-                    : (isColor 
-                        ? 'border-slate-800 bg-slate-900/30 hover:border-slate-600' 
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md')
-                }`}
-              >
-                {index === 1 && (
-                  <div className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide ${
-                    isColor ? 'bg-cyan-600 text-white' : 'bg-blue-600 text-white'
-                  }`}>
-                    Recommended
-                  </div>
-                )}
-                
-                <h3 className={`text-lg font-mono font-bold mb-2 ${
-                  index === 1 
-                    ? (isColor ? 'text-cyan-400' : 'text-blue-600') 
-                    : (isColor ? 'text-slate-300' : 'text-slate-700')
-                }`}>
-                  {plan.name}
-                </h3>
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className={`text-4xl font-bold ${isColor ? 'text-white' : 'text-slate-900'}`}>{plan.price}</span>
-                  <span className="text-slate-500 text-sm">/param</span>
-                </div>
-                
-                <ul className="space-y-4 mb-8 flex-1">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className={`flex items-start text-sm ${isColor ? 'text-slate-300' : 'text-slate-600'}`}>
-                      <ChevronRight className={`w-4 h-4 mr-2 mt-0.5 flex-shrink-0 ${isColor ? 'text-cyan-500' : 'text-blue-500'}`} />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                
-                <button
-                  onClick={() => handlePrice(plan.price, plan.name)}
-                  className={`w-full py-3 rounded-lg font-bold text-sm uppercase tracking-wide transition-all ${
-                    index === 1 
-                      ? (isColor ? 'bg-cyan-600 text-white hover:bg-cyan-500' : 'bg-blue-600 text-white hover:bg-blue-700')
-                      : (isColor ? 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white' : 'bg-slate-100 text-slate-800 hover:bg-slate-200')
-                  }`}
-                >
-                  Acquire Access
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
 
       {/* --- FAQ SECTION --- */}
       <section className={`py-20 ${isColor ? 'bg-slate-900/20' : 'bg-slate-50'}`}>

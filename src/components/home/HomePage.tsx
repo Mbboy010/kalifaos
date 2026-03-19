@@ -96,15 +96,15 @@ export default function HomePage() {
       </section>
 
 
+      <section className={`py-20 ${isColor ? 'bg-gradient-to-b from-[#0a0a0a] to-slate-900' : 'bg-slate-50'}`}>
+        <WindowsBypassTools />
+       </section> 
 
       {/* --- CORE TOOLS COMPONENTS --- */}
       <div className="relative z-20 -mt-10 pt-10">
         <FrpLanding />
       </div>
 
-      <section className={`py-20 ${isColor ? 'bg-gradient-to-b from-[#0a0a0a] to-slate-900' : 'bg-slate-50'}`}>
-        <WindowsBypassTools />
-      </section>
       
     <div className="container max-w-7xl mx-auto px-4 relative z-10 text-center">
       <div className={`mt-16 relative mx-auto max-w-5xl rounded-xl border p-2 shadow-2xl backdrop-blur-sm ${

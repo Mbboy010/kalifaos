@@ -96,7 +96,7 @@ export default function HomePage() {
       </section>
 
 
-      <section className={`py-20 ${isColor ? 'bg-gradient-to-b from-[#0a0a0a] to-slate-900' : 'bg-slate-50'}`}>
+      <section className={` ${isColor ? 'bg-gradient-to-b from-[#0a0a0a] to-slate-900' : 'bg-slate-50'}`}>
         <WindowsBypassTools />
        </section> 
 
@@ -122,6 +122,11 @@ export default function HomePage() {
           </div>
        </div>
       
+      
+     {/* --- VIDEO FEED --- */}
+      <div className="py-20">
+        <YouTubeVideos />
+      </div>
       
 
       {/* --- FEATURES GRID --- */}
@@ -231,10 +236,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* --- VIDEO FEED --- */}
-      <div className="py-20">
-        <YouTubeVideos />
-      </div>
+
 
     </div>
   );

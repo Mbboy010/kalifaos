@@ -9,56 +9,45 @@ function middleware(req) {
     var isProduction = process.env.NODE_ENV === 'production';
     var baseDomain = isProduction ? 'kalifaos.site' : 'localhost:3000';
     var protocol = isProduction ? 'https' : 'http';
-    // ==========================================
-    // 1. FORCED REDIRECTS (Naked Domain -> app.)
-    // ==========================================
-    // If user hits kalifaos.vercel.app OR kalifaos.site directly
+    // 1. Redirect naked domain (kalifaos.site) to app.kalifaos.site
     if (hostname === 'kalifaos.vercel.app' || hostname === 'kalifaos.site') {
         return server_1.NextResponse.redirect(new URL(pathname + url.search, "".concat(protocol, "://app.").concat(baseDomain)), 301);
     }
-    // ==========================================
-    // 2. SUBDOMAIN EXTRACTION
-    // ==========================================
+    // 2. Extract Subdomain
     var cleanHostname = hostname.replace(/:\d+$/, '');
     var subdomain = '';
-    // Logic to pull subdomain from the host string
-    if (cleanHostname.endsWith(".".concat(baseDomain.split(':')[0]))) {
-        subdomain = cleanHostname.replace(".".concat(baseDomain.split(':')[0]), '');
+    if (isProduction) {
+        if (cleanHostname.endsWith('.kalifaos.site')) {
+            subdomain = cleanHostname.replace('.kalifaos.site', '');
+        }
     }
-    // ==========================================
-    // 3. ROUTE VALIDATION & FALLBACK
-    // ==========================================
-    // If it's not a known dashboard/auth area, default it to 'app'
+    else {
+        if (cleanHostname.endsWith('.localhost')) {
+            subdomain = cleanHostname.replace('.localhost', '');
+        }
+    }
+    // 3. Set 'app' as the default subdomain
     var validSubdomains = ['admin', 'auth', 'app'];
-    if (!validSubdomains.includes(subdomain)) {
+    if (!subdomain || !validSubdomains.includes(subdomain)) {
         subdomain = 'app';
     }
-    // ==========================================
-    // 4. PATH-BASED SUBDOMAIN CORRECTION
-    // ==========================================
-    // If someone is on app.kalifaos.site but types /admin in the URL
+    // 4. Path-based Correction (e.g., app.kalifaos.site/admin -> admin.kalifaos.site)
     var pathPrefix = pathname.split('/')[1];
     if (validSubdomains.includes(pathPrefix) && subdomain !== pathPrefix) {
         return server_1.NextResponse.redirect(new URL(pathname.replace("/".concat(pathPrefix), '') + url.search, "".concat(protocol, "://").concat(pathPrefix, ".").concat(baseDomain)));
     }
-    // ==========================================
-    // 5. INTERNAL REWRITE
-    // ==========================================
-    // This maps the hostname to your /app/app/ folder, /app/admin/ folder, etc.
-    url.pathname = "/".concat(subdomain).concat(pathname);
+    // 5. INTERNAL REWRITE (The Fix)
+    // Since your files are at the root of /src/app, we DON'T prefix 'app'
+    if (subdomain === 'admin' || subdomain === 'auth') {
+        url.pathname = "/".concat(subdomain).concat(pathname);
+    }
+    else {
+        // This keeps the path as /about instead of /app/about
+        url.pathname = pathname;
+    }
     return server_1.NextResponse.rewrite(url);
 }
 exports.middleware = middleware;
 exports.config = {
-    matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - api (API routes)
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         * - Public files with extensions (e.g. .png, .jpg, .svg)
-         */
-        '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
-    ],
+    matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 };

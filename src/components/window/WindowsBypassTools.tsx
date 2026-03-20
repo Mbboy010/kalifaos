@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, MoreVertical, Share2, Flag, X, Terminal, Clock, HardDrive, Cpu, AlertTriangle } from 'lucide-react';
+import { ArrowRight, MoreVertical, Share2, Flag, X, Terminal, Clock, Cpu, AlertTriangle, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useAppSelector } from '../redux/hooks';
 import { useState, useEffect } from 'react';
@@ -13,13 +13,11 @@ interface Tool {
   id: string;
   title: string;
   price: any;
-  size: string;
   date: any;
   image: string;
 }
 
 export default function WindowsBypassTools() {
-  // Logic: isColor = true (Dark Mode), isColor = false (Light Mode)
   const isColor = useAppSelector((state) => state.color.value);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [tools, setTools] = useState<Tool[]>([]);
@@ -43,7 +41,7 @@ export default function WindowsBypassTools() {
     if (price === undefined || price === null || price === '') return '';
     const raw = typeof price === 'number' ? price : Number(String(price).replace(/[^0-9.-]+/g, ''));
     if (Number.isNaN(raw)) return String(price);
-    if (raw === 0) return 'FREE_ACCESS';
+    if (raw === 0) return 'COMMUNITY_ACCESS';
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: 'NGN',
@@ -55,15 +53,12 @@ export default function WindowsBypassTools() {
     const then = getTimeFromValue(value);
     if (!then) return '';
     const diffSec = Math.floor((now - then) / 1000);
-    if (diffSec < 5) return 'just now';
     if (diffSec < 60) return `${diffSec}s ago`;
     const minutes = Math.floor(diffSec / 60);
     if (minutes < 60) return `${minutes}m ago`;
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    if (days < 30) return `${days}d ago`;
-    return `${Math.floor(days / 30)}mo ago`;
+    return `${Math.floor(hours / 24)}d ago`;
   };
 
   // --- DATA FETCHING ---
@@ -77,15 +72,15 @@ export default function WindowsBypassTools() {
             id: doc.id,
             title: d.title ?? '',
             price: d.price ?? '',
-            size: d.size ?? '',
+            // Size removed from mapping
             date: d.date ?? '',
             image: d.image ?? '',
-          } as Tool;
+          };
         });
 
         toolsData = toolsData
           .sort((a, b) => getTimeFromValue(b.date) - getTimeFromValue(a.date))
-          .slice(0, 5);
+          .slice(0, 6); // Showing 6 for a better grid/list balance
 
         setTools(toolsData);
       } catch (error) {
@@ -108,203 +103,139 @@ export default function WindowsBypassTools() {
     } catch { /* cancelled */ } finally { setOpenMenuId(null); }
   };
 
-  const handleReport = (toolId: string) => {
-    alert(`Report logged for item ID: ${toolId}`);
-    setOpenMenuId(null);
-  };
-
-  // --- SKELETON COMPONENT (Cyber Scan Style) ---
+  // --- UI COMPONENTS ---
   const SkeletonCard = () => (
-    <div className={`relative overflow-hidden p-4 rounded-xl border ${
-      isColor ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'
-    }`}>
-      {/* Shimmer Effect */}
-      <div className={`absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent`}></div>
-      
-      <div className="flex items-center gap-4">
-        <div className={`w-16 h-16 rounded-lg ${isColor ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
+    <div className={`p-4 rounded-lg border ${isColor ? 'bg-slate-900/40 border-slate-800' : 'bg-white border-slate-200'}`}>
+      <div className="flex gap-4 animate-pulse">
+        <div className={`w-14 h-14 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
         <div className="flex-1 space-y-3">
-          <div className={`h-4 w-3/4 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
-          <div className="flex gap-2">
-            <div className={`h-3 w-16 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
-            <div className={`h-3 w-16 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
-          </div>
+          <div className={`h-3 w-1/2 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
+          <div className={`h-2 w-1/4 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className={`w-full py-16 px-4 transition-colors duration-300 ${
-      isColor ? 'bg-[#0a0a0a] text-slate-200' : 'bg-slate-50 text-slate-900'
+    <div className={`w-full py-12 px-6 transition-all duration-500 ${
+      isColor ? 'bg-[#050505] text-slate-300' : 'bg-white text-slate-900'
     }`}>
       
-      {/* --- HEADER --- */}
-      <div className="max-w-4xl mx-auto mb-10">
-        <div className={`flex items-center gap-2 text-xs font-mono mb-2 ${
-          isColor ? 'text-cyan-500' : 'text-blue-600'
-        }`}>
-          <Terminal size={14} />
-          <span>/bin/windows_utilities</span>
+      {/* Header Section */}
+      <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+        <div className="space-y-2">
+          <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] ${isColor ? 'text-cyan-500' : 'text-blue-600'}`}>
+            <ShieldCheck size={14} />
+            <span>Verified System Utilities</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight">
+            Windows <span className={`italic ${isColor ? 'text-white underline decoration-cyan-500/30' : 'text-slate-900'}`}>Bypass</span>
+          </h2>
         </div>
-        <h2 className={`text-3xl md:text-4xl font-bold ${isColor ? 'text-white' : 'text-slate-900'}`}>
-          Windows <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600">Bypass Tools</span>
-        </h2>
+        <a href="/windows-tools" className={`text-xs font-bold uppercase tracking-widest flex items-center gap-2 group ${isColor ? 'text-slate-500 hover:text-cyan-400' : 'text-slate-400 hover:text-blue-600'}`}>
+          Tools Archive <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+        </a>
       </div>
 
-      {/* --- TOOLS LIST --- */}
-      <div className="flex flex-col gap-4 max-w-4xl w-full mx-auto">
+      {/* Tools List */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto">
         {loading ? (
-          Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)
-        ) : tools.length === 0 ? (
-          <div className={`text-center py-10 rounded-xl border border-dashed ${
-            isColor ? 'border-slate-800 text-slate-500' : 'border-slate-300 text-slate-500'
-          }`}>
-            <AlertTriangle className="mx-auto w-8 h-8 mb-2 opacity-50" />
-            No tools currently indexed in database.
-          </div>
+          Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
         ) : (
-          tools.map((tool, index) => (
+          tools.map((tool) => (
             <div
               key={tool.id}
-              className={`group relative flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 animate-fade-in hover:scale-[1.01] ${
+              className={`relative group flex items-center gap-4 p-5 rounded-2xl border transition-all duration-300 ${
                 isColor 
-                  ? 'bg-slate-900/40 border-slate-800 hover:border-cyan-500/50 hover:bg-slate-900 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]' 
-                  : 'bg-white border-slate-200 hover:border-blue-300 hover:shadow-lg'
+                  ? 'bg-[#0c0c0c] border-slate-800/60 hover:border-cyan-500/40 hover:bg-[#111111]' 
+                  : 'bg-slate-50 border-slate-200 hover:border-blue-500/40 hover:bg-white hover:shadow-xl'
               }`}
-              style={{ animationDelay: `${index * 100}ms` }}
             >
-              <Link href={`/windows-tools/${tool.id}`} className="flex items-center gap-4 flex-1 relative z-10 min-w-0">
-                {/* Image Container */}
-                <div className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border shrink-0 ${
-                  isColor ? 'border-slate-700 bg-slate-950' : 'border-slate-100 bg-slate-100'
-                }`}>
-                  <img
-                    src={tool.image}
-                    alt={tool.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  {/* Status Dot */}
-                  <div className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full shadow-[0_0_5px_#22c55e]"></div>
-                </div>
+              {/* Image with Tech Frame */}
+              <div className={`relative w-16 h-16 shrink-0 rounded-xl p-1 border ${
+                isColor ? 'bg-slate-900 border-slate-800 group-hover:border-cyan-500/50' : 'bg-white border-slate-200'
+              }`}>
+                <img src={tool.image} alt="" className="w-full h-full object-cover rounded-lg transition-all" />
+              </div>
 
-                {/* Content */}
-                <div className="flex flex-col flex-1 min-w-0">
-                  {/* --- UPDATED TITLE SECTION --- */}
-                  <h3 className={`text-base md:text-lg font-bold truncate mb-1 md:mb-2 w-full max-w-[160px] xs:max-w-[200px] sm:max-w-none ${
-                    isColor ? 'text-white group-hover:text-cyan-400' : 'text-slate-900 group-hover:text-blue-600'
-                  }`}>
+              {/* Tool Info */}
+              <div className="flex-1 min-w-0">
+                <a href={`/windows-tools/${tool.id}`}>
+                  <h3 className={`font-bold truncate text-lg ${isColor ? 'text-slate-100' : 'text-slate-900'}`}>
                     {tool.title}
                   </h3>
-                  
-                  {/* Metadata Row */}
-                  <div className="flex flex-wrap items-center gap-2 md:gap-3 text-[10px] md:text-xs font-mono">
-                     <span className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${
-                        isColor ? 'bg-slate-800 text-cyan-400' : 'bg-blue-50 text-blue-600'
-                     }`}>
-                        <Cpu size={10} className="md:w-3 md:h-3" /> {formatPrice(tool.price)}
-                     </span>
-                     <span className={`flex items-center gap-1 ${isColor ? 'text-slate-500' : 'text-slate-500'}`}>
-                        <HardDrive size={10} className="md:w-3 md:h-3" /> {tool.size}
-                     </span>
-                     <span className={`flex items-center gap-1 ${isColor ? 'text-slate-500' : 'text-slate-500'}`}>
-                        <Clock size={10} className="md:w-3 md:h-3" /> {formatDate(tool.date)}
-                     </span>
+                </a>
+                
+                <div className="flex items-center gap-3 mt-1">
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+                    isColor ? 'border-cyan-500/20 text-cyan-400 bg-cyan-500/5' : 'border-blue-200 text-blue-600 bg-blue-50'
+                  }`}>
+                    {formatPrice(tool.price)}
+                  </span>
+                  <div className="flex items-center gap-1 text-[10px] font-medium opacity-40">
+                    <Clock size={10} />
+                    {formatDate(tool.date)}
                   </div>
                 </div>
-              </Link>
+              </div>
 
-              {/* Action Menu Button */}
+              {/* Interaction Button */}
               <button
-                onClick={(e) => { e.stopPropagation(); setOpenMenuId(tool.id); }}
-                className={`p-2 rounded-lg transition-colors z-20 shrink-0 ${
-                  isColor 
-                    ? 'text-slate-400 hover:text-white hover:bg-slate-800' 
-                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                onClick={() => setOpenMenuId(tool.id)}
+                className={`p-2 rounded-full transition-all ${
+                  isColor ? 'hover:bg-white/5 text-slate-500' : 'hover:bg-slate-200 text-slate-400'
                 }`}
               >
-                <MoreVertical className="w-5 h-5" />
+                <MoreVertical size={18} />
               </button>
             </div>
           ))
         )}
       </div>
 
-      {/* --- SEE MORE LINK --- */}
-      <div className="max-w-4xl mx-auto mt-8">
-        <Link
-          href="/windows-tools?list_page=1"
-          className={`inline-flex items-center gap-2 text-sm font-bold tracking-wide uppercase transition-all ${
-            isColor ? 'text-cyan-500 hover:text-cyan-400 hover:tracking-widest' : 'text-blue-600 hover:text-blue-700 hover:tracking-widest'
-          }`}
-        >
-          <span>View Archive</span>
-          <ArrowRight className="w-4 h-4" />
-        </Link>
-      </div>
-
-      {/* --- DISCLAIMER --- */}
-      <div className={`mt-12 p-5 rounded-lg border text-xs font-mono max-w-4xl mx-auto ${
-        isColor 
-          ? 'bg-red-950/10 border-red-900/30 text-red-400/80' 
-          : 'bg-orange-50 border-orange-200 text-orange-800'
+      {/* Footer Info */}
+      <div className={`max-w-5xl mx-auto mt-16 p-6 rounded-2xl border border-dashed flex items-center justify-between ${
+        isColor ? 'bg-slate-900/20 border-slate-800 text-slate-500' : 'bg-slate-50 border-slate-300 text-slate-500'
       }`}>
-        <p className="flex items-start gap-3">
-          <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-          <span>
-            LEGAL WARNING: All tools provided here are for educational and repair purposes only. 
-            Kalifa OS assumes no liability for hardware damage or misuse.
-          </span>
-        </p>
+        <div className="flex items-center gap-4 text-[11px] font-mono">
+          <Terminal size={14} className={isColor ? 'text-cyan-500' : 'text-blue-600'} />
+          <span>SECURE_ACCESS_PROTOCOL: ACTIVE</span>
+        </div>
+        <div className="hidden sm:flex items-center gap-2 text-[11px] font-mono uppercase">
+          <ShieldCheck size={14} />
+          <span>Kalifa Security Verified</span>
+        </div>
       </div>
 
-      {/* --- BOTTOM SHEET MODAL --- */}
+      {/* Bottom Sheet Logic - Kept similar but styled for the new UI */}
       {openMenuId && (
-        <div
-          onClick={() => setOpenMenuId(null)}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-end animate-in fade-in duration-200"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className={`w-full max-w-md rounded-t-2xl border-t p-6 animate-in slide-in-from-bottom duration-300 ${
-              isColor 
-                ? 'bg-[#0f0f0f] border-cyan-500/50 text-slate-200 shadow-[0_-5px_30px_rgba(0,0,0,0.8)]' 
-                : 'bg-white border-blue-500 text-slate-900 shadow-2xl'
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex justify-center items-end" onClick={() => setOpenMenuId(null)}>
+          <div 
+            className={`w-full max-w-lg p-8 rounded-t-[2.5rem] border-t-4 animate-in slide-in-from-bottom duration-500 ${
+              isColor ? 'bg-[#0a0a0a] border-cyan-600 text-white' : 'bg-white border-blue-600 text-slate-900'
             }`}
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h4 className="font-bold text-lg">Tool Options</h4>
-                <p className="text-xs font-mono opacity-50">ID: {openMenuId}</p>
-              </div>
-              <button onClick={() => setOpenMenuId(null)} className="p-2 rounded-full hover:bg-white/10">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+             <div className="w-12 h-1.5 bg-slate-700/30 rounded-full mx-auto mb-8" />
+             <h4 className="text-2xl font-black mb-2">Security Options</h4>
+             <p className="text-sm opacity-50 mb-8 font-mono">HASH_ID: {openMenuId}</p>
 
-            {/* Modal Actions */}
-            <div className="space-y-3">
-              <button
-                onClick={() => handleShare(openMenuId!, tools.find((t) => t.id === openMenuId)?.title || '')}
-                className={`w-full flex items-center gap-4 px-4 py-4 rounded-xl font-medium transition-all ${
-                  isColor ? 'bg-slate-900 hover:bg-cyan-900/20 hover:text-cyan-400' : 'bg-slate-100 hover:bg-blue-50 hover:text-blue-600'
-                }`}
-              >
-                <Share2 className="w-5 h-5" />
-                Share Link
-              </button>
-              
-              <button
-                onClick={() => handleReport(openMenuId!)}
-                className={`w-full flex items-center gap-4 px-4 py-4 rounded-xl font-medium transition-all ${
-                  isColor ? 'bg-slate-900 hover:bg-red-900/20 hover:text-red-400' : 'bg-slate-100 hover:bg-red-50 hover:text-red-600'
-                }`}
-              >
-                <Flag className="w-5 h-5" />
-                Report Issue
-              </button>
-            </div>
+             <div className="grid grid-cols-1 gap-4">
+                <button 
+                  onClick={() => handleShare(openMenuId!, tools.find(t => t.id === openMenuId)?.title || '')}
+                  className={`flex items-center justify-between p-5 rounded-2xl font-bold transition-all ${
+                    isColor ? 'bg-slate-900 hover:bg-cyan-600 hover:text-white' : 'bg-slate-100 hover:bg-blue-600 hover:text-white'
+                  }`}
+                >
+                  Share Repository <Share2 size={20} />
+                </button>
+                <button className={`flex items-center justify-between p-5 rounded-2xl font-bold text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all`}>
+                  Report Integrity Issue <Flag size={20} />
+                </button>
+             </div>
+             <button onClick={() => setOpenMenuId(null)} className="w-full mt-6 py-4 text-sm font-bold opacity-40 hover:opacity-100 transition-opacity">
+                CLOSE INTERFACE
+             </button>
           </div>
         </div>
       )}

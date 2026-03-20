@@ -1,14 +1,23 @@
 'use client';
 
-import Toggle from './Toggle';
-import SearchBar from './SearchBar';
-import { useAppSelector, useAppDispatch } from '../redux/hooks';
-import { setChat } from '../redux/slicer/CheckChat';
-import Link from 'next/link';
-// Added User, LogIn, LogOut, and Shield icons
-import { Unlock, Menu, X, Search, Terminal, ChevronRight, User, LogIn, LogOut, Shield } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { useAppSelector, useAppDispatch } from '../redux/hooks';
+import { setChat } from '../redux/slicer/CheckChat';
+
+// UI Components
+import Toggle from './Toggle';
+import SearchBar from './SearchBar';
+
+// Firebase Logic
+import { logoutUser } from '@/server/firebaseApi';
+
+// Icons
+import { 
+  Unlock, Menu, X, Search, Terminal, ChevronRight, 
+  User, LogIn, LogOut, Shield, UserPlus, Settings 
+} from 'lucide-react';
 
 interface NavigateProps {
   darkMode: boolean;
@@ -17,16 +26,14 @@ interface NavigateProps {
 
 export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
   const dispatch = useAppDispatch();
-  const chat = useAppSelector((state) => state.chatCheck.value);
-  
-  // --- AUTH STATE ---
-  // Assuming your auth slice looks like this. Adjust the paths to match your actual Redux store.
+  const chat = useAppSelector((state) => state.chatCheck.value); // Mobile Menu State
   const { user, isAdmin } = useAppSelector((state) => state.auth || { user: null, isAdmin: false });
   
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
+  // Scroll effect for glassmorphism
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
@@ -43,9 +50,13 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
     setSearchOpen(!searchOpen);
   };
 
-  const handleLogout = () => {
-    // Add your Firebase sign-out logic here
-    console.log("Logging out...");
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      if (chat) dispatch(setChat(false));
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   const navLinks = [
@@ -61,7 +72,7 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b ${
           scrolled
             ? darkMode 
-              ? 'bg-[#050505]/90 backdrop-blur-xl border-slate-800 shadow-lg' 
+              ? 'bg-[#050505]/90 backdrop-blur-xl border-slate-800 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)]' 
               : 'bg-white/90 backdrop-blur-xl border-slate-200 shadow-sm'
             : 'bg-transparent border-transparent'
         }`}
@@ -73,15 +84,13 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
             <Link href="/" className="group flex items-center gap-3 relative z-50">
               <div className={`p-2 rounded-lg border transition-all duration-300 ${
                 darkMode 
-                  ? 'bg-slate-900 border-slate-700 text-cyan-500 group-hover:border-cyan-500' 
+                  ? 'bg-slate-900 border-slate-700 text-cyan-500 group-hover:border-cyan-500 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.3)]' 
                   : 'bg-white border-slate-200 text-blue-600 group-hover:border-blue-400'
               }`}>
                 <Unlock size={20} />
               </div>
               <div className="flex flex-col">
-                <span className={`font-bold text-xl tracking-tight leading-none ${
-                  darkMode ? 'text-white' : 'text-slate-900'
-                }`}>
+                <span className={`font-bold text-xl tracking-tight leading-none ${darkMode ? 'text-white' : 'text-slate-900'}`}>
                   KALIFA<span className={darkMode ? 'text-cyan-500' : 'text-blue-600'}>OS</span>
                 </span>
                 <span className="text-[10px] font-mono opacity-50 tracking-widest uppercase">System v2.0</span>
@@ -110,35 +119,47 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
             <div className="flex items-center gap-3 md:gap-5">
               
               {/* Search Toggle */}
-              <button onClick={toggleSearch} className={`p-2 transition-all ${darkMode ? 'text-slate-400 hover:text-cyan-400' : 'text-slate-600 hover:text-blue-600'}`}>
+              <button 
+                onClick={toggleSearch}
+                className={`p-2 rounded-full transition-all hover:scale-110 ${
+                  darkMode 
+                    ? searchOpen ? 'bg-cyan-500 text-black' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                    : searchOpen ? 'bg-blue-600 text-white' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-100'
+                }`}
+              >
                 {searchOpen ? <X size={20} /> : <Search size={20} />}
               </button>
 
-              {/* Theme Toggle (Hidden on very small screens) */}
+              {/* Theme Toggle (Desktop) */}
               <div className="hidden sm:block">
                 <Toggle darkMode={darkMode} setDarkMode={setDarkMode} />
               </div>
 
-              {/* --- AUTH BUTTONS (Desktop) --- */}
-              <div className="hidden md:flex items-center gap-2 border-l border-slate-800 pl-5">
+              {/* Desktop Auth Section */}
+              <div className="hidden md:flex items-center gap-2 border-l border-slate-800/50 pl-5">
                 {!user ? (
-                  <Link href="/login" className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
-                    darkMode ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-white' : 'bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-600 hover:text-white'
-                  }`}>
-                    <LogIn size={14} /> Login
-                  </Link>
+                  <>
+                    <Link href="/login" className={`text-xs font-bold uppercase px-3 py-2 ${darkMode ? 'text-slate-400 hover:text-white' : 'text-slate-600'}`}>
+                      Login
+                    </Link>
+                    <Link href="/register" className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${
+                      darkMode ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-black' : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}>
+                      <UserPlus size={14} /> Join
+                    </Link>
+                  </>
                 ) : (
                   <div className="flex items-center gap-3">
                     {isAdmin ? (
-                      <Link href="/admin" className={`p-2 rounded-lg transition-all ${darkMode ? 'bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white' : 'bg-orange-50 text-orange-600 hover:bg-orange-500 hover:text-white'}`}>
+                      <Link href="/admin" title="Admin Panel" className={`p-2 rounded-lg transition-all ${darkMode ? 'bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white' : 'bg-orange-50 text-orange-600'}`}>
                         <Shield size={18} />
                       </Link>
                     ) : (
-                      <Link href="/profile" className={`p-2 rounded-lg transition-all ${darkMode ? 'bg-slate-800 text-slate-300 hover:text-cyan-400' : 'bg-slate-100 text-slate-600 hover:text-blue-600'}`}>
+                      <Link href="/profile" title="Profile" className={`p-2 rounded-lg transition-all ${darkMode ? 'bg-slate-800 text-slate-300 hover:text-cyan-400' : 'bg-slate-100 text-slate-600 hover:text-blue-600'}`}>
                         <User size={18} />
                       </Link>
                     )}
-                    <button onClick={handleLogout} className={`p-2 rounded-lg transition-all ${darkMode ? 'text-slate-500 hover:text-red-400' : 'text-slate-400 hover:text-red-600'}`}>
+                    <button onClick={handleLogout} className="p-2 text-slate-500 hover:text-red-500 transition-colors">
                       <LogOut size={18} />
                     </button>
                   </div>
@@ -147,28 +168,42 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
 
               {/* Mobile Menu Button */}
               <div className="md:hidden">
-                <button onClick={toggleMenu} className={`p-2 rounded-lg ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                  {chat ? <X size={24} /> : <Menu size={24} />}
+                <button 
+                  onClick={toggleMenu}
+                  className={`p-2 rounded-lg border transition-all ${
+                    darkMode ? 'border-slate-800 text-slate-300 bg-slate-900' : 'border-slate-200 text-slate-700 bg-white'
+                  }`}
+                >
+                  {chat ? <X size={20} /> : <Menu size={20} />}
                 </button>
               </div>
             </div>
           </div>
         </div>
 
+        {/* --- SEARCH BAR DROPDOWN --- */}
+        <div className={`overflow-hidden transition-[max-height] duration-500 ease-in-out ${
+          searchOpen ? 'max-h-96 border-b border-slate-800/50' : 'max-h-0'
+        } ${darkMode ? 'bg-[#0a0a0a]' : 'bg-white'}`}>
+          <SearchBar darkMode={darkMode} open={searchOpen} onClose={() => setSearchOpen(false)} />
+        </div>
+
         {/* --- MOBILE MENU OVERLAY --- */}
-        <div className={`md:hidden fixed w-full overflow-y-auto transition-all duration-500 ${
+        <div className={`md:hidden overflow-y-auto transition-all duration-300 ease-in-out ${
           chat ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
-        } ${darkMode ? 'bg-[#050505]' : 'bg-white'}`} style={{ height: 'calc(100vh - 80px)' }}>
+        } ${darkMode ? 'bg-[#0a0a0a]' : 'bg-white'}`} style={{ height: 'calc(100vh - 80px)' }}>
           
-          <div className="px-6 py-8 space-y-4">
+          <div className="container mx-auto px-6 py-8 space-y-4 pb-24">
             
-            {/* User Status Card (Mobile) */}
-            <div className={`p-5 rounded-2xl border-2 border-dashed mb-6 ${darkMode ? 'border-slate-800 bg-slate-900/30' : 'border-slate-100 bg-slate-50'}`}>
+            {/* Mobile User Card */}
+            <div className={`p-5 rounded-2xl border-2 border-dashed ${darkMode ? 'border-slate-800 bg-slate-900/30' : 'border-slate-100 bg-slate-50'}`}>
               {!user ? (
-                <div className="space-y-4">
-                  <p className="text-xs font-mono opacity-50 uppercase tracking-tighter">Identity: Anonymous</p>
-                  <Link href="/login" onClick={toggleMenu} className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-cyan-500 text-white font-bold text-sm">
-                    <LogIn size={18} /> Login
+                <div className="grid grid-cols-2 gap-3">
+                  <Link href="/login" onClick={toggleMenu} className={`flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-xs uppercase border ${darkMode ? 'border-slate-700 text-white' : 'border-slate-200 text-slate-900'}`}>
+                    <LogIn size={16} /> Login
+                  </Link>
+                  <Link href="/register" onClick={toggleMenu} className="flex items-center justify-center gap-2 py-4 rounded-xl bg-cyan-500 text-black font-bold text-xs uppercase">
+                    <UserPlus size={16} /> Join
                   </Link>
                 </div>
               ) : (
@@ -178,9 +213,9 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
                       <User size={20} />
                     </div>
                     <div>
-                      <p className="text-sm font-bold">{user.displayName || 'User'}</p>
+                      <p className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{user.displayName || 'Operator'}</p>
                       <p className={`text-[10px] font-mono ${isAdmin ? 'text-red-400' : 'text-cyan-400'}`}>
-                        {isAdmin ? 'LVL_ADMIN_ACCESS' : 'LVL_USER_ACCESS'}
+                        {isAdmin ? 'SEC_LEVEL_ADMIN' : 'SEC_LEVEL_USER'}
                       </p>
                     </div>
                   </div>
@@ -189,29 +224,44 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
               )}
             </div>
 
-            {/* Nav Links */}
-            {navLinks.map((link, i) => (
-              <Link key={i} href={link.href} onClick={toggleMenu} className={`flex items-center justify-between p-4 rounded-xl transition-all ${darkMode ? 'bg-slate-900/50 text-slate-300' : 'bg-slate-50 text-slate-700'}`}>
-                <span className="font-bold">{link.name}</span>
-                <ChevronRight size={18} className="opacity-30" />
+            {/* Mobile Links */}
+            {[
+              ...navLinks, 
+              { name: 'Settings & Lock', href: '/setting-and-lock-screen', icon: <Settings size={18}/> },
+              { name: 'About System', href: '/about', icon: <Terminal size={18}/> }
+            ].map((link, index) => (
+              <Link
+                key={index}
+                href={link.href}
+                onClick={toggleMenu}
+                className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+                  darkMode 
+                    ? 'border-slate-800 bg-slate-900/50 text-slate-300' 
+                    : 'border-slate-100 bg-slate-50 text-slate-700'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="opacity-50">{link.icon || <Terminal size={16} />}</span>
+                  <span className="font-semibold">{link.name}</span>
+                </div>
+                <ChevronRight size={16} className="opacity-50" />
               </Link>
             ))}
 
-            {/* Conditional User Links (Mobile) */}
-            {user && (
-              isAdmin ? (
-                <Link href="/admin" onClick={toggleMenu} className="flex items-center gap-3 p-4 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20">
-                  <Shield size={18} /> <span className="font-bold">Admin Control Panel</span>
-                </Link>
-              ) : (
-                <Link href="/profile" onClick={toggleMenu} className="flex items-center gap-3 p-4 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                  <User size={18} /> <span className="font-bold">User Profile Settings</span>
-                </Link>
-              )
-            )}
+            {/* Mobile System Controls */}
+            <div className="pt-4 space-y-3">
+               <p className="text-[10px] font-mono opacity-40 uppercase tracking-widest ml-2">System Config</p>
+               <div className="flex items-center justify-between p-4 rounded-xl border border-dashed border-slate-700">
+                <span className={`text-sm font-mono ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                  DARK_MODE_ACTIVE
+                </span>
+                <Toggle darkMode={darkMode} setDarkMode={setDarkMode} />
+              </div>
+            </div>
           </div>
         </div>
       </header>
+      
       <div className="h-20" /> 
     </>
   );

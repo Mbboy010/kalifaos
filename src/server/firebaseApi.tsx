@@ -1,6 +1,6 @@
 // app/server/firebaseApi.ts
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider,signOut } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -18,3 +18,13 @@ export const storage = getStorage(app);
 export const db = getFirestore(app);
 export const provider = new GoogleAuthProvider();
 export const auth = getAuth(app);
+
+export const logoutUser = async () => {
+  try {
+    await signOut(auth);
+    console.log("Firebase Auth: Session successfully terminated.");
+  } catch (error) {
+    console.error("Firebase Auth: Logout Error", error);
+    throw error;
+  }
+};

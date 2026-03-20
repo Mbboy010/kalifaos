@@ -122,7 +122,7 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
               {/* --- AUTH BUTTONS (Desktop) --- */}
               <div className="hidden md:flex items-center gap-2 border-l border-slate-800 pl-5">
                 {!user ? (
-                  <Link href="/auth" className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+                  <Link href="/login" className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
                     darkMode ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-white' : 'bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-600 hover:text-white'
                   }`}>
                     <LogIn size={14} /> Login
@@ -167,8 +167,8 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
               {!user ? (
                 <div className="space-y-4">
                   <p className="text-xs font-mono opacity-50 uppercase tracking-tighter">Identity: Anonymous</p>
-                  <Link href="/auth" onClick={toggleMenu} className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-cyan-500 text-white font-bold text-sm">
-                    <LogIn size={18} /> AUTHENTICATE SYSTEM
+                  <Link href="/login" onClick={toggleMenu} className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-cyan-500 text-white font-bold text-sm">
+                    <LogIn size={18} /> Login
                   </Link>
                 </div>
               ) : (

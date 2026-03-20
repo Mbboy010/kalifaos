@@ -10,22 +10,13 @@ export default function FrpLanding() {
 
   const tools = [
     {
-      title: "APK Depository",
-      subtitle: "FRP Tools & Utilities",
-      desc: "Direct download links for essential bypass APKs. No redirects, high-speed servers.",
-      href: "/frp-tools-apk-download",
-      icon: <Download className="w-6 h-6" />,
-      tag: "v3.0.1",
-      id: "MOD_01"
-    },
-    {
       title: "System Apps",
       subtitle: "Core Android Access",
       desc: "Force launch hidden system activities on Samsung, Xiaomi, and Pixel devices.",
       href: "/system-apps",
       icon: <Smartphone className="w-6 h-6" />,
       tag: "ROOT_ACCESS",
-      id: "MOD_02"
+      id: "MOD_01"
     },
     {
       title: "Config & Security",
@@ -34,7 +25,7 @@ export default function FrpLanding() {
       href: "/setting-and-lock-screen",
       icon: <Settings className="w-6 h-6" />,
       tag: "CONFIG_EDIT",
-      id: "MOD_03"
+      id: "MOD_02"
     }
   ];
 
@@ -47,12 +38,6 @@ export default function FrpLanding() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
-            <div className={`flex items-center gap-2 text-xs font-mono mb-2 ${
-              isColor ? 'text-cyan-500' : 'text-blue-600'
-            }`}>
-              <Terminal size={14} />
-              <span>/root/tools/android_bypass</span>
-            </div>
             <h2 className={`text-3xl md:text-4xl font-bold ${
               isColor ? 'text-white' : 'text-slate-900'
             }`}>
@@ -77,7 +62,7 @@ export default function FrpLanding() {
         {/* Tools Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {tools.map((tool, index) => (
-            <Link
+            <a
               key={index}
               href={tool.href}
               className={`group relative overflow-hidden rounded-xl border p-6 transition-all duration-300 hover:-translate-y-1 ${
@@ -139,7 +124,7 @@ export default function FrpLanding() {
               <div className={`absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-transparent to-transparent opacity-10 transition-all group-hover:opacity-20 ${
                  isColor ? 'group-hover:to-cyan-500' : 'group-hover:to-blue-500'
               } rounded-bl-3xl`}></div>
-            </Link>
+            </a>
           ))}
         </div>
       </div>

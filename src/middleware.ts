@@ -23,56 +23,52 @@ export function middleware(req: NextRequest) {
       subdomain = cleanHostname.replace('.kalifaos.site', '');
     }
   } else {
-    // For local: auth.localhost:3000 -> subdomain = auth
     const parts = cleanHostname.split('.');
     if (parts.length > 1) subdomain = parts[0];
   }
 
   // 3. Handle Naked Domain / Vercel Domain (Redirect to app.kalifaos.site)
   const isNakedDomain = hostname === 'kalifaos.site' || hostname === 'www.kalifaos.site';
-  const isVercelDomain = hostname.includes('.vercel.app');
-
-  if (isNakedDomain || isVercelDomain) {
+  if (isNakedDomain || hostname.includes('.vercel.app')) {
     return NextResponse.redirect(
       new URL(pathname + url.search, `${protocol}://app.${baseDomain}`),
       301
     );
   }
 
-  // 4. AUTH SUBDOMAIN ENFORCEMENT
+  // 4. THE FIX: Subdomain Isolation
   
-  // If user is on an auth path but NOT on the auth subdomain -> Redirect to auth.
+  // A. If user hits an auth route on 'app' or any other subdomain -> Return 404
   if (isAuthRoute && subdomain !== 'auth') {
-    return NextResponse.redirect(
-      new URL(pathname + url.search, `${protocol}://auth.${baseDomain}`),
-      307
-    );
+    url.pathname = '/404'; 
+    return NextResponse.rewrite(url);
   }
 
-  // If user is on the auth subdomain but NOT on an auth path -> Redirect back to app.
-  // Exception: if they hit auth.kalifaos.site/ directly, send them to /login.
+  // B. Handle Logic for the 'auth' subdomain
   if (subdomain === 'auth') {
+    // If they hit auth.kalifaos.site/ directly, send to login
     if (pathname === '/') {
-      return NextResponse.redirect(new URL('/login', `${protocol}://auth.${baseDomain}`));
+      return NextResponse.redirect(new URL('/login', req.url));
     }
     
+    // If they try to hit a non-auth page (like /dashboard) on the auth subdomain -> Return 404
     if (!isAuthRoute) {
-      return NextResponse.redirect(new URL(pathname + url.search, `${protocol}://app.${baseDomain}`));
+      url.pathname = '/404';
+      return NextResponse.rewrite(url);
     }
 
-    // INTERNAL REWRITE: Maps auth.kalifaos.site/login to src/app/auth/login/page.tsx
-    // The browser URL stays "auth.kalifaos.site/login"
+    // Internal Rewrite: auth.kalifaos.site/login -> src/app/auth/login/page.tsx
     url.pathname = `/auth${pathname}`;
     return NextResponse.rewrite(url);
   }
 
-  // 5. ADMIN SUBDOMAIN REWRITE
+  // 5. Admin Subdomain Rewrite
   if (subdomain === 'admin') {
     url.pathname = `/admin${pathname}`;
     return NextResponse.rewrite(url);
   }
 
-  // Default for 'app' subdomain or others: No rewrite needed if they are at the root
+  // Default: Normal 'app' behavior
   return NextResponse.next();
 }
 

@@ -21,42 +21,42 @@ function middleware(req) {
         }
     }
     else {
-        // For local: auth.localhost:3000 -> subdomain = auth
         var parts = cleanHostname.split('.');
         if (parts.length > 1)
             subdomain = parts[0];
     }
     // 3. Handle Naked Domain / Vercel Domain (Redirect to app.kalifaos.site)
     var isNakedDomain = hostname === 'kalifaos.site' || hostname === 'www.kalifaos.site';
-    var isVercelDomain = hostname.includes('.vercel.app');
-    if (isNakedDomain || isVercelDomain) {
+    if (isNakedDomain || hostname.includes('.vercel.app')) {
         return server_1.NextResponse.redirect(new URL(pathname + url.search, "".concat(protocol, "://app.").concat(baseDomain)), 301);
     }
-    // 4. AUTH SUBDOMAIN ENFORCEMENT
-    // If user is on an auth path but NOT on the auth subdomain -> Redirect to auth.
+    // 4. THE FIX: Subdomain Isolation
+    // A. If user hits an auth route on 'app' or any other subdomain -> Return 404
     if (isAuthRoute && subdomain !== 'auth') {
-        return server_1.NextResponse.redirect(new URL(pathname + url.search, "".concat(protocol, "://auth.").concat(baseDomain)), 307);
+        url.pathname = '/404';
+        return server_1.NextResponse.rewrite(url);
     }
-    // If user is on the auth subdomain but NOT on an auth path -> Redirect back to app.
-    // Exception: if they hit auth.kalifaos.site/ directly, send them to /login.
+    // B. Handle Logic for the 'auth' subdomain
     if (subdomain === 'auth') {
+        // If they hit auth.kalifaos.site/ directly, send to login
         if (pathname === '/') {
-            return server_1.NextResponse.redirect(new URL('/login', "".concat(protocol, "://auth.").concat(baseDomain)));
+            return server_1.NextResponse.redirect(new URL('/login', req.url));
         }
+        // If they try to hit a non-auth page (like /dashboard) on the auth subdomain -> Return 404
         if (!isAuthRoute) {
-            return server_1.NextResponse.redirect(new URL(pathname + url.search, "".concat(protocol, "://app.").concat(baseDomain)));
+            url.pathname = '/404';
+            return server_1.NextResponse.rewrite(url);
         }
-        // INTERNAL REWRITE: Maps auth.kalifaos.site/login to src/app/auth/login/page.tsx
-        // The browser URL stays "auth.kalifaos.site/login"
+        // Internal Rewrite: auth.kalifaos.site/login -> src/app/auth/login/page.tsx
         url.pathname = "/auth".concat(pathname);
         return server_1.NextResponse.rewrite(url);
     }
-    // 5. ADMIN SUBDOMAIN REWRITE
+    // 5. Admin Subdomain Rewrite
     if (subdomain === 'admin') {
         url.pathname = "/admin".concat(pathname);
         return server_1.NextResponse.rewrite(url);
     }
-    // Default for 'app' subdomain or others: No rewrite needed if they are at the root
+    // Default: Normal 'app' behavior
     return server_1.NextResponse.next();
 }
 exports.middleware = middleware;

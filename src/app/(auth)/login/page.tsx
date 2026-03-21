@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Mail, Lock, Terminal, Unlock, AlertCircle, Loader2 } from 'lucide-react';
 
 // Firebase Imports
-import { auth } from '@/server/firebaseApi'; // Adjust this path to your firebase config
+import { auth } from '@/server/firebaseApi';
 import { 
   signInWithEmailAndPassword, 
   signInWithPopup, 
@@ -23,14 +23,33 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // --- HELPER: SET WILDCARD COOKIE ---
+  const finalizeLogin = (user: any) => {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const rootDomain = isProduction ? '.kalifaos.site' : 'localhost';
+    
+    // Set the token that middleware looks for
+    // The leading dot in .kalifaos.site is critical for cross-subdomain access
+    document.cookie = `admin-token=true; path=/; domain=${rootDomain}; max-age=86400; SameSite=Lax; Secure`;
+
+    // Full window redirect is needed when changing subdomains
+    if (isProduction) {
+      // If you are the admin (Musa), you might want to auto-redirect to admin.
+      // Otherwise, go to the main app.
+      window.location.href = "https://app.kalifaos.site/";
+    } else {
+      router.push('/');
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push('/'); // Redirect after successful login
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      finalizeLogin(result.user);
     } catch (err: any) {
       console.error("Auth Error:", err.code);
       setError(err.code === 'auth/invalid-credential' 
@@ -47,8 +66,8 @@ export default function LoginPage() {
     const provider = new GoogleAuthProvider();
 
     try {
-      await signInWithPopup(auth, provider);
-      router.push('/');
+      const result = await signInWithPopup(auth, provider);
+      finalizeLogin(result.user);
     } catch (err: any) {
       console.error("Google Auth Error:", err);
       setError('Google Authority Verification Failed');
@@ -57,6 +76,7 @@ export default function LoginPage() {
     }
   };
 
+  // ... (Rest of your JSX remains exactly the same)
   return (
     <div className={`min-h-screen flex justify-center p-4 transition-colors duration-500 ${
       isColor ? 'bg-[#050505] text-slate-300' : 'bg-slate-50 text-slate-900'

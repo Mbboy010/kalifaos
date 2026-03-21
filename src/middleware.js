@@ -6,17 +6,17 @@ function middleware(req) {
     var url = req.nextUrl.clone();
     var hostname = req.headers.get('host') || '';
     var pathname = url.pathname;
-    // 1. FIREBASE BYPASS (The Fix)
-    // Completely ignore Firebase internal routes so they don't trigger 404s
-    if (pathname.startsWith('/__/')) {
+    // 1. SYSTEM BYPASS
+    if (pathname.startsWith('/__/') || pathname.includes('.') || pathname.startsWith('/_next')) {
         return server_1.NextResponse.next();
     }
     var isProduction = process.env.NODE_ENV === 'production';
     var baseDomain = isProduction ? 'kalifaos.site' : 'localhost:3000';
     var protocol = isProduction ? 'https' : 'http';
-    // 2. Identify Auth Routes
+    // 2. Identify Route Types
     var AUTH_ROUTES = ['/login', '/register', '/forgot-password'];
     var isAuthRoute = AUTH_ROUTES.some(function (route) { return pathname.startsWith(route); });
+    var isAdminRoute = pathname.startsWith('/admin');
     // 3. Extract Subdomain
     var cleanHostname = hostname.replace(/:\d+$/, '');
     var subdomain = '';
@@ -26,18 +26,36 @@ function middleware(req) {
         }
     }
     else {
-        // For local: auth.localhost:3000 -> subdomain = auth
         var parts = cleanHostname.split('.');
-        if (parts.length > 1)
+        if (parts.length > 1 && parts[0] !== 'localhost')
             subdomain = parts[0];
     }
     // 4. Handle Naked Domain / Vercel Domain
     var isNakedDomain = hostname === 'kalifaos.site' || hostname === 'www.kalifaos.site';
-    var isVercelDomain = hostname.includes('.vercel.app');
-    if (isNakedDomain || isVercelDomain) {
+    if (isNakedDomain || hostname.includes('.vercel.app')) {
         return server_1.NextResponse.redirect(new URL(pathname + url.search, "".concat(protocol, "://app.").concat(baseDomain)), 301);
     }
-    // 5. AUTH ROUTING LOGIC
+    // 5. REDIRECT TO ADMIN SUBDOMAIN (The Fix for app.kalifaos.site/admin)
+    // If they hit /admin on ANY domain that isn't the admin subdomain, redirect them.
+    if (isAdminRoute && subdomain !== 'admin') {
+        // Strip '/admin' from the URL so they go to admin.kalifaos.site/ instead of admin.kalifaos.site/admin
+        var newPath = pathname.replace(/^\/admin/, '') || '/';
+        return server_1.NextResponse.redirect(new URL(newPath + url.search, "".concat(protocol, "://admin.").concat(baseDomain)));
+    }
+    // 6. ADMIN SUBDOMAIN LOGIC
+    if (subdomain === 'admin') {
+        // Check for the cross-domain cookie
+        //const hasSession = req.cookies.has('__session') || req.cookies.has('admin-token');
+        // If no token, bounce to login
+        //if (!hasSession && pathname !== '/login') {
+        //   return NextResponse.redirect(new URL('/login', `${protocol}://auth.${baseDomain}`));
+        //  }
+        // Rewrite mapped correctly
+        var path = pathname.startsWith('/admin') ? pathname.replace('/admin', '') : pathname;
+        url.pathname = "/admin".concat(path === '/' ? '' : path);
+        return server_1.NextResponse.rewrite(url);
+    }
+    // 7. AUTH SUBDOMAIN LOGIC
     if (isAuthRoute) {
         if (subdomain !== 'auth') {
             return server_1.NextResponse.redirect(new URL(pathname + url.search, "".concat(protocol, "://auth.").concat(baseDomain)));
@@ -50,16 +68,9 @@ function middleware(req) {
         }
         return server_1.NextResponse.redirect(new URL(pathname + url.search, "".concat(protocol, "://app.").concat(baseDomain)));
     }
-    // 6. ADMIN SUBDOMAIN REWRITE
-    if (subdomain === 'admin') {
-        url.pathname = "/admin".concat(pathname);
-        return server_1.NextResponse.rewrite(url);
-    }
     return server_1.NextResponse.next();
 }
 exports.middleware = middleware;
-// 7. UPDATED MATCHER
-// Added __ to the ignored patterns just to be extra safe at the edge level
 exports.config = {
     matcher: ['/((?!api|_next/static|_next/image|favicon.ico|__|.*\\..*).*)'],
 };

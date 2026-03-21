@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAppSelector } from '../../../components/redux/hooks';
-import Link from 'next/navigation';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, Terminal, Unlock, AlertCircle, Loader2 } from 'lucide-react';
 

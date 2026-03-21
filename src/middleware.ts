@@ -1,3 +1,4 @@
+// src/middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -23,52 +24,52 @@ export function middleware(req: NextRequest) {
       subdomain = cleanHostname.replace('.kalifaos.site', '');
     }
   } else {
+    // For local: auth.localhost:3000 -> subdomain = auth
     const parts = cleanHostname.split('.');
     if (parts.length > 1) subdomain = parts[0];
   }
 
   // 3. Handle Naked Domain / Vercel Domain (Redirect to app.kalifaos.site)
   const isNakedDomain = hostname === 'kalifaos.site' || hostname === 'www.kalifaos.site';
-  if (isNakedDomain || hostname.includes('.vercel.app')) {
+  const isVercelDomain = hostname.includes('.vercel.app');
+
+  if (isNakedDomain || isVercelDomain) {
     return NextResponse.redirect(
       new URL(pathname + url.search, `${protocol}://app.${baseDomain}`),
       301
     );
   }
 
-  // 4. THE FIX: Subdomain Isolation
+  // 4. AUTH ROUTING LOGIC (The Fix)
   
-  // A. If user hits an auth route on 'app' or any other subdomain -> Return 404
-  if (isAuthRoute && subdomain !== 'auth') {
-    url.pathname = '/404'; 
-    return NextResponse.rewrite(url);
+  // If the user visits an auth route (/login, /register, etc.)
+  if (isAuthRoute) {
+    if (subdomain !== 'auth') {
+      // Redirect them to the auth subdomain (e.g., app. -> auth.)
+      return NextResponse.redirect(new URL(pathname + url.search, `${protocol}://auth.${baseDomain}`));
+    }
+    // If they are already on the auth subdomain, let the page load directly!
+    // This expects your files to be at src/app/login/page.tsx
+    return NextResponse.next();
   }
 
-  // B. Handle Logic for the 'auth' subdomain
+  // If the user is on the auth subdomain but trying to access a non-auth page
   if (subdomain === 'auth') {
-    // If they hit auth.kalifaos.site/ directly, send to login
     if (pathname === '/') {
-      return NextResponse.redirect(new URL('/login', req.url));
+      // Send the root auth domain directly to login
+      return NextResponse.redirect(new URL('/login', `${protocol}://auth.${baseDomain}`));
     }
-    
-    // If they try to hit a non-auth page (like /dashboard) on the auth subdomain -> Return 404
-    if (!isAuthRoute) {
-      url.pathname = '/404';
-      return NextResponse.rewrite(url);
-    }
-
-    // Internal Rewrite: auth.kalifaos.site/login -> src/app/auth/login/page.tsx
-    url.pathname = `/auth${pathname}`;
-    return NextResponse.rewrite(url);
+    // Kick them back to the app domain for anything else
+    return NextResponse.redirect(new URL(pathname + url.search, `${protocol}://app.${baseDomain}`));
   }
 
-  // 5. Admin Subdomain Rewrite
+  // 5. ADMIN SUBDOMAIN REWRITE
   if (subdomain === 'admin') {
     url.pathname = `/admin${pathname}`;
     return NextResponse.rewrite(url);
   }
 
-  // Default: Normal 'app' behavior
+  // Default: Normal 'app' routing
   return NextResponse.next();
 }
 

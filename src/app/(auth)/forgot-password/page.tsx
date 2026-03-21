@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-500 ${
+    <div className={`min-h-screen flex justify-center p-4 transition-colors duration-500 ${
       isColor ? 'bg-[#050505] text-slate-300' : 'bg-slate-50 text-slate-900'
     }`}>
       {/* Background Decor */}

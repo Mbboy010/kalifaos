@@ -11,12 +11,15 @@ import Toggle from './Toggle';
 import SearchBar from './SearchBar';
 
 // Firebase Logic
+import { auth, db } from '@/server/firebaseApi';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { logoutUser } from '@/server/firebaseApi';
 
 // Icons
 import { 
   Unlock, Menu, X, Search, Terminal, ChevronRight, 
-  User, LogIn, LogOut, Shield, UserPlus, Settings 
+  User, LogIn, LogOut, Shield, UserPlus, Settings, Loader2
 } from 'lucide-react';
 
 interface NavigateProps {
@@ -27,11 +30,42 @@ interface NavigateProps {
 export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
   const dispatch = useAppDispatch();
   const chat = useAppSelector((state) => state.chatCheck.value); // Mobile Menu State
-  const { user, isAdmin } = useAppSelector((state) => state.auth || { user: null, isAdmin: false });
+  
+  // Direct Firebase Auth State
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  // Listen to Firebase Auth state directly
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        // Check Firestore for Admin Role
+        try {
+          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          if (userDoc.exists() && userDoc.data().role === 'admin') {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          setIsAdmin(false);
+        }
+      } else {
+        setUser(null);
+        setIsAdmin(false);
+      }
+      setIsAuthLoading(false);
+    });
+
+    return () => unsubscribe(); // Cleanup listener on unmount
+  }, []);
 
   // Scroll effect for glassmorphism
   useEffect(() => {
@@ -53,7 +87,7 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
   const handleLogout = async () => {
     try {
       await logoutUser();
-      if (chat) dispatch(setChat(false));
+      if (chat) dispatch(setChat(false)); // Close menu on mobile after logout
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -115,7 +149,7 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
               ))}
             </nav>
 
-            {/* --- CONTROLS & AUTH --- */}
+            {/* --- CONTROLS & AUTH (DESKTOP) --- */}
             <div className="flex items-center gap-3 md:gap-5">
               
               {/* Search Toggle */}
@@ -130,16 +164,19 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
                 {searchOpen ? <X size={20} /> : <Search size={20} />}
               </button>
 
-              {/* Theme Toggle (Desktop) */}
+              {/* Theme Toggle */}
               <div className="hidden sm:block">
                 <Toggle darkMode={darkMode} setDarkMode={setDarkMode} />
               </div>
 
               {/* Desktop Auth Section */}
-              <div className="hidden md:flex items-center gap-2 border-l border-slate-800/50 pl-5">
-                {!user ? (
+              <div className="hidden md:flex items-center gap-2 border-l border-slate-800/50 pl-5 min-w-[120px] justify-end">
+                {isAuthLoading ? (
+                  <Loader2 size={20} className={`animate-spin ${darkMode ? 'text-slate-600' : 'text-slate-400'}`} />
+                ) : !user ? (
+                  // NOT LOGGED IN
                   <>
-                    <Link href="/login" className={`text-xs font-bold uppercase px-3 py-2 ${darkMode ? 'text-slate-400 hover:text-white' : 'text-slate-600'}`}>
+                    <Link href="/login" className={`text-xs font-bold uppercase px-3 py-2 ${darkMode ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-blue-600'}`}>
                       Login
                     </Link>
                     <Link href="/register" className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${
@@ -149,17 +186,18 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
                     </Link>
                   </>
                 ) : (
+                  // LOGGED IN
                   <div className="flex items-center gap-3">
                     {isAdmin ? (
-                      <Link href="/admin" title="Admin Panel" className={`p-2 rounded-lg transition-all ${darkMode ? 'bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white' : 'bg-orange-50 text-orange-600'}`}>
+                      <Link href="/admin" title="Admin Panel" className={`p-2 rounded-lg transition-all ${darkMode ? 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white' : 'bg-orange-50 text-orange-600 hover:bg-orange-100'}`}>
                         <Shield size={18} />
                       </Link>
                     ) : (
-                      <Link href="/profile" title="Profile" className={`p-2 rounded-lg transition-all ${darkMode ? 'bg-slate-800 text-slate-300 hover:text-cyan-400' : 'bg-slate-100 text-slate-600 hover:text-blue-600'}`}>
+                      <Link href="/profile" title="User Profile" className={`p-2 rounded-lg transition-all ${darkMode ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-black' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}>
                         <User size={18} />
                       </Link>
                     )}
-                    <button onClick={handleLogout} className="p-2 text-slate-500 hover:text-red-500 transition-colors">
+                    <button onClick={handleLogout} title="Logout" className={`p-2 rounded-lg transition-all ${darkMode ? 'text-slate-400 hover:text-red-400 hover:bg-slate-800' : 'text-slate-500 hover:text-red-500 hover:bg-slate-100'}`}>
                       <LogOut size={18} />
                     </button>
                   </div>
@@ -195,36 +233,57 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
           
           <div className="container mx-auto px-6 py-8 space-y-4 pb-24">
             
-            {/* Mobile User Card */}
-            <div className={`p-5 rounded-2xl border-2 border-dashed ${darkMode ? 'border-slate-800 bg-slate-900/30' : 'border-slate-100 bg-slate-50'}`}>
-              {!user ? (
+            {/* --- MOBILE USER CARD --- */}
+            <div className={`p-5 rounded-2xl border-2 border-dashed ${darkMode ? 'border-slate-800 bg-slate-900/30' : 'border-slate-200 bg-slate-50'}`}>
+              {isAuthLoading ? (
+                 <div className="flex justify-center py-4">
+                    <Loader2 size={24} className={`animate-spin ${darkMode ? 'text-slate-600' : 'text-slate-400'}`} />
+                 </div>
+              ) : !user ? (
+                // Not Logged In Mobile
                 <div className="grid grid-cols-2 gap-3">
-                  <Link href="/login" onClick={toggleMenu} className={`flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-xs uppercase border ${darkMode ? 'border-slate-700 text-white' : 'border-slate-200 text-slate-900'}`}>
+                  <Link href="/login" onClick={toggleMenu} className={`flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-xs uppercase border ${darkMode ? 'border-slate-700 text-white hover:bg-slate-800' : 'border-slate-300 text-slate-900 hover:bg-slate-100'}`}>
                     <LogIn size={16} /> Login
                   </Link>
-                  <Link href="/register" onClick={toggleMenu} className="flex items-center justify-center gap-2 py-4 rounded-xl bg-cyan-500 text-black font-bold text-xs uppercase">
+                  <Link href="/register" onClick={toggleMenu} className={`flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-xs uppercase transition-all ${darkMode ? 'bg-cyan-500 text-black' : 'bg-blue-600 text-white'}`}>
                     <UserPlus size={16} /> Join
                   </Link>
                 </div>
               ) : (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white">
-                      <User size={20} />
+                // Logged In Mobile
+                <div className="flex flex-col gap-5">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${isAdmin ? 'bg-gradient-to-br from-red-500 to-orange-600' : 'bg-gradient-to-br from-cyan-500 to-blue-600'}`}>
+                      {isAdmin ? <Shield size={24} /> : <User size={24} />}
                     </div>
                     <div>
-                      <p className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{user.displayName || 'Operator'}</p>
-                      <p className={`text-[10px] font-mono ${isAdmin ? 'text-red-400' : 'text-cyan-400'}`}>
+                      <p className={`text-base font-bold leading-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>{user.displayName || 'Operator'}</p>
+                      <p className={`text-[10px] font-mono uppercase tracking-widest mt-1 ${isAdmin ? 'text-red-500' : 'text-cyan-500'}`}>
                         {isAdmin ? 'SEC_LEVEL_ADMIN' : 'SEC_LEVEL_USER'}
                       </p>
                     </div>
                   </div>
-                  <button onClick={handleLogout} className="p-2 text-red-500"><LogOut size={20} /></button>
+                  
+                  {/* Auth Actions Mobile */}
+                  <div className={`grid grid-cols-2 gap-3 pt-4 border-t ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
+                    {isAdmin ? (
+                      <Link href="/admin" onClick={toggleMenu} className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border ${darkMode ? 'border-red-500/30 text-red-400 bg-red-500/10' : 'border-orange-200 text-orange-600 bg-orange-50'}`}>
+                        <Shield size={16} /> Admin Panel
+                      </Link>
+                    ) : (
+                      <Link href="/profile" onClick={toggleMenu} className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border ${darkMode ? 'border-cyan-500/30 text-cyan-400 bg-cyan-500/10' : 'border-blue-200 text-blue-600 bg-blue-50'}`}>
+                        <User size={16} /> Profile
+                      </Link>
+                    )}
+                    <button onClick={handleLogout} className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border transition-colors ${darkMode ? 'border-slate-800 text-slate-400 hover:text-red-400 hover:border-red-900/50' : 'border-slate-200 text-slate-600 hover:text-red-500 hover:border-red-200 hover:bg-red-50'}`}>
+                      <LogOut size={16} /> Logout
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Mobile Links */}
+            {/* Mobile Nav Links */}
             {[
               ...navLinks, 
               { name: 'Settings & Lock', href: '/setting-and-lock-screen', icon: <Settings size={18}/> },
@@ -241,8 +300,8 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="opacity-50">{<Terminal size={16} />}</span>
-                  <span className="font-semibold">{link.name}</span>
+                  <span className="opacity-50">{link.icon || <Terminal size={16} />}</span>
+                  <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
                 </div>
                 <ChevronRight size={16} className="opacity-50" />
               </Link>
@@ -252,8 +311,8 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
             <div className="pt-4 space-y-3">
                <p className="text-[10px] font-mono opacity-40 uppercase tracking-widest ml-2">System Config</p>
                <div className="flex items-center justify-between p-4 rounded-xl border border-dashed border-slate-700">
-                <span className={`text-sm font-mono ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                  DARK_MODE_ACTIVE
+                <span className={`text-xs font-mono font-bold ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                  DARK_MODE_STATUS
                 </span>
                 <Toggle darkMode={darkMode} setDarkMode={setDarkMode} />
               </div>

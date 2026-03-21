@@ -300,7 +300,7 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="opacity-50">{link.icon || <Terminal size={16} />}</span>
+                  <span className="opacity-50">{<Terminal size={16} />}</span>
                   <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
                 </div>
                 <ChevronRight size={16} className="opacity-50" />

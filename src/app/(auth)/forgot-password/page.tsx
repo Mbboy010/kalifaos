@@ -3,26 +3,46 @@
 import { useState } from 'react';
 import { useAppSelector } from '../../../components/redux/hooks';
 import Link from 'next/link';
-import { Mail, ArrowRight, ShieldCheck, Terminal, KeyRound } from 'lucide-react';
+import { 
+  Mail, ArrowRight, ShieldCheck, Terminal, 
+  KeyRound, Loader2, AlertCircle, CheckCircle2 
+} from 'lucide-react';
+
+// Firebase Imports
+import { auth } from '@/server/firebaseApi';
+import { sendPasswordResetEmail } from 'firebase/auth';
 
 export default function ForgotPasswordPage() {
   const isColor = useAppSelector((state) => state.color.value);
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
+    setSuccess(false);
+
     try {
-      // Firebase reset password logic here
-      console.log('Resetting password for:', email);
+      await sendPasswordResetEmail(auth, email);
+      setSuccess(true);
+      setEmail(''); // Clear input on success
+    } catch (err: any) {
+      console.error('Reset Error:', err.code);
+      setError(
+        err.code === 'auth/user-not-found' 
+          ? 'Identity not found in system records.' 
+          : 'Transmission failed. Verify network connection.'
+      );
     } finally {
-      setTimeout(() => setIsLoading(false), 1000);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className={`min-h-screen flex  justify-center p-4 transition-colors duration-500 ${
+    <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-500 ${
       isColor ? 'bg-[#050505] text-slate-300' : 'bg-slate-50 text-slate-900'
     }`}>
       {/* Background Decor */}
@@ -49,6 +69,25 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
 
+        {/* Feedback Messages */}
+        {error && (
+          <div className={`mb-6 p-4 rounded-xl border flex items-center gap-3 text-xs font-bold uppercase tracking-wider ${
+            isColor ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-red-50 border-red-200 text-red-600'
+          }`}>
+            <AlertCircle size={16} />
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className={`mb-6 p-4 rounded-xl border flex items-center gap-3 text-xs font-bold uppercase tracking-wider ${
+            isColor ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-green-50 border-green-200 text-green-600'
+          }`}>
+            <CheckCircle2 size={16} />
+            Recovery link transmitted to inbox.
+          </div>
+        )}
+
         <form onSubmit={handleReset} className="space-y-4">
           <div className="relative">
             <Mail className="absolute left-4 top-3.5 w-5 h-5 opacity-40" />
@@ -64,10 +103,18 @@ export default function ForgotPasswordPage() {
             />
           </div>
 
-          <button type="submit" disabled={isLoading} className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold tracking-wider uppercase transition-all mt-4 ${
-            isColor ? 'bg-red-500 hover:bg-red-400 text-[#050505]' : 'bg-red-600 hover:bg-red-700 text-white'
-          } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
-            {isLoading ? 'Processing...' : <><ArrowRight size={18} /> Transmit Reset Link</>}
+          <button 
+            type="submit" 
+            disabled={isLoading} 
+            className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold tracking-wider uppercase transition-all mt-4 ${
+              isColor ? 'bg-red-500 hover:bg-red-400 text-[#050505]' : 'bg-red-600 hover:bg-red-700 text-white'
+            } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isLoading ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <><ArrowRight size={18} /> Transmit Reset Link</>
+            )}
           </button>
         </form>
 

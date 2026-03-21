@@ -2,34 +2,63 @@
 
 import { useState } from 'react';
 import { useAppSelector } from '../../../components/redux/hooks';
-import Link from 'next/link';
-import { Mail, Lock, ArrowRight, Terminal, Unlock } from 'lucide-react';
+import Link from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { Mail, Lock, Terminal, Unlock, AlertCircle, Loader2 } from 'lucide-react';
 
-
+// Firebase Imports
+import { auth } from '@/server/firebaseApi'; // Adjust this path to your firebase config
+import { 
+  signInWithEmailAndPassword, 
+  signInWithPopup, 
+  GoogleAuthProvider 
+} from 'firebase/auth';
 
 export default function LoginPage() {
   const isColor = useAppSelector((state) => state.color.value);
+  const router = useRouter();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
+
     try {
-      // Firebase login logic here
-      console.log('Logging in with:', email, password);
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push('/'); // Redirect after successful login
+    } catch (err: any) {
+      console.error("Auth Error:", err.code);
+      setError(err.code === 'auth/invalid-credential' 
+        ? 'Invalid System Credentials' 
+        : 'Access Denied: Connection Failure');
     } finally {
-      setTimeout(() => setIsLoading(false), 1000);
+      setIsLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
-    console.log('Initiating Google Auth Sequence...');
+    setIsLoading(true);
+    setError(null);
+    const provider = new GoogleAuthProvider();
+
+    try {
+      await signInWithPopup(auth, provider);
+      router.push('/');
+    } catch (err: any) {
+      console.error("Google Auth Error:", err);
+      setError('Google Authority Verification Failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className={`min-h-screen flex  justify-center p-4 transition-colors duration-500 ${
+    <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-500 ${
       isColor ? 'bg-[#050505] text-slate-300' : 'bg-slate-50 text-slate-900'
     }`}>
       {/* Background Decor */}
@@ -56,6 +85,16 @@ export default function LoginPage() {
             <span>Secure Authentication Protocol</span>
           </div>
         </div>
+
+        {/* Error Alert */}
+        {error && (
+          <div className={`mb-6 p-4 rounded-xl border flex items-center gap-3 text-xs font-bold uppercase tracking-wider ${
+            isColor ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-red-50 border-red-200 text-red-600'
+          }`}>
+            <AlertCircle size={16} />
+            {error}
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleLogin} className="space-y-4">
@@ -94,10 +133,18 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <button type="submit" disabled={isLoading} className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold tracking-wider uppercase transition-all mt-4 ${
-            isColor ? 'bg-cyan-500 hover:bg-cyan-400 text-[#050505]' : 'bg-blue-600 hover:bg-blue-700 text-white'
-          } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
-            {isLoading ? 'Processing...' : <><Unlock size={18} /> Authenticate</>}
+          <button 
+            type="submit" 
+            disabled={isLoading} 
+            className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold tracking-wider uppercase transition-all mt-4 ${
+              isColor ? 'bg-cyan-500 hover:bg-cyan-400 text-[#050505]' : 'bg-blue-600 hover:bg-blue-700 text-white'
+            } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isLoading ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <><Unlock size={18} /> Authenticate</>
+            )}
           </button>
         </form>
 
@@ -108,9 +155,14 @@ export default function LoginPage() {
             <span className={`flex-shrink-0 mx-4 text-[10px] font-mono uppercase tracking-widest ${isColor ? 'text-slate-500' : 'text-slate-400'}`}>Or connect via</span>
             <div className={`flex-grow border-t ${isColor ? 'border-slate-800' : 'border-slate-200'}`}></div>
           </div>
-          <button onClick={handleGoogleSignIn} type="button" className={`w-full flex items-center justify-center gap-3 py-3 rounded-xl border font-bold transition-all ${
-            isColor ? 'bg-slate-900/50 border-slate-700 hover:bg-slate-800 text-white hover:border-slate-600' : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700'
-          }`}>
+          <button 
+            onClick={handleGoogleSignIn} 
+            disabled={isLoading}
+            type="button" 
+            className={`w-full flex items-center justify-center gap-3 py-3 rounded-xl border font-bold transition-all ${
+              isColor ? 'bg-slate-900/50 border-slate-700 hover:bg-slate-800 text-white hover:border-slate-600' : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700'
+            } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />

@@ -1,6 +1,6 @@
 // app/server/firebaseApi.ts
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider,signOut } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -21,10 +21,30 @@ export const auth = getAuth(app);
 
 export const logoutUser = async () => {
   try {
+    // 1. Terminate Firebase Client Session
     await signOut(auth);
-    console.log("Firebase Auth: Session successfully terminated.");
+
+    // 2. Terminate Middleware Access Cookies
+    const isProduction = process.env.NODE_ENV === 'production';
+    const rootDomain = isProduction ? '.kalifaos.site' : 'localhost';
+
+    // To delete a cookie, we set its 'expires' date to the past (1970).
+    // The path and domain MUST match exactly how it was set during login.
+    document.cookie = `admin-token=; path=/; domain=${rootDomain}; expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; SameSite=Lax`;
+    
+    // (Optional) Clear __session if you ever use Firebase Hosting session cookies
+    document.cookie = `__session=; path=/; domain=${rootDomain}; expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; SameSite=Lax`;
+
+    console.log("System Status: Session and tokens successfully terminated.");
+
+    // 3. Force Redirect to App Login
+    // This ensures they are kicked out of the admin interface immediately
+    if (typeof window !== 'undefined') {
+      window.location.href = isProduction ? "https://app.kalifaos.site/login" : "/login";
+    }
+
   } catch (error) {
-    console.error("Firebase Auth: Logout Error", error);
+    console.error("System Status: Logout Error", error);
     throw error;
   }
 };

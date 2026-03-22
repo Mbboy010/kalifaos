@@ -23,22 +23,34 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // --- HELPER: SET WILDCARD COOKIE ---
-  const finalizeLogin = (user: any) => {
+  // --- UPDATED HELPER: SECURE CROSS-DOMAIN LOGIN ---
+  const finalizeLogin = async (user: any) => {
     const isProduction = process.env.NODE_ENV === 'production';
     const rootDomain = isProduction ? '.kalifaos.site' : 'localhost';
     
-    // Set the token that middleware looks for
-    // The leading dot in .kalifaos.site is critical for cross-subdomain access
-    document.cookie = `admin-token=true; path=/; domain=${rootDomain}; max-age=86400; SameSite=Lax; Secure`;
+    // 1. GET THE REAL JWT TOKEN (Middleware uses this to verify identity)
+    const token = await user.getIdToken();
 
-    // Full window redirect is needed when changing subdomains
+    // 2. SET THE WILDCARD COOKIE
+    // We store the full token so the admin subdomain can verify who you are
+    document.cookie = `admin-token=${token}; path=/; domain=${rootDomain}; max-age=86400; SameSite=Lax; Secure`;
+
+    // 3. IDENTIFY OPERATOR ROLE
+    // Add your email and any other admin emails here
+    const ADMIN_EMAILS = ['musa@kalifaos.site', 'mbboy@kalifaos.site']; 
+    const isAdmin = ADMIN_EMAILS.includes(user.email);
+
+    // 4. SMART REDIRECT
     if (isProduction) {
-      // If you are the admin (Musa), you might want to auto-redirect to admin.
-      // Otherwise, go to the main app.
-      window.location.href = "https://app.kalifaos.site/";
+      // Use window.location.href to jump between subdomains (app -> admin)
+      window.location.href = isAdmin 
+        ? "https://admin.kalifaos.site/" 
+        : "https://app.kalifaos.site/";
     } else {
-      router.push('/');
+      // Localhost handling
+      window.location.href = isAdmin 
+        ? "http://admin.localhost:3000/" 
+        : "http://localhost:3000/";
     }
   };
 
@@ -49,7 +61,7 @@ export default function LoginPage() {
 
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
-      finalizeLogin(result.user);
+      await finalizeLogin(result.user);
     } catch (err: any) {
       console.error("Auth Error:", err.code);
       setError(err.code === 'auth/invalid-credential' 
@@ -67,7 +79,7 @@ export default function LoginPage() {
 
     try {
       const result = await signInWithPopup(auth, provider);
-      finalizeLogin(result.user);
+      await finalizeLogin(result.user);
     } catch (err: any) {
       console.error("Google Auth Error:", err);
       setError('Google Authority Verification Failed');
@@ -76,7 +88,6 @@ export default function LoginPage() {
     }
   };
 
-  // ... (Rest of your JSX remains exactly the same)
   return (
     <div className={`min-h-screen flex justify-center p-4 transition-colors duration-500 ${
       isColor ? 'bg-[#050505] text-slate-300' : 'bg-slate-50 text-slate-900'

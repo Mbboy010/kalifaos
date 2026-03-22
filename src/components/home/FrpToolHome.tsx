@@ -9,7 +9,7 @@ const tools = [
   {
     name: 'QuickShortcutMaker',
     desc: 'Create shortcuts to hidden settings and apps...',
-    href: '/tools/quickshortcutmaker',
+    href: 'https://albastuz3d.net/FRP%20apps/Quickshortcut%20maker%202019%20(Albastuz3d).apk',
     icon: (
       <svg viewBox="0 0 24 24" className="w-12 h-12" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="24" height="24" rx="6" fill="#FBBF24"/>
@@ -23,7 +23,7 @@ const tools = [
   {
     name: 'Apex Launcher',
     desc: 'Customize your Android home screen with Apex...',
-    href: '/tools/apex-launcher',
+    href: 'https://albastuz3d.net/FRP%20apps/Apex%20Launcher(Albastuz3d).apk',
     icon: (
       <svg viewBox="0 0 24 24" className="w-12 h-12" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="24" height="24" rx="6" fill="#3B82F6"/>
@@ -34,7 +34,7 @@ const tools = [
   {
     name: 'FRP Bypass',
     desc: 'Bypass Factory Reset Protection on Android...',
-    href: '/tools/frp-bypass',
+    href: 'https://albastuz3d.net/FRP%20apps/Frpbypass%20(Albastuz3d).apk',
     icon: (
       <svg viewBox="0 0 24 24" className="w-12 h-12" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M17.6 8.48L19.54 5.11C19.68 4.87 19.6 4.56 19.36 4.42C19.12 4.28 18.81 4.36 18.67 4.6L16.78 7.87C15.35 7.21 13.73 6.83 12 6.83C10.27 6.83 8.65 7.21 7.22 7.87L5.33 4.6C5.19 4.36 4.88 4.28 4.64 4.42C4.4 4.56 4.32 4.87 4.46 5.11L6.4 8.48C3.89 10.03 2.15 12.78 2 16H22C21.85 12.78 20.11 10.03 17.6 8.48ZM8.5 13.5C7.67 13.5 7 12.83 7 12C7 11.17 7.67 10.5 8.5 10.5C9.33 10.5 10 11.17 10 12C10 12.83 9.33 13.5 8.5 13.5ZM15.5 13.5C14.67 13.5 14 12.83 14 12C14 11.17 14.67 10.5 15.5 10.5C16.33 10.5 17 11.17 17 12C17 12.83 16.33 13.5 15.5 13.5Z" fill="#A4C639"/>
@@ -44,7 +44,7 @@ const tools = [
   {
     name: 'Nova Launcher',
     desc: 'Highly customizable, performance driven home screen...',
-    href: '/tools/nova-launcher',
+    href: '/thttps://albastuz3d.net/FRP%20apps/Nova%20Launcher(Albastuz3d).apk',
     icon: (
       <svg viewBox="0 0 24 24" className="w-12 h-12" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="24" height="24" rx="6" fill="#1E293B"/>
@@ -54,9 +54,9 @@ const tools = [
     )
   },
   {
-    name: 'Android 8',
+    name: 'Android 8-9-10',
     desc: 'Manage your Google account for Android 8.0...',
-    href: '/tools/android-8',
+    href: 'https://github.com/vnrom/bypass/raw/master/Android_8-9-10_GAM.apk',
     icon: (
       <svg viewBox="0 0 24 24" className="w-12 h-12" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -67,9 +67,9 @@ const tools = [
     )
   },
   {
-    name: 'Android 9',
-    desc: 'Manage your Google account for Android 9.0...',
-    href: '/tools/android-9',
+    name: 'Android 5',
+    desc: 'Manage your Google account for Android 5.0...',
+    href: 'https://github.com/vnrom/bypass/raw/master/Android_5_GAM.apk',
     icon: (
       <svg viewBox="0 0 24 24" className="w-12 h-12" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>

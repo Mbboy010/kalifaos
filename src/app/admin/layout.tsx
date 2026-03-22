@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
+import AdminGuard from './AdminGuard';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,13 +31,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} bg-black text-gray-200  `}>
+  
          <div className="mt-7">
-           
-        {children}
+           <AdminGuard>
+               {children}
+           </AdminGuard>
          </div>
-      
-
-      
       </body>
     </html>
   );

@@ -95,9 +95,8 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
 
   const navLinks = [
     { name: 'Home', href: '/' },
-    { name: 'FRP Vault', href: '/frp-tools-apk-download' },
-    { name: 'System Core', href: '/system-apps' },
-    { name: 'Win Tools', href: '/windows-tools?list_page=1' },
+    { name: 'FRP APKS', href: '/frp-tools-apk-download' },
+    { name: 'Windows tools', href: '/windows-tools?list_page=1' },
   ];
 
   return (
@@ -286,8 +285,7 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
             {/* Mobile Nav Links */}
             {[
               ...navLinks, 
-              { name: 'Settings & Lock', href: '/setting-and-lock-screen', icon: <Settings size={18}/> },
-              { name: 'About System', href: '/about', icon: <Terminal size={18}/> }
+              { name: 'About', href: '/about', icon: <Terminal size={18}/> }
             ].map((link, index) => (
               <Link
                 key={index}

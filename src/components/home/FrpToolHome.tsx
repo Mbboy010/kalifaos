@@ -106,7 +106,7 @@ export default function FrpToolHome() {
         <h1 className={`text-4xl md:text-5xl lg:text-6xl font-black text-center tracking-tight leading-tight mb-10 max-w-2xl transition-colors duration-500 ${
           isColor ? 'text-white' : 'text-slate-900'
         }`}>
-          BYPASS ANDROID 5 TO<br/>ANDROID 16+ TOOLS
+          BYPASS ANDROID 5 TO<br/>ANDROID 16 + TOOLS
         </h1>
 
         {/* Phone Mockup Hero */}

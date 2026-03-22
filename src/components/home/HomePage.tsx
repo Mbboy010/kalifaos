@@ -9,6 +9,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAppSelector } from '../redux/hooks';
 import { useState } from 'react';
+import FrpToolHome from "./FrpToolHome"
 
 export default function HomePage() {
   // Logic Update: isColor = true (Dark Mode), isColor = false (Light Mode)
@@ -103,6 +104,7 @@ export default function HomePage() {
       {/* --- CORE TOOLS COMPONENTS --- */}
       <div className="relative z-20 -mt-10 pt-10">
         <FrpLanding />
+        <FrpToolHome />
       </div>
 
       

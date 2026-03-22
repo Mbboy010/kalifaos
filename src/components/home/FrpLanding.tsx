@@ -3,7 +3,7 @@
 import { Download, Smartphone, Settings, ShieldCheck, ChevronRight, Terminal } from 'lucide-react';
 import Link from 'next/link';
 import { useAppSelector } from '../redux/hooks';
-import FrpToolHome from "./FrpToolHome"
+
 
 export default function FrpLanding() {
   // Logic: isColor = true (Dark Mode), isColor = false (Light Mode)
@@ -129,7 +129,7 @@ export default function FrpLanding() {
           ))}
         </div>
       </div>
-      <FrpToolHome />
+
     </div>
   );
 }

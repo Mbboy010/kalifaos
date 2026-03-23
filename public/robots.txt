@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /privacy
 
-Sitemap: https://kalifaos.vercel.app/sitemap.xml
+Sitemap: https://app.kalifaos.site/sitemap.xml

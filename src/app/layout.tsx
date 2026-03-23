@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   
   title: {
     default: "Kalifa Os - Best Bypass Tools & Mobile Tech | Zaria",
-    template: "%s | Kalifa Os",
+    template: "Kalifa Os",
   },
   
   description: "Download the best mobile and PC bypass tools in Zaria, Kaduna State. Kalifa Os offers FRP bypass, unlocking software, and tech solutions at PZ Zaria.",

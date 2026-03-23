@@ -20,11 +20,8 @@ export const metadata: Metadata = {
   // ✅ 1. metadataBase is REQUIRED for social images to work
   metadataBase: new URL("https://kalifaos.site"),
   
-  title: {
-    default: "Kalifa Os - Best Bypass Tools & Mobile Tech | Zaria",
-    template: "%s | Kalifa Os",
-  },
-  
+  title: "Kalifa Os - Best Bypass Tools & Mobile Tech | Zaria",
+    
   description: "Download the best mobile and PC bypass tools in Zaria, Kaduna State. Kalifa Os offers FRP bypass, unlocking software, and tech solutions at PZ Zaria.",
   
   keywords: [

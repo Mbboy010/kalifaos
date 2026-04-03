@@ -40,18 +40,20 @@ exports.POST = void 0;
 var server_1 = require("next/server");
 function POST(req) {
     return __awaiter(this, void 0, void 0, function () {
-        var token, res;
+        var token, isProduction, res;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, req.json()];
                 case 1:
                     token = (_a.sent()).token;
+                    isProduction = process.env.NODE_ENV === 'production';
                     res = server_1.NextResponse.json({ success: true });
                     res.cookies.set('__session', token, {
-                        domain: '.kalifaos.site',
+                        domain: isProduction ? '.kalifaos.site' : 'localhost',
                         path: '/',
                         httpOnly: true,
-                        secure: true,
+                        secure: isProduction,
+                        sameSite: 'lax',
                     });
                     return [2 /*return*/, res];
             }

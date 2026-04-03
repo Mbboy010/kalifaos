@@ -7,37 +7,41 @@ import { useAppSelector } from '@/components/redux/hooks';
 import { Loader2, ShieldAlert, Lock } from 'lucide-react';
 
 // Authorized Root Admins - Keep this synced with your Login Page
-const ADMIN_EMAILS = ['musa@kalifaos.site', 'mbboy@kalifaos.site']; 
+const ADMIN_EMAILS = ['m880yka@gmail.com', 'mbboy@kalifaos.site']; 
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
   const isColor = useAppSelector((state) => state.color.value);
   const [status, setStatus] = useState<'loading' | 'authorized' | 'denied'>('loading');
 
   useEffect(() => {
-    // 1. Check for the cookie first (Immediate signal)
-    const hasToken = document.cookie.split('; ').find(row => row.startsWith('admin-token='));
-    
-    // 2. Listen for Firebase Auth state
+    const cookieName = 'admin-token'; // Match your login cookie
+    const hasToken = document.cookie
+      .split('; ')
+      .some(row => row.startsWith(`${cookieName}=`));
+
+    let timeout: NodeJS.Timeout;
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && ADMIN_EMAILS.includes(user.email || '')) {
         setStatus('authorized');
       } else if (!hasToken) {
-        // Only deny if there is NO cookie and NO firebase user
         setStatus('denied');
         handleRedirect();
       } else {
-        // If there's a cookie but Firebase isn't ready, we wait a moment
-        const timeout = setTimeout(() => {
+        // Cookie exists but Firebase not ready, wait a bit
+        timeout = setTimeout(() => {
           if (!auth.currentUser) {
             setStatus('denied');
             handleRedirect();
           }
-        }, 3000); // 3-second grace period for subdomain sync
-        return () => clearTimeout(timeout);
+        }, 3000);
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (timeout) clearTimeout(timeout);
+    };
   }, []);
 
   const handleRedirect = () => {

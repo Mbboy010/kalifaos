@@ -23,15 +23,20 @@ function middleware(req) {
     }
     else {
         var parts = cleanHostname.split('.');
-        // For local testing: if you use app.localhost:3000, it captures 'app'
         if (parts.length > 1 && parts[parts.length - 1] !== 'localhost') {
             subdomain = parts[0];
         }
     }
-    // 3. LEGACY REDIRECTS (Remove 'app' and 'auth' subdomains)
-    // If someone visits app.kalifaos.site or auth.kalifaos.site, send them to kalifaos.site
+    // 3. CLEANUP: Redirect Legacy Subdomains & Vercel Domains
     var isLegacySubdomain = subdomain === 'app' || subdomain === 'auth';
-    if (isLegacySubdomain) {
+    var isVercelDomain = hostname.includes('.vercel.app');
+    // If hitting app.kalifaos.site, auth.kalifaos.site, or your-project.vercel.app
+    if (isLegacySubdomain || isVercelDomain) {
+        // Special check: If they are trying to reach /admin on a Vercel domain, 
+        // we should ideally send them to the admin subdomain directly.
+        if (pathname.startsWith('/admin')) {
+            return server_1.NextResponse.redirect(new URL(pathname.replace(/^\/admin/, '') || '/', "".concat(protocol, "://admin.").concat(baseDomain)), 301);
+        }
         return server_1.NextResponse.redirect(new URL(pathname + url.search, "".concat(protocol, "://").concat(baseDomain)), 301);
     }
     // 4. ADMIN SUBDOMAIN LOGIC
@@ -45,15 +50,13 @@ function middleware(req) {
         // SECURITY: Ensure the operator is logged in
         var hasSession = req.cookies.has('__session') || req.cookies.has('admin-token');
         if (!hasSession) {
-            // Redirect to login on the main naked domain
             return server_1.NextResponse.redirect(new URL('/login', "".concat(protocol, "://").concat(baseDomain)));
         }
-        // Rewrite to internal admin folder
         var path = pathname.startsWith('/admin') ? pathname.replace('/admin', '') : pathname;
         url.pathname = "/admin".concat(path === '/' ? '' : path);
         return server_1.NextResponse.rewrite(url);
     }
-    // 5. DEFAULT (Load everything on kalifaos.site)
+    // 5. DEFAULT
     return server_1.NextResponse.next();
 }
 exports.middleware = middleware;

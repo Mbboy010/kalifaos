@@ -25,17 +25,26 @@ export function middleware(req: NextRequest) {
     }
   } else {
     const parts = cleanHostname.split('.');
-    // For local testing: if you use app.localhost:3000, it captures 'app'
     if (parts.length > 1 && parts[parts.length - 1] !== 'localhost') {
        subdomain = parts[0];
     }
   }
 
-  // 3. LEGACY REDIRECTS (Remove 'app' and 'auth' subdomains)
-  // If someone visits app.kalifaos.site or auth.kalifaos.site, send them to kalifaos.site
+  // 3. CLEANUP: Redirect Legacy Subdomains & Vercel Domains
   const isLegacySubdomain = subdomain === 'app' || subdomain === 'auth';
-  
-  if (isLegacySubdomain) {
+  const isVercelDomain = hostname.includes('.vercel.app');
+
+  // If hitting app.kalifaos.site, auth.kalifaos.site, or your-project.vercel.app
+  if (isLegacySubdomain || isVercelDomain) {
+    // Special check: If they are trying to reach /admin on a Vercel domain, 
+    // we should ideally send them to the admin subdomain directly.
+    if (pathname.startsWith('/admin')) {
+        return NextResponse.redirect(
+            new URL(pathname.replace(/^\/admin/, '') || '/', `${protocol}://admin.${baseDomain}`),
+            301
+        );
+    }
+
     return NextResponse.redirect(
       new URL(pathname + url.search, `${protocol}://${baseDomain}`),
       301
@@ -56,17 +65,15 @@ export function middleware(req: NextRequest) {
     const hasSession = req.cookies.has('__session') || req.cookies.has('admin-token');
 
     if (!hasSession) {
-      // Redirect to login on the main naked domain
       return NextResponse.redirect(new URL('/login', `${protocol}://${baseDomain}`));
     }
 
-    // Rewrite to internal admin folder
     const path = pathname.startsWith('/admin') ? pathname.replace('/admin', '') : pathname;
     url.pathname = `/admin${path === '/' ? '' : path}`;
     return NextResponse.rewrite(url);
   }
 
-  // 5. DEFAULT (Load everything on kalifaos.site)
+  // 5. DEFAULT
   return NextResponse.next();
 }
 

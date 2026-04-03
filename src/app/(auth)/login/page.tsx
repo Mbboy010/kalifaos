@@ -40,7 +40,7 @@ export default function LoginPage() {
   });
 
   // 3. Check admin role
-  const ADMIN_EMAILS = ['musa@kalifaos.site', 'mbboy@kalifaos.site'];
+  const ADMIN_EMAILS = ['m880yka@gmail.com', 'mbboy@kalifaos.site'];
   const isAdmin = ADMIN_EMAILS.includes(user.email);
 
   // 4. Redirect

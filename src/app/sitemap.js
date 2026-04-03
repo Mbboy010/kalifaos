@@ -53,7 +53,7 @@ function sitemap() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    baseUrl = 'https://app.kalifaos.site';
+                    baseUrl = 'https://kalifaos.site';
                     windowsToolsUrls = [];
                     _a.label = 1;
                 case 1:

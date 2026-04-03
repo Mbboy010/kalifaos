@@ -3,7 +3,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/server/firebaseApi';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://app.kalifaos.site';
+  const baseUrl = 'https://kalifaos.site';
 
   // ============================================
   // 1. FETCH DYNAMIC WINDOWS TOOLS (From Firebase)

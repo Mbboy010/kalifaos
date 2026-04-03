@@ -25,34 +25,35 @@ export default function LoginPage() {
 
   // --- UPDATED HELPER: SECURE CROSS-DOMAIN LOGIN ---
   const finalizeLogin = async (user: any) => {
-    const isProduction = process.env.NODE_ENV === 'production';
-    const rootDomain = isProduction ? '.kalifaos.site' : 'localhost';
-    
-    // 1. GET THE REAL JWT TOKEN (Middleware uses this to verify identity)
-    const token = await user.getIdToken();
+  const isProduction = process.env.NODE_ENV === 'production';
 
-    // 2. SET THE WILDCARD COOKIE
-    // We store the full token so the admin subdomain can verify who you are
-    document.cookie = `admin-token=${token}; path=/; domain=${rootDomain}; max-age=86400; SameSite=Lax; Secure`;
+  // 1. Get Firebase token
+  const token = await user.getIdToken();
 
-    // 3. IDENTIFY OPERATOR ROLE
-    // Add your email and any other admin emails here
-    const ADMIN_EMAILS = ['musa@kalifaos.site', 'mbboy@kalifaos.site']; 
-    const isAdmin = ADMIN_EMAILS.includes(user.email);
+  // 2. Send token to backend (THIS IS THE FIX)
+  await fetch('/api/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ token }),
+  });
 
-    // 4. SMART REDIRECT
-    if (isProduction) {
-      // Use window.location.href to jump between subdomains (app -> admin)
-      window.location.href = isAdmin 
-        ? "https://admin.kalifaos.site/" 
-        : "https://app.kalifaos.site/";
-    } else {
-      // Localhost handling
-      window.location.href = isAdmin 
-        ? "http://admin.localhost:3000/" 
-        : "http://localhost:3000/";
-    }
-  };
+  // 3. Check admin role
+  const ADMIN_EMAILS = ['musa@kalifaos.site', 'mbboy@kalifaos.site'];
+  const isAdmin = ADMIN_EMAILS.includes(user.email);
+
+  // 4. Redirect
+  if (isProduction) {
+    window.location.href = isAdmin
+      ? "https://admin.kalifaos.site/"
+      : "https://kalifaos.site/";
+  } else {
+    window.location.href = isAdmin
+      ? "http://admin.localhost:3000/"
+      : "http://localhost:3000/";
+  }
+};
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

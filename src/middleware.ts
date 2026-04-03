@@ -7,7 +7,11 @@ export function middleware(req: NextRequest) {
   const pathname = url.pathname;
 
   // 1. SYSTEM BYPASS
-  if (pathname.startsWith('/__/') || pathname.includes('.') || pathname.startsWith('/_next')) {
+  if (
+    pathname.startsWith('/__/') ||
+    pathname.startsWith('/_next') ||
+    pathname.includes('.')
+  ) {
     return NextResponse.next();
   }
 
@@ -18,31 +22,33 @@ export function middleware(req: NextRequest) {
   // 2. Extract Subdomain
   const cleanHostname = hostname.replace(/:\d+$/, '');
   let subdomain = '';
-  
+
   if (isProduction) {
-    if (cleanHostname.endsWith('.kalifaos.site')) {
-      subdomain = cleanHostname.replace('.kalifaos.site', '');
+    if (cleanHostname === baseDomain) {
+      subdomain = '';
+    } else if (cleanHostname.endsWith(`.${baseDomain}`)) {
+      subdomain = cleanHostname.replace(`.${baseDomain}`, '');
     }
   } else {
     const parts = cleanHostname.split('.');
     if (parts.length > 1 && parts[parts.length - 1] !== 'localhost') {
-       subdomain = parts[0];
+      subdomain = parts[0];
     }
   }
 
-  // 3. CLEANUP: Redirect Legacy Subdomains & Vercel Domains
+  // 3. CLEANUP
   const isLegacySubdomain = subdomain === 'app' || subdomain === 'auth';
   const isVercelDomain = hostname.includes('.vercel.app');
 
-  // If hitting app.kalifaos.site, auth.kalifaos.site, or your-project.vercel.app
   if (isLegacySubdomain || isVercelDomain) {
-    // Special check: If they are trying to reach /admin on a Vercel domain, 
-    // we should ideally send them to the admin subdomain directly.
     if (pathname.startsWith('/admin')) {
-        return NextResponse.redirect(
-            new URL(pathname.replace(/^\/admin/, '') || '/', `${protocol}://admin.${baseDomain}`),
-            301
-        );
+      return NextResponse.redirect(
+        new URL(
+          pathname.replace(/^\/admin/, '') || '/',
+          `${protocol}://admin.${baseDomain}`
+        ),
+        301
+      );
     }
 
     return NextResponse.redirect(
@@ -51,29 +57,39 @@ export function middleware(req: NextRequest) {
     );
   }
 
-  // 4. ADMIN SUBDOMAIN LOGIC
+  // 4. ADMIN ROUTE HANDLING
   const isAdminRoute = pathname.startsWith('/admin');
 
-  // If they hit /admin on the main domain, move them to the admin subdomain
+  // Move /admin → admin subdomain
   if (isAdminRoute && subdomain !== 'admin') {
     const newPath = pathname.replace(/^\/admin/, '') || '/';
-    return NextResponse.redirect(new URL(newPath + url.search, `${protocol}://admin.${baseDomain}`));
+    return NextResponse.redirect(
+      new URL(newPath + url.search, `${protocol}://admin.${baseDomain}`)
+    );
   }
 
+  // 5. ADMIN SUBDOMAIN LOGIC
   if (subdomain === 'admin') {
-    // SECURITY: Ensure the operator is logged in
-    const hasSession = req.cookies.has('__session') || req.cookies.has('admin-token');
+    // 🔐 Read cookie properly
+    const sessionCookie = req.cookies.get('__session')?.value;
+    const adminToken = req.cookies.get('admin-token')?.value;
 
+    const hasSession = !!sessionCookie || !!adminToken;
+
+    // ❗ Redirect to ADMIN login (not main domain)
     if (!hasSession) {
-      return NextResponse.redirect(new URL('/login', `${protocol}://${baseDomain}`));
+      return NextResponse.redirect(
+        new URL('/login', `${protocol}://admin.${baseDomain}`)
+      );
     }
 
-    const path = pathname.startsWith('/admin') ? pathname.replace('/admin', '') : pathname;
-    url.pathname = `/admin${path === '/' ? '' : path}`;
+    // Rewrite to /admin internally
+    const cleanPath = pathname === '/' ? '' : pathname;
+    url.pathname = `/admin${cleanPath}`;
     return NextResponse.rewrite(url);
   }
 
-  // 5. DEFAULT
+  // 6. DEFAULT
   return NextResponse.next();
 }
 

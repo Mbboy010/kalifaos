@@ -120,11 +120,11 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
   ];
 
   const adminLinks = [
-    { name: 'Users', href: '/admin/users', icon: <Users size={16}/> },
-    { name: 'Downloads', href: '/admin/downloads', icon: <HardDrive size={16}/> },
-    { name: 'Windows', href: '/admin/windows-files', icon: <Monitor size={16}/> },
-    { name: 'YouTube', href: '/admin/youtube-videos', icon: <Youtube size={16}/> },
-    { name: 'Messages', href: '/admin/contact-messages', icon: <MessageSquare size={16}/> },
+    { name: 'Users', href: '/users', icon: <Users size={16}/> },
+    { name: 'Downloads', href: '/downloads', icon: <HardDrive size={16}/> },
+    { name: 'Windows', href: '/windows-files', icon: <Monitor size={16}/> },
+    { name: 'YouTube', href: '/youtube-videos', icon: <Youtube size={16}/> },
+    { name: 'Messages', href: '/contact-messages', icon: <MessageSquare size={16}/> },
   ];
 
   const currentLinks = isAdminSection ? adminLinks : publicLinks;
@@ -144,7 +144,7 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
           <div className="flex justify-between items-center h-20">
             
             {/* --- LOGO --- */}
-            <Link href={isAdminSection ? "/admin" : "/"} className="group flex items-center gap-3 relative z-50">
+            <Link href={isAdminSection ? "/" : "/"} className="group flex items-center gap-3 relative z-50">
               <div className={`p-2 rounded-lg border transition-all duration-300 ${
                 isAdminSection
                   ? 'bg-red-500/10 border-red-500/50 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]'

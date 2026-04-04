@@ -12,22 +12,9 @@ import {
 } from 'firebase/auth';
 import { auth } from '@/server/firebaseApi';
 
-/**
- * Logic: Google Sign-In Helper
- * Now integrated directly into the module.
- */
-const handleGoogleSignIn = async () => {
-  const provider = new GoogleAuthProvider();
-  try {
-    const result = await signInWithPopup(auth, provider);
-    return result.user;
-  } catch (error) {
-    console.error("Google Sign-In Error:", error);
-    throw error;
-  }
-};
 
-const LoginPage = () => {
+
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -61,6 +48,21 @@ const LoginPage = () => {
       setGoogleLoading(false);
     }
   };
+  
+  /**
+ * Logic: Google Sign-In Helper
+ * Now integrated directly into the module.
+ */
+const handleGoogleSignIn = async () => {
+  const provider = new GoogleAuthProvider();
+  try {
+    const result = await signInWithPopup(auth, provider);
+    return result.user;
+  } catch (error) {
+    console.error("Google Sign-In Error:", error);
+    throw error;
+  }
+};
 
   return (
     <div className="min-h-screen w-full bg-[#050505] flex items-center justify-center relative overflow-hidden">
@@ -166,7 +168,6 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
 
 
   

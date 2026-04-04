@@ -7,11 +7,7 @@ export function middleware(req: NextRequest) {
   const pathname = url.pathname;
 
   // 1. SYSTEM BYPASS
-  if (
-    pathname.startsWith('/__/') ||
-    pathname.startsWith('/_next') ||
-    pathname.includes('.')
-  ) {
+  if (pathname.startsWith('/__/') || pathname.includes('.') || pathname.startsWith('/_next')) {
     return NextResponse.next();
   }
 
@@ -22,79 +18,62 @@ export function middleware(req: NextRequest) {
   // 2. Extract Subdomain
   const cleanHostname = hostname.replace(/:\d+$/, '');
   let subdomain = '';
-
+  
   if (isProduction) {
-    if (cleanHostname === baseDomain) {
-      subdomain = '';
-    } else if (cleanHostname.endsWith(`.${baseDomain}`)) {
-      subdomain = cleanHostname.replace(`.${baseDomain}`, '');
+    if (cleanHostname.endsWith('.kalifaos.site')) {
+      subdomain = cleanHostname.replace('.kalifaos.site', '');
     }
   } else {
     const parts = cleanHostname.split('.');
     if (parts.length > 1 && parts[parts.length - 1] !== 'localhost') {
-      subdomain = parts[0];
+       subdomain = parts[0];
     }
   }
 
-  // 3. CLEANUP (Redirect Legacy/Vercel to Naked Domain)
+  // 3. CLEANUP: Redirect Legacy Subdomains & Vercel Domains
   const isLegacySubdomain = subdomain === 'app' || subdomain === 'auth';
   const isVercelDomain = hostname.includes('.vercel.app');
 
+  // If hitting app.kalifaos.site, auth.kalifaos.site, or your-project.vercel.app
   if (isLegacySubdomain || isVercelDomain) {
+    // Special check: If they are trying to reach /admin on a Vercel domain, 
+    // we should ideally send them to the admin subdomain directly.
     if (pathname.startsWith('/admin')) {
-      return NextResponse.redirect(
-        new URL(pathname.replace(/^\/admin/, '') || '/', `${protocol}://admin.${baseDomain}`),
-        301
-      );
+        return NextResponse.redirect(
+            new URL(pathname.replace(/^\/admin/, '') || '/', `${protocol}://admin.${baseDomain}`),
+            301
+        );
     }
+
     return NextResponse.redirect(
       new URL(pathname + url.search, `${protocol}://${baseDomain}`),
       301
     );
   }
 
-  // 4. ADMIN ROUTE HANDLING (Main domain /admin -> admin subdomain)
-  if (pathname.startsWith('/admin') && subdomain !== 'admin') {
+  // 4. ADMIN SUBDOMAIN LOGIC
+  const isAdminRoute = pathname.startsWith('/admin');
+
+  // If they hit /admin on the main domain, move them to the admin subdomain
+  if (isAdminRoute && subdomain !== 'admin') {
     const newPath = pathname.replace(/^\/admin/, '') || '/';
-    return NextResponse.redirect(
-      new URL(newPath + url.search, `${protocol}://admin.${baseDomain}`)
-    );
+    return NextResponse.redirect(new URL(newPath + url.search, `${protocol}://admin.${baseDomain}`));
   }
 
-  // 5. ADMIN SUBDOMAIN LOGIC
   if (subdomain === 'admin') {
-    const sessionCookie = req.cookies.get('__session')?.value;
-    const adminToken = req.cookies.get('admin-token')?.value;
-    const hasSession = !!sessionCookie || !!adminToken;
+    // SECURITY: Ensure the operator is logged in
+    const hasSession = req.cookies.has('__session') || req.cookies.has('admin-token');
 
-    /**
-     * FIX: Break the redirect loop.
-     * Based on your folder tree: app/admin/os/login/page.tsx
-     * The URL path is /os/login
-     */
-    const loginPath = '/os/login'; 
-
-    // If NOT logged in and NOT on the login page, go to login
-    if (!hasSession && pathname !== loginPath) {
-      return NextResponse.redirect(
-        new URL(loginPath, `${protocol}://admin.${baseDomain}`)
-      );
+    if (!hasSession) {
+      return NextResponse.redirect(new URL('/login', `${protocol}://${baseDomain}`));
     }
 
-    // If ALREADY logged in and trying to access login, go to admin dashboard
-    if (hasSession && pathname === loginPath) {
-      return NextResponse.redirect(
-        new URL('/', `${protocol}://admin.${baseDomain}`)
-      );
-    }
-
-    // Rewrite to internal /admin folder
-    const cleanPath = pathname === '/' ? '' : pathname;
-    url.pathname = `/admin${cleanPath}`;
+    const path = pathname.startsWith('/admin') ? pathname.replace('/admin', '') : pathname;
+    url.pathname = `/admin${path === '/' ? '' : path}`;
     return NextResponse.rewrite(url);
   }
 
-  // 6. DEFAULT
+  // 5. DEFAULT
   return NextResponse.next();
 }
 

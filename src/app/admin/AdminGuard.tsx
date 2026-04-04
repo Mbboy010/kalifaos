@@ -4,31 +4,49 @@ import { useEffect, useState } from 'react';
 import { auth } from '@/server/firebaseApi';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useAppSelector } from '@/components/redux/hooks';
+import { usePathname, useRouter } from 'next/navigation';
 import { Loader2, ShieldAlert, Lock } from 'lucide-react';
 
-// Authorized Root Admins - Keep this synced with your Login Page
+// Authorized Root Admins
 const ADMIN_EMAILS = ['m880yka@gmail.com', 'mbboy@kalifaos.site']; 
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
   const isColor = useAppSelector((state) => state.color.value);
+  const pathname = usePathname();
+  const router = useRouter();
+  
   const [status, setStatus] = useState<'loading' | 'authorized' | 'denied'>('loading');
 
+  // 1. If we are on the login page, don't guard it.
+  const isLoginPage = pathname === '/login';
+
   useEffect(() => {
-    const cookieName = 'admin-token'; // Match your login cookie
+    // Skip logic if we are already on the login page
+    if (isLoginPage) {
+      setStatus('authorized');
+      return;
+    }
+
+    const cookieName = 'admin-token';
     const hasToken = document.cookie
       .split('; ')
       .some(row => row.startsWith(`${cookieName}=`));
+
+    // Fast check: If no cookie exists, middleware should have caught this, 
+    // but we deny here as a fallback.
+    if (!hasToken) {
+      setStatus('denied');
+      handleRedirect();
+      return;
+    }
 
     let timeout: NodeJS.Timeout;
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && ADMIN_EMAILS.includes(user.email || '')) {
         setStatus('authorized');
-      } else if (!hasToken) {
-        setStatus('denied');
-        handleRedirect();
       } else {
-        // Cookie exists but Firebase not ready, wait a bit
+        // If Firebase says no user but we have a token, give Firebase 3 seconds to sync
         timeout = setTimeout(() => {
           if (!auth.currentUser) {
             setStatus('denied');
@@ -42,18 +60,18 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
       unsubscribe();
       if (timeout) clearTimeout(timeout);
     };
-  }, []);
+  }, [isLoginPage]);
 
   const handleRedirect = () => {
-    const isProduction = process.env.NODE_ENV === 'production';
-    const redirectUrl = isProduction 
-      ? 'https://admin.kalifaos.site/login' 
-      : 'http://localhost:3000/login';
-    
+    // Since we are already on the admin subdomain, we just need to go to /login
+    // router.push is better than window.location to avoid full page flickers
     setTimeout(() => {
-      window.location.href = redirectUrl;
+      router.push('/login');
     }, 2000);
   };
+
+  // If on login page, just show the login page immediately
+  if (isLoginPage) return <>{children}</>;
 
   if (status === 'loading') {
     return (
@@ -65,7 +83,7 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
           <Lock className="absolute mb-4 animate-pulse" size={24} />
         </div>
         <p className="font-mono text-[10px] uppercase tracking-[0.5em] animate-pulse">
-          Synchronizing_Admin_Session...
+          Authenticating_Operator...
         </p>
       </div>
     );
@@ -79,7 +97,7 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
         <ShieldAlert size={48} className="mb-4 animate-bounce" />
         <h2 className="text-xl font-black uppercase tracking-tighter">Access Denied</h2>
         <p className="font-mono text-[10px] uppercase mt-2 opacity-60">
-          Redirecting to Authorization Portal...
+          Redirecting to Login...
         </p>
       </div>
     );

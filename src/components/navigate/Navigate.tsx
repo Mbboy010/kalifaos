@@ -40,11 +40,17 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  
+  // --- 1. DETECT ADMIN CONTEXT VIA SUBDOMAIN ---
+  const [isAdminSection, setIsAdminSection] = useState(false);
 
-  // --- 1. DETECT ADMIN CONTEXT ---
-  // Since middleware rewrites 'admin.kalifaos.site' to '/admin', 
-  // checking pathname.startsWith('/admin') works reliably on both client and server.
-  const isAdminSection = pathname.startsWith('/admin');
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      // Triggers if subdomain is admin (admin.kalifaos.site) OR if path is /admin
+      setIsAdminSection(hostname.startsWith('admin.') || pathname.startsWith('/admin'));
+    }
+  }, [pathname]);
 
   // Listen to Firebase Auth state directly
   useEffect(() => {
@@ -160,7 +166,7 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
 
             {/* --- DESKTOP NAVIGATION --- */}
             <nav className="hidden md:flex items-center space-x-8">
-              {currentLinks.map((link) => (
+              {currentLinks.map((link: any) => (
                 <Link
                   key={link.name}
                   href={link.href}
@@ -168,7 +174,7 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
                     darkMode ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-blue-600'
                   } ${pathname === link.href ? (darkMode ? 'text-white' : 'text-blue-600') : ''}`}
                 >
-                  {isAdminSection}
+                  {isAdminSection && link.icon && link.icon}
                   {link.name}
                   <span className={`absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full ${
                     isAdminSection ? 'bg-red-500' : (darkMode ? 'bg-cyan-500' : 'bg-blue-600')
@@ -329,7 +335,7 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
             </div>
 
             {/* Mobile Nav Links - Dynamically renders based on context */}
-            {currentLinks.map((link, index) => (
+            {currentLinks.map((link: any, index) => (
               <Link
                 key={index}
                 href={link.href}
@@ -342,7 +348,7 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
               >
                 <div className="flex items-center gap-3">
                   <span className={isAdminSection ? 'text-red-500' : 'opacity-50'}>
-                    { <Terminal size={16} />}
+                    {link.icon || <Terminal size={16} />}
                   </span>
                   <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
                 </div>

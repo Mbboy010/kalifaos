@@ -79,7 +79,7 @@ export function middleware(req: NextRequest) {
     // ❗ Redirect to ADMIN login (not main domain)
     if (!hasSession) {
       return NextResponse.redirect(
-        new URL('/login', `${protocol}://admin.${baseDomain}`)
+        new URL('/os/login', `${protocol}://admin.${baseDomain}`)
       );
     }
 

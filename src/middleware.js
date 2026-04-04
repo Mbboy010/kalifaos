@@ -57,7 +57,7 @@ function middleware(req) {
         var hasSession = !!sessionCookie || !!adminToken;
         // ❗ Redirect to ADMIN login (not main domain)
         if (!hasSession) {
-            return server_1.NextResponse.redirect(new URL('/login', "".concat(protocol, "://admin.").concat(baseDomain)));
+            return server_1.NextResponse.redirect(new URL('/os/login', "".concat(protocol, "://admin.").concat(baseDomain)));
         }
         // Rewrite to /admin internally
         var cleanPath = pathname === '/' ? '' : pathname;

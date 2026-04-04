@@ -168,7 +168,7 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
                     darkMode ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-blue-600'
                   } ${pathname === link.href ? (darkMode ? 'text-white' : 'text-blue-600') : ''}`}
                 >
-                  {isAdminSection && link.icon}
+                  {isAdminSection}
                   {link.name}
                   <span className={`absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full ${
                     isAdminSection ? 'bg-red-500' : (darkMode ? 'bg-cyan-500' : 'bg-blue-600')
@@ -342,7 +342,7 @@ export default function Navigate({ darkMode, setDarkMode }: NavigateProps) {
               >
                 <div className="flex items-center gap-3">
                   <span className={isAdminSection ? 'text-red-500' : 'opacity-50'}>
-                    {link.icon || <Terminal size={16} />}
+                    { <Terminal size={16} />}
                   </span>
                   <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
                 </div>

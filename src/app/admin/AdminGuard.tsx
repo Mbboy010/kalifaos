@@ -18,7 +18,7 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
   const [status, setStatus] = useState<'loading' | 'authorized' | 'denied'>('loading');
 
   // 1. If we are on the login page, don't guard it.
-  const isLoginPage = pathname === '/login';
+  const isLoginPage = pathname === '/os/login';
 
   useEffect(() => {
     // Skip logic if we are already on the login page

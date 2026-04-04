@@ -47,7 +47,7 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
   const handleRedirect = () => {
     const isProduction = process.env.NODE_ENV === 'production';
     const redirectUrl = isProduction 
-      ? 'https://app.kalifaos.site/login' 
+      ? 'https://admin.kalifaos.site/login' 
       : 'http://localhost:3000/login';
     
     setTimeout(() => {

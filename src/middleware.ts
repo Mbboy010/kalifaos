@@ -7,7 +7,11 @@ export function middleware(req: NextRequest) {
   const pathname = url.pathname;
 
   // 1. SYSTEM BYPASS
-  if (pathname.startsWith('/__/') || pathname.includes('.') || pathname.startsWith('/_next')) {
+  if (
+    pathname.startsWith('/__/') || 
+    pathname.includes('.') || 
+    pathname.startsWith('/_next')
+  ) {
     return NextResponse.next();
   }
 
@@ -30,17 +34,15 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // 3. CLEANUP: Redirect Legacy Subdomains & Vercel Domains
+  // 3. CLEANUP: Redirect Legacy Subdomains & Vercel Domains to Naked Domain
   const isLegacySubdomain = subdomain === 'app' || subdomain === 'auth';
   const isVercelDomain = hostname.includes('.vercel.app');
 
-  // If hitting app.kalifaos.site, auth.kalifaos.site, or your-project.vercel.app
   if (isLegacySubdomain || isVercelDomain) {
-    // Special check: If they are trying to reach /admin on a Vercel domain, 
-    // we should ideally send them to the admin subdomain directly.
+    // If they hit /admin on a legacy domain, send them to the admin subdomain root
     if (pathname.startsWith('/admin')) {
         return NextResponse.redirect(
-            new URL(pathname.replace(/^\/admin/, '') || '/', `${protocol}://admin.${baseDomain}`),
+            new URL('/', `${protocol}://admin.${baseDomain}`),
             301
         );
     }
@@ -51,29 +53,26 @@ export function middleware(req: NextRequest) {
     );
   }
 
-  // 4. ADMIN SUBDOMAIN LOGIC
-  const isAdminRoute = pathname.startsWith('/admin');
-
-  // If they hit /admin on the main domain, move them to the admin subdomain
-  if (isAdminRoute && subdomain !== 'admin') {
+  // 4. ADMIN ROUTE REDIRECT (kalifaos.site/admin -> admin.kalifaos.site)
+  if (pathname.startsWith('/admin') && subdomain !== 'admin') {
     const newPath = pathname.replace(/^\/admin/, '') || '/';
     return NextResponse.redirect(new URL(newPath + url.search, `${protocol}://admin.${baseDomain}`));
   }
 
+  // 5. ADMIN SUBDOMAIN INTERNAL ROUTING
   if (subdomain === 'admin') {
-    // SECURITY: Ensure the operator is logged in
-    const hasSession = req.cookies.has('__session') || req.cookies.has('admin-token');
-
-    if (!hasSession) {
-      return NextResponse.redirect(new URL('/login', `${protocol}://${baseDomain}`));
-    }
-
-    const path = pathname.startsWith('/admin') ? pathname.replace('/admin', '') : pathname;
-    url.pathname = `/admin${path === '/' ? '' : path}`;
+    /**
+     * No more cookie/session checks here.
+     * The AdminGuard.tsx component handles the Firestore 'admin' role check.
+     * * This rewrites 'admin.kalifaos.site/os/login' 
+     * to the internal folder 'app/admin/os/login'
+     */
+    const path = pathname === '/' ? '' : pathname;
+    url.pathname = `/admin${path}`;
     return NextResponse.rewrite(url);
   }
 
-  // 5. DEFAULT
+  // 6. DEFAULT (Naked Domain)
   return NextResponse.next();
 }
 

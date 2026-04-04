@@ -6,12 +6,8 @@ export function middleware(req: NextRequest) {
   const hostname = req.headers.get('host') || '';
   const pathname = url.pathname;
 
-  // 1. SYSTEM BYPASS ppass
-  if (
-    pathname.startsWith('/__/') ||
-    pathname.startsWith('/_next') ||
-    pathname.includes('.')
-  ) {
+  // 1. SYSTEM BYPASS
+  if (pathname.startsWith('/__/') || pathname.includes('.') || pathname.startsWith('/_next')) {
     return NextResponse.next();
   }
 
@@ -22,74 +18,55 @@ export function middleware(req: NextRequest) {
   // 2. Extract Subdomain
   const cleanHostname = hostname.replace(/:\d+$/, '');
   let subdomain = '';
-
+  
   if (isProduction) {
-    if (cleanHostname === baseDomain) {
-      subdomain = '';
-    } else if (cleanHostname.endsWith(`.${baseDomain}`)) {
-      subdomain = cleanHostname.replace(`.${baseDomain}`, '');
+    if (cleanHostname.endsWith('.kalifaos.site')) {
+      subdomain = cleanHostname.replace('.kalifaos.site', '');
     }
   } else {
     const parts = cleanHostname.split('.');
+    // For local testing: if you use app.localhost:3000, it captures 'app'
     if (parts.length > 1 && parts[parts.length - 1] !== 'localhost') {
-      subdomain = parts[0];
+       subdomain = parts[0];
     }
   }
 
-  // 3. CLEANUP
+  // 3. LEGACY REDIRECTS (Remove 'app' and 'auth' subdomains)
+  // If someone visits app.kalifaos.site or auth.kalifaos.site, send them to kalifaos.site
   const isLegacySubdomain = subdomain === 'app' || subdomain === 'auth';
-  const isVercelDomain = hostname.includes('.vercel.app');
-
-  if (isLegacySubdomain || isVercelDomain) {
-    if (pathname.startsWith('/admin')) {
-      return NextResponse.redirect(
-        new URL(
-          pathname.replace(/^\/admin/, '') || '/',
-          `${protocol}://admin.${baseDomain}`
-        ),
-        301
-      );
-    }
-
+  
+  if (isLegacySubdomain) {
     return NextResponse.redirect(
       new URL(pathname + url.search, `${protocol}://${baseDomain}`),
       301
     );
   }
 
-  // 4. ADMIN ROUTE HANDLING
+  // 4. ADMIN SUBDOMAIN LOGIC
   const isAdminRoute = pathname.startsWith('/admin');
 
-  // Move /admin → admin subdomain
+  // If they hit /admin on the main domain, move them to the admin subdomain
   if (isAdminRoute && subdomain !== 'admin') {
     const newPath = pathname.replace(/^\/admin/, '') || '/';
-    return NextResponse.redirect(
-      new URL(newPath + url.search, `${protocol}://admin.${baseDomain}`)
-    );
+    return NextResponse.redirect(new URL(newPath + url.search, `${protocol}://admin.${baseDomain}`));
   }
 
-  // 5. ADMIN SUBDOMAIN LOGIC
   if (subdomain === 'admin') {
-    // 🔐 Read cookie properly
-    const sessionCookie = req.cookies.get('__session')?.value;
-    const adminToken = req.cookies.get('admin-token')?.value;
+    // SECURITY: Ensure the operator is logged in
+    const hasSession = req.cookies.has('__session') || req.cookies.has('admin-token');
 
-    const hasSession = !!sessionCookie || !!adminToken;
-
-    // ❗ Redirect to ADMIN login (not main domain)
     if (!hasSession) {
-      return NextResponse.redirect(
-        new URL('/os/login', `${protocol}://admin.${baseDomain}`)
-      );
+      // Redirect to login on the main naked domain
+      return NextResponse.redirect(new URL('/login', `${protocol}://${baseDomain}`));
     }
 
-    // Rewrite to /admin internally
-    const cleanPath = pathname === '/' ? '' : pathname;
-    url.pathname = `/admin${cleanPath}`;
+    // Rewrite to internal admin folder
+    const path = pathname.startsWith('/admin') ? pathname.replace('/admin', '') : pathname;
+    url.pathname = `/admin${path === '/' ? '' : path}`;
     return NextResponse.rewrite(url);
   }
 
-  // 6. DEFAULT
+  // 5. DEFAULT (Load everything on kalifaos.site)
   return NextResponse.next();
 }
 

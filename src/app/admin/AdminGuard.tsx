@@ -66,7 +66,7 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
     // Since we are already on the admin subdomain, we just need to go to /login
     // router.push is better than window.location to avoid full page flickers
     setTimeout(() => {
-      router.push('/login');
+      router.push('/os/login');
     }, 2000);
   };
 

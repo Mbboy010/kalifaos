@@ -6,7 +6,7 @@ export function middleware(req: NextRequest) {
   const hostname = req.headers.get('host') || '';
   const pathname = url.pathname;
 
-  // 1. SYSTEM BYPASS
+  // 1. SYSTEM BYPASS ppass
   if (
     pathname.startsWith('/__/') ||
     pathname.startsWith('/_next') ||
@@ -36,25 +36,32 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // 3. CLEANUP (Redirect Vercel & Legacy subdomains to Naked Domain)
+  // 3. CLEANUP
   const isLegacySubdomain = subdomain === 'app' || subdomain === 'auth';
   const isVercelDomain = hostname.includes('.vercel.app');
 
   if (isLegacySubdomain || isVercelDomain) {
     if (pathname.startsWith('/admin')) {
       return NextResponse.redirect(
-        new URL(pathname.replace(/^\/admin/, '') || '/', `${protocol}://admin.${baseDomain}`),
+        new URL(
+          pathname.replace(/^\/admin/, '') || '/',
+          `${protocol}://admin.${baseDomain}`
+        ),
         301
       );
     }
+
     return NextResponse.redirect(
       new URL(pathname + url.search, `${protocol}://${baseDomain}`),
       301
     );
   }
 
-  // 4. ADMIN ROUTE HANDLING (Main domain /admin -> admin. subdomain)
-  if (pathname.startsWith('/admin') && subdomain !== 'admin') {
+  // 4. ADMIN ROUTE HANDLING
+  const isAdminRoute = pathname.startsWith('/admin');
+
+  // Move /admin → admin subdomain
+  if (isAdminRoute && subdomain !== 'admin') {
     const newPath = pathname.replace(/^\/admin/, '') || '/';
     return NextResponse.redirect(
       new URL(newPath + url.search, `${protocol}://admin.${baseDomain}`)
@@ -63,31 +70,26 @@ export function middleware(req: NextRequest) {
 
   // 5. ADMIN SUBDOMAIN LOGIC
   if (subdomain === 'admin') {
+    // 🔐 Read cookie properly
     const sessionCookie = req.cookies.get('__session')?.value;
     const adminToken = req.cookies.get('admin-token')?.value;
+
     const hasSession = !!sessionCookie || !!adminToken;
 
-    // --- FIX: Allow the login page to load without a session ---
-    const isPublicAdminRoute = pathname === '/login' || pathname === '/register';
-
-    if (!hasSession && !isPublicAdminRoute) {
+    // ❗ Redirect to ADMIN login (not main domain)
+    if (!hasSession) {
       return NextResponse.redirect(
         new URL('/login', `${protocol}://admin.${baseDomain}`)
       );
     }
 
-    // If user IS logged in and tries to go to /login, send them to admin dashboard
-    if (hasSession && isPublicAdminRoute) {
-      return NextResponse.redirect(new URL('/', `${protocol}://admin.${baseDomain}`));
-    }
-
-    // Rewrite to /admin folder internally (e.g., src/app/admin/login/page.tsx)
+    // Rewrite to /admin internally
     const cleanPath = pathname === '/' ? '' : pathname;
     url.pathname = `/admin${cleanPath}`;
     return NextResponse.rewrite(url);
   }
 
-  // 6. DEFAULT (Main domain logic)
+  // 6. DEFAULT
   return NextResponse.next();
 }
 

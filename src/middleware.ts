@@ -6,7 +6,7 @@ export function middleware(req: NextRequest) {
   const hostname = req.headers.get('host') || '';
   const pathname = url.pathname;
 
-  // 1. SYSTEM BYPASS
+  // 1. SYSTEM BYPASS ppass
   if (
     pathname.startsWith('/__/') ||
     pathname.startsWith('/_next') ||

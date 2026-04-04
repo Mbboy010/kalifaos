@@ -7,7 +7,7 @@ function middleware(req) {
     var url = req.nextUrl.clone();
     var hostname = req.headers.get('host') || '';
     var pathname = url.pathname;
-    // 1. SYSTEM BYPASS
+    // 1. SYSTEM BYPASS ppass
     if (pathname.startsWith('/__/') ||
         pathname.startsWith('/_next') ||
         pathname.includes('.')) {

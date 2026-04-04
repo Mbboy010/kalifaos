@@ -3,11 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.config = exports.middleware = void 0;
 var server_1 = require("next/server");
 function middleware(req) {
+    var _a, _b;
     var url = req.nextUrl.clone();
     var hostname = req.headers.get('host') || '';
     var pathname = url.pathname;
     // 1. SYSTEM BYPASS
-    if (pathname.startsWith('/__/') || pathname.includes('.') || pathname.startsWith('/_next')) {
+    if (pathname.startsWith('/__/') ||
+        pathname.startsWith('/_next') ||
+        pathname.includes('.')) {
         return server_1.NextResponse.next();
     }
     var isProduction = process.env.NODE_ENV === 'production';
@@ -17,43 +20,58 @@ function middleware(req) {
     var cleanHostname = hostname.replace(/:\d+$/, '');
     var subdomain = '';
     if (isProduction) {
-        if (cleanHostname.endsWith('.kalifaos.site')) {
-            subdomain = cleanHostname.replace('.kalifaos.site', '');
+        if (cleanHostname === baseDomain) {
+            subdomain = '';
+        }
+        else if (cleanHostname.endsWith(".".concat(baseDomain))) {
+            subdomain = cleanHostname.replace(".".concat(baseDomain), '');
         }
     }
     else {
         var parts = cleanHostname.split('.');
-        // For local testing: if you use app.localhost:3000, it captures 'app'
         if (parts.length > 1 && parts[parts.length - 1] !== 'localhost') {
             subdomain = parts[0];
         }
     }
-    // 3. LEGACY REDIRECTS (Remove 'app' and 'auth' subdomains)
-    // If someone visits app.kalifaos.site or auth.kalifaos.site, send them to kalifaos.site
+    // 3. CLEANUP (Redirect Legacy/Vercel to Naked Domain)
     var isLegacySubdomain = subdomain === 'app' || subdomain === 'auth';
-    if (isLegacySubdomain) {
+    var isVercelDomain = hostname.includes('.vercel.app');
+    if (isLegacySubdomain || isVercelDomain) {
+        if (pathname.startsWith('/admin')) {
+            return server_1.NextResponse.redirect(new URL(pathname.replace(/^\/admin/, '') || '/', "".concat(protocol, "://admin.").concat(baseDomain)), 301);
+        }
         return server_1.NextResponse.redirect(new URL(pathname + url.search, "".concat(protocol, "://").concat(baseDomain)), 301);
     }
-    // 4. ADMIN SUBDOMAIN LOGIC
-    var isAdminRoute = pathname.startsWith('/admin');
-    // If they hit /admin on the main domain, move them to the admin subdomain
-    if (isAdminRoute && subdomain !== 'admin') {
+    // 4. ADMIN ROUTE HANDLING (Main domain /admin -> admin subdomain)
+    if (pathname.startsWith('/admin') && subdomain !== 'admin') {
         var newPath = pathname.replace(/^\/admin/, '') || '/';
         return server_1.NextResponse.redirect(new URL(newPath + url.search, "".concat(protocol, "://admin.").concat(baseDomain)));
     }
+    // 5. ADMIN SUBDOMAIN LOGIC
     if (subdomain === 'admin') {
-        // SECURITY: Ensure the operator is logged in
-        var hasSession = req.cookies.has('__session') || req.cookies.has('admin-token');
-        if (!hasSession) {
-            // Redirect to login on the main naked domain
-            return server_1.NextResponse.redirect(new URL('/login', "".concat(protocol, "://").concat(baseDomain)));
+        var sessionCookie = (_a = req.cookies.get('__session')) === null || _a === void 0 ? void 0 : _a.value;
+        var adminToken = (_b = req.cookies.get('admin-token')) === null || _b === void 0 ? void 0 : _b.value;
+        var hasSession = !!sessionCookie || !!adminToken;
+        /**
+         * FIX: Break the redirect loop.
+         * Based on your folder tree: app/admin/os/login/page.tsx
+         * The URL path is /os/login
+         */
+        var loginPath = '/os/login';
+        // If NOT logged in and NOT on the login page, go to login
+        if (!hasSession && pathname !== loginPath) {
+            return server_1.NextResponse.redirect(new URL(loginPath, "".concat(protocol, "://admin.").concat(baseDomain)));
         }
-        // Rewrite to internal admin folder
-        var path = pathname.startsWith('/admin') ? pathname.replace('/admin', '') : pathname;
-        url.pathname = "/admin".concat(path === '/' ? '' : path);
+        // If ALREADY logged in and trying to access login, go to admin dashboard
+        if (hasSession && pathname === loginPath) {
+            return server_1.NextResponse.redirect(new URL('/', "".concat(protocol, "://admin.").concat(baseDomain)));
+        }
+        // Rewrite to internal /admin folder
+        var cleanPath = pathname === '/' ? '' : pathname;
+        url.pathname = "/admin".concat(cleanPath);
         return server_1.NextResponse.rewrite(url);
     }
-    // 5. DEFAULT (Load everything on kalifaos.site)
+    // 6. DEFAULT
     return server_1.NextResponse.next();
 }
 exports.middleware = middleware;

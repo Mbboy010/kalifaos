@@ -32,7 +32,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} bg-black text-gray-200  `}>
   
-         <div className="mt-7">
+         <div className="">
            <AdminGuard>
                {children}
            </AdminGuard>

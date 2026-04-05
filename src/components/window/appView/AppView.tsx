@@ -1,9 +1,11 @@
 "use client";
 
-import Comments from "./Comments";
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import Suggestions from "./Suggestions";
+import { useTheme } from "next-themes";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import {
   Download,
   Tag,
@@ -22,12 +24,14 @@ import {
   Maximize2,
   FileCode
 } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
+
+// Firebase
 import { db } from "@/server/firebaseApi";
 import { doc, getDoc, updateDoc, increment, Timestamp } from "firebase/firestore";
-import { useParams } from "next/navigation";
-import { useAppSelector } from "../../redux/hooks";
+
+// Components
+import Comments from "./Comments";
+import Suggestions from "./Suggestions";
 
 interface Tool {
   id: string;
@@ -47,28 +51,28 @@ interface Tool {
 }
 
 // --- CYBER SKELETON LOADER ---
-function SkeletonLoader({ isColor }: { isColor: boolean }) {
+function SkeletonLoader() {
   return (
-    <div className={`container mx-auto px-4 py-12 animate-pulse ${isColor ? 'text-slate-700' : 'text-slate-200'}`}>
+    <div className="container mx-auto px-4 py-12 animate-pulse text-slate-200 dark:text-slate-700">
       <div className="flex flex-col lg:flex-row gap-8 mb-12">
-        <div className={`w-32 h-32 rounded-2xl ${isColor ? 'bg-slate-800' : 'bg-slate-200'}`}></div>
+        <div className="w-32 h-32 rounded-2xl bg-slate-200 dark:bg-slate-800"></div>
         <div className="flex-1 space-y-4">
-          <div className={`h-8 w-2/3 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-200'}`}></div>
+          <div className="h-8 w-2/3 rounded bg-slate-200 dark:bg-slate-800"></div>
           <div className="flex gap-4">
-            <div className={`h-4 w-24 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-200'}`}></div>
-            <div className={`h-4 w-24 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-200'}`}></div>
+            <div className="h-4 w-24 rounded bg-slate-200 dark:bg-slate-800"></div>
+            <div className="h-4 w-24 rounded bg-slate-200 dark:bg-slate-800"></div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className={`h-16 rounded-lg ${isColor ? 'bg-slate-900' : 'bg-slate-100'}`}></div>
+              <div key={i} className="h-16 rounded-lg bg-slate-100 dark:bg-slate-900"></div>
             ))}
           </div>
         </div>
       </div>
       <div className="space-y-4">
-         <div className={`h-4 w-full rounded ${isColor ? 'bg-slate-800' : 'bg-slate-200'}`}></div>
-         <div className={`h-4 w-5/6 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-200'}`}></div>
-         <div className={`h-4 w-4/6 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-200'}`}></div>
+         <div className="h-4 w-full rounded bg-slate-200 dark:bg-slate-800"></div>
+         <div className="h-4 w-5/6 rounded bg-slate-200 dark:bg-slate-800"></div>
+         <div className="h-4 w-4/6 rounded bg-slate-200 dark:bg-slate-800"></div>
       </div>
     </div>
   );
@@ -80,7 +84,7 @@ function formatDescription(text: string) {
     .replace(/\[red\](.*?)\[\/red\]/g, '<span class="text-red-500 font-bold">$1</span>')
     .replace(/\[green\](.*?)\[\/green\]/g, '<span class="text-green-500 font-bold">$1</span>')
     .replace(/\[blue\](.*?)\[\/blue\]/g, '<span class="text-blue-500 font-bold">$1</span>')
-    .replace(/\[yellow\](.*?)\[\/yellow\]/g, '<span class="text-yellow-500 font-bold">$1</span>') // Added yellow support
+    .replace(/\[yellow\](.*?)\[\/yellow\]/g, '<span class="text-yellow-500 font-bold">$1</span>')
     .replace(
       /\[img\](.*?)\[\/img\]/g,
       '<img src="$1" alt="tool image" class="rounded-lg shadow-md my-4 border border-slate-700/50 max-w-full h-auto" />'
@@ -95,15 +99,18 @@ function formatDownloads(num: number): string {
 }
 
 export default function AppView() {
-  const isColor = useAppSelector((state) => state.color.value); // Dark Mode Check
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const params = useParams();
   const id = params.contentId as string;
+  
   const [tool, setTool] = useState<Tool | null>(null);
   const [loading, setLoading] = useState(true);
   const [fullscreen, setFullscreen] = useState<string | null>(null);
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     async function fetchTool() {
       try {
         const docRef = doc(db, "Windows-tools", id);
@@ -132,7 +139,6 @@ export default function AppView() {
     if (id) fetchTool();
   }, [id]);
 
-  // Fullscreen Logic
   useEffect(() => {
     if (fullscreen) {
       document.body.style.overflow = "hidden";
@@ -176,11 +182,11 @@ export default function AppView() {
     } catch (error) { alert("Payment error, please try again"); }
   };
 
-  if (loading) return <SkeletonLoader isColor={isColor} />;
+  if (!mounted || loading) return <SkeletonLoader />;
 
   if (!tool) {
     return (
-      <div className={`flex flex-col items-center justify-center min-h-[70vh] px-4 ${isColor ? 'text-slate-300' : 'text-slate-700'}`}>
+      <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 text-slate-700 dark:text-slate-300">
         <div className="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center mb-6">
           <AlertTriangle className="w-12 h-12 text-red-500" />
         </div>
@@ -194,12 +200,10 @@ export default function AppView() {
   }
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 pb-20 ${
-      isColor ? 'bg-[#0a0a0a] text-slate-200 selection:bg-cyan-500/30' : 'bg-slate-50 text-slate-900'
-    }`}>
+    <div className="min-h-screen transition-colors duration-300 pb-20 bg-slate-50 text-slate-900 dark:bg-[#0a0a0a] dark:text-slate-200 dark:selection:bg-cyan-500/30">
       
       {/* --- HERO / HEADER SECTION --- */}
-      <div className={`relative pt-5 pb-12 border-b ${isColor ? 'bg-slate-900/30 border-slate-800' : 'bg-white border-slate-200'}`}>
+      <div className="relative pt-5 pb-12 border-b bg-white border-slate-200 dark:bg-slate-900/30 dark:border-slate-800">
         <div className="container mx-auto px-4">
           
           {/* Breadcrumb */}
@@ -210,9 +214,7 @@ export default function AppView() {
 
           <div className="flex flex-col lg:flex-row gap-8 items-start">
             {/* App Icon */}
-            <div className={`relative group w-32 h-32 lg:w-40 lg:h-40 flex-shrink-0 rounded-2xl overflow-hidden border-2 shadow-2xl ${
-              isColor ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'
-            }`}>
+            <div className="relative group w-32 h-32 lg:w-40 lg:h-40 flex-shrink-0 rounded-2xl overflow-hidden border-2 shadow-2xl border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
               <img src={tool.image} alt={tool.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             </div>
@@ -220,15 +222,15 @@ export default function AppView() {
             {/* App Info */}
             <div className="flex-1 w-full">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                <h1 className={`text-3xl md:text-5xl font-bold ${isColor ? 'text-white' : 'text-slate-900'}`}>
+                <h1 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white">
                   {tool.title}
                 </h1>
                 
                 {/* Security Badge */}
                 <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${
                   tool.security === 'Safe' 
-                    ? (isColor ? 'bg-green-950/30 border-green-800 text-green-400' : 'bg-green-50 border-green-200 text-green-700')
-                    : 'bg-red-950/30 border-red-800 text-red-400'
+                    ? 'bg-green-50 border-green-200 text-green-700 dark:bg-green-950/30 dark:border-green-800 dark:text-green-400'
+                    : 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-800 dark:text-red-400'
                 }`}>
                   <ShieldCheck size={14} />
                   <span>{tool.security.toUpperCase()}</span>
@@ -238,7 +240,7 @@ export default function AppView() {
               {/* Quick Stats Row */}
               <div className="flex flex-wrap items-center gap-6 text-sm mb-8 font-mono opacity-80">
                 <div className="flex items-center gap-2">
-                   <Activity size={16} className={isColor ? 'text-cyan-500' : 'text-blue-600'} />
+                   <Activity size={16} className="text-blue-600 dark:text-cyan-500" />
                    <span>{formatDownloads(tool.downloads)} Downloads</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -246,7 +248,7 @@ export default function AppView() {
                    <span>{tool.rating} Rating</span>
                 </div>
                 <div className="flex items-center gap-2">
-                   <Calendar size={16} className={isColor ? 'text-red-400' : 'text-red-500'} />
+                   <Calendar size={16} className="text-red-500 dark:text-red-400" />
                    <span>Updated: {tool.createdAt}</span>
                 </div>
               </div>
@@ -267,11 +269,7 @@ export default function AppView() {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={handleDownload}
-                    className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-3 px-8 py-3 rounded-xl font-bold transition-all ${
-                      isColor 
-                        ? 'bg-cyan-600 text-white hover:bg-cyan-500 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]' 
-                        : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg'
-                    }`}
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-3 px-8 py-3 rounded-xl font-bold transition-all bg-blue-600 text-white hover:bg-blue-700 shadow-lg dark:bg-cyan-600 dark:hover:bg-cyan-500 dark:hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]"
                   >
                     <Download size={20} />
                     <span>Download</span>
@@ -293,15 +291,12 @@ export default function AppView() {
             { icon: <Monitor />, label: "Platform", value: tool.os, color: "text-purple-500" },
             { icon: <Cpu />, label: "Architecture", value: tool.architecture, color: "text-orange-500" },
           ].map((item, i) => (
-            <div key={i} className={`p-4 rounded-xl border ${
-              isColor ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'
-            }`}>
+            <div key={i} className="p-4 rounded-xl border bg-white border-slate-200 dark:bg-slate-900/50 dark:border-slate-800">
               <div className={`mb-2 ${item.color} opacity-80`}>
-                {/* FIXED: Added <any> to cloneElement to support 'size' prop */}
                 {React.cloneElement(item.icon as React.ReactElement<any>, { size: 20 })}
               </div>
               <div className="text-xs uppercase opacity-50 font-bold tracking-wider mb-1">{item.label}</div>
-              <div className={`font-mono font-bold ${isColor ? 'text-slate-200' : 'text-slate-800'}`}>{item.value}</div>
+              <div className="font-mono font-bold text-slate-800 dark:text-slate-200">{item.value}</div>
             </div>
           ))}
         </div>
@@ -316,15 +311,13 @@ export default function AppView() {
               <section>
                 <div className="flex items-center gap-2 mb-4">
                   <FileCode size={20} className="text-slate-500" />
-                  <h3 className={`text-xl font-bold ${isColor ? 'text-white' : 'text-slate-900'}`}>Visual Evidence</h3>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Visual Evidence</h3>
                 </div>
                 <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar snap-x">
                   {tool.screenshots.map((src, idx) => (
                     <div 
                       key={idx} 
-                      className={`relative flex-shrink-0 snap-center group cursor-pointer overflow-hidden rounded-lg border shadow-md ${
-                        isColor ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'
-                      }`}
+                      className="relative flex-shrink-0 snap-center group cursor-pointer overflow-hidden rounded-lg border shadow-md border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
                       onClick={() => setFullscreen(src)}
                     >
                       <img src={src} alt="screen" className="h-48 w-auto object-cover transition-transform group-hover:scale-105" />
@@ -337,21 +330,14 @@ export default function AppView() {
               </section>
             )}
 
-            {/* DESCRIPTION (FIXED) */}
-            <section className={`rounded-2xl py-6 border ${
-              isColor ? 'bg-[#0f0f0f] border-slate-800' : 'bg-white border-slate-200 shadow-sm'
-            }`}>
+            {/* DESCRIPTION */}
+            <section className="rounded-2xl py-6 border bg-white border-slate-200 shadow-sm dark:bg-[#0f0f0f] dark:border-slate-800">
               <div className="flex mx-4 items-center gap-2 mb-6 border-b border-dashed border-slate-700/50 pb-4">
-                <Terminal size={18} className={isColor ? 'text-cyan-500' : 'text-blue-600'} />
+                <Terminal size={18} className="text-blue-600 dark:text-cyan-500" />
                 <h3 className="font-mono font-bold uppercase tracking-widest text-sm">/var/log/description</h3>
               </div>
               
-              {/* Added break-words, w-full, max-w-full to prevent overflow */}
-              <div className={`prose w-full max-w-full px-4 break-words overflow-hidden ${
-                isColor 
-                  ? 'prose-invert prose-p:text-slate-400 prose-headings:text-slate-200 prose-a:text-blue-400 prose-li:text-slate-400' 
-                  : 'prose-slate'
-              }`}>
+              <div className="prose w-full max-w-full px-4 break-words overflow-hidden dark:prose-invert dark:prose-p:text-slate-400 dark:prose-headings:text-slate-200 dark:prose-a:text-blue-400 dark:prose-li:text-slate-400 prose-slate">
                 <ReactMarkdown
                   rehypePlugins={[rehypeRaw]}
                   components={{
@@ -364,7 +350,6 @@ export default function AppView() {
               </div>
             </section>
             
-            {/* COMMENTS */}
             <section>
                <Comments contentId={tool.id} />
             </section>

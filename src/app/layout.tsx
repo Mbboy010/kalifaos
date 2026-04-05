@@ -5,7 +5,6 @@ import { Providers } from "@/components/redux/Provider";
 import { ProvCom } from "./ProvCom";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
-import { ThemeProvider } from './providers';
 
 
 
@@ -115,12 +114,9 @@ export default function RootLayout({
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
-         <ThemeProvider >
         <Providers>
           <ProvCom>{children}</ProvCom>
         </Providers>
-        
-        </ThemeProvider>
 
         <SpeedInsights />
       </body>

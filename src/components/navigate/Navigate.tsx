@@ -147,7 +147,7 @@ export default function Navigate() {
                     text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white 
                     ${pathname === link.href ? 'text-blue-600 dark:text-white' : ''}`}
                 >
-                  {isAdminSection && link.icon && link.icon}
+                  {isAdminSection}
                   {link.name}
                   <span className={`absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full ${
                     isAdminSection ? 'bg-red-500' : 'bg-blue-600 dark:bg-cyan-500'
@@ -257,8 +257,34 @@ export default function Navigate() {
                       </p>
                     </div>
                   </div>
+                  
+                  {/* FIXED: Mobile User/Admin Links */}
                   <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-                    <button onClick={handleLogout} className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-slate-800">
+                    {isAdmin ? (
+                      <Link 
+                        href={isAdminSection ? "/" : "/admin"} 
+                        onClick={toggleMenu} 
+                        className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border transition-all ${
+                          isAdminSection 
+                            ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/30' 
+                            : 'bg-orange-50 text-orange-600 border-orange-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/30'
+                        }`}
+                      >
+                        {isAdminSection ? <><Globe size={16} /> Client</> : <><Shield size={16} /> Admin</>}
+                      </Link>
+                    ) : (
+                      <Link 
+                        href="/profile" 
+                        onClick={toggleMenu} 
+                        className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      >
+                        <User size={16} /> Profile
+                      </Link>
+                    )}
+                    <button 
+                      onClick={handleLogout} 
+                      className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-slate-800 dark:hover:text-red-400"
+                    >
                       <LogOut size={16} /> Logout
                     </button>
                   </div>
@@ -274,7 +300,7 @@ export default function Navigate() {
                 className="flex items-center justify-between p-4 rounded-xl border transition-all border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300"
               >
                 <div className="flex items-center gap-3">
-                  <span className={isAdminSection ? 'text-red-500' : 'opacity-50'}>{link.icon || <Terminal size={16} />}</span>
+                  <span className={isAdminSection ? 'text-red-500' : 'opacity-50'}>{<Terminal size={16} />}</span>
                   <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
                 </div>
                 <ChevronRight size={16} className="opacity-50" />

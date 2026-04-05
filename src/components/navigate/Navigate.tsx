@@ -137,7 +137,7 @@ export default function Navigate() {
           <div className="flex justify-between items-center h-20">
             
             {/* --- LOGO --- */}
-            <Link href="/" className="group flex items-center gap-3 relative z-50">
+            <a href="/" className="group flex items-center gap-3 relative z-50">
               <div className={`p-2 rounded-lg border transition-all duration-300 ${
                 isAdminSection
                   ? 'bg-red-500/10 border-red-500/50 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
@@ -153,12 +153,12 @@ export default function Navigate() {
                   {isAdminSection ? 'Admin Console' : 'System v2.0'}
                 </span>
               </div>
-            </Link>
+            </a>
 
             {/* --- DESKTOP NAVIGATION --- */}
             <nav className="hidden md:flex items-center space-x-8">
               {currentLinks.map((link: any) => (
-                <Link
+                <a
                   key={link.name}
                   href={link.href}
                   className={`relative flex items-center gap-2 text-sm font-medium transition-colors duration-200 group py-2 
@@ -170,7 +170,7 @@ export default function Navigate() {
                   <span className={`absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full ${
                     isAdminSection ? 'bg-red-500' : 'bg-blue-600 dark:bg-cyan-500'
                   } ${pathname === link.href ? 'w-full' : ''}`}></span>
-                </Link>
+                </a>
               ))}
             </nav>
 
@@ -198,23 +198,23 @@ export default function Navigate() {
                   <Loader2 size={20} className="animate-spin text-slate-400 dark:text-slate-600" />
                 ) : !user ? (
                   <>
-                    <Link href="/login" className="text-xs font-bold uppercase px-3 py-2 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white">
+                    <a href="/login" className="text-xs font-bold uppercase px-3 py-2 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white">
                       Login
-                    </Link>
-                    <Link href="/register" className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all bg-blue-600 hover:bg-blue-700 text-white dark:bg-cyan-500/10 dark:text-cyan-400 dark:border dark:border-cyan-500/20 dark:hover:bg-cyan-500 dark:hover:text-black">
+                    </a>
+                    <a href="/register" className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all bg-blue-600 hover:bg-blue-700 text-white dark:bg-cyan-500/10 dark:text-cyan-400 dark:border dark:border-cyan-500/20 dark:hover:bg-cyan-500 dark:hover:text-black">
                       <UserPlus size={14} /> Join
-                    </Link>
+                    </a>
                   </>
                 ) : (
                   <div className="flex items-center gap-3">
                     {isAdmin ? (
-                      <Link href={isAdminSection ? "https://kalifaos.site" : "/admin"} className={`p-2 rounded-lg transition-all ${isAdminSection ? 'bg-blue-50 text-blue-600 dark:bg-cyan-500/10 dark:text-cyan-400' : 'bg-orange-50 text-orange-600 dark:bg-red-500/10 dark:text-red-400'}`}>
+                      <a href={isAdminSection ? "https://kalifaos.site" : "/admin"} className={`p-2 rounded-lg transition-all ${isAdminSection ? 'bg-blue-50 text-blue-600 dark:bg-cyan-500/10 dark:text-cyan-400' : 'bg-orange-50 text-orange-600 dark:bg-red-500/10 dark:text-red-400'}`}>
                         {isAdminSection ? <Globe size={18} /> : <Shield size={18} />}
-                      </Link>
+                      </a>
                     ) : (
-                      <Link href="/profile" className="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-cyan-500/10 dark:text-cyan-400">
+                      <a href="/profile" className="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-cyan-500/10 dark:text-cyan-400">
                         <User size={18} />
-                      </Link>
+                      </a>
                     )}
                     <button onClick={handleLogout} className="p-2 rounded-lg text-slate-500 hover:text-red-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-red-400 dark:hover:bg-slate-800">
                       <LogOut size={18} />
@@ -255,12 +255,12 @@ export default function Navigate() {
             <div className="p-5 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30">
               {!user ? (
                 <div className="grid grid-cols-2 gap-3">
-                  <Link href="/login" onClick={toggleMenu} className="flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-xs uppercase border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800">
+                  <a href="/login" onClick={toggleMenu} className="flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-xs uppercase border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800">
                     <LogIn size={16} /> Login
-                  </Link>
-                  <Link href="/register" onClick={toggleMenu} className="flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-xs uppercase bg-blue-600 dark:bg-cyan-500 text-white dark:text-black">
+                  </a>
+                  <a href="/register" onClick={toggleMenu} className="flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-xs uppercase bg-blue-600 dark:bg-cyan-500 text-white dark:text-black">
                     <UserPlus size={16} /> Join
-                  </Link>
+                  </a>
                 </div>
               ) : (
                 <div className="flex flex-col gap-5">
@@ -279,7 +279,7 @@ export default function Navigate() {
                   {/* Mobile User/Admin Links */}
                   <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                     {isAdmin ? (
-                      <Link 
+                      <a 
                         href={isAdminSection ? "https://kalifaos.site" : "/admin"} 
                         onClick={toggleMenu} 
                         className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border transition-all ${
@@ -289,15 +289,15 @@ export default function Navigate() {
                         }`}
                       >
                         {isAdminSection ? <><Globe size={16} /> Client</> : <><Shield size={16} /> Admin</>}
-                      </Link>
+                      </a>
                     ) : (
-                      <Link 
+                      <a 
                         href="/profile" 
                         onClick={toggleMenu} 
                         className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                       >
                         <User size={16} /> Profile
-                      </Link>
+                      </a>
                     )}
                     <button 
                       onClick={handleLogout} 
@@ -312,7 +312,7 @@ export default function Navigate() {
 
             {/* Mobile Menu Main Links */}
             {currentLinks.map((link: any, index) => (
-              <Link
+              <a
                 key={index}
                 href={link.href}
                 onClick={toggleMenu}
@@ -325,7 +325,7 @@ export default function Navigate() {
                   <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
                 </div>
                 <ChevronRight size={16} className="opacity-50" />
-              </Link>
+              </a>
             ))}
 
             <div className="pt-4 space-y-3">

@@ -38,7 +38,7 @@ export function ProvCom({ children }: { children: React.ReactNode }) {
         darkMode ? "bg-[#121212] text-white" : "bg-gray-100 text-gray-800"
       }`}
     >
-      <Navigate setDarkMode={setDarkMode} darkMode={darkMode} />
+      <Navigate/>
       <RouteTracker />
       {children}
       <ScrollToTopHandler />

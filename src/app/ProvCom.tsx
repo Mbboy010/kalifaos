@@ -15,7 +15,7 @@ export function ProvCom({ children }: { children: React.ReactNode }) {
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window === "undefined") return true; // Default to dark on server uuid
     const savedTheme = localStorage.getItem("theme");
-    return savedTheme ? savedTheme === "dark" : true; // Default to dark if no theme saved
+    return savedTheme ? savedTheme === "dark" : true; // Default to dark if no theme saved uuid
   });
 
   useEffect(() => {

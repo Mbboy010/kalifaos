@@ -127,7 +127,7 @@ export default function Navigate() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b ${
+        className={`fixed bg-white/90 dark:bg-[#050505]/90 top-0 left-0 w-full z-50 transition-all duration-300 border-b ${
           scrolled || isAdminSection
             ? 'bg-white/90 dark:bg-[#050505]/90 backdrop-blur-xl border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)]' 
             : 'bg-transparent border-transparent'
@@ -149,7 +149,7 @@ export default function Navigate() {
                 <span className="font-bold text-xl tracking-tight leading-none text-slate-900 dark:text-white">
                   KALIFA<span className={isAdminSection ? 'text-red-500' : 'text-blue-600 dark:text-cyan-500'}>OS</span>
                 </span>
-                <span className="text-[10px] font-mono opacity-50 tracking-widest uppercase">
+                <span className="text-[10px] font-mono opacity-50 tracking-widest text-black dark:text-gray-100 uppercase">
                   {isAdminSection ? 'Admin Console' : 'System v2.0'}
                 </span>
               </div>

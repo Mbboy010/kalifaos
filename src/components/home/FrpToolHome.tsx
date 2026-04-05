@@ -97,13 +97,13 @@ export default function FrpToolHome() {
         </h1>
 
         {/* Phone Mockup */}
-        <div className="relative w-[360px] h-[460px] flex justify-center mb-8 drop-shadow-2xl hover:scale-[1.02] transition-transform duration-700">
+        <div className="relative w-[360px] h-[460px] flex justify-center mb-8  hover:scale-[1.02] transition-transform duration-700">
           
           {/* Power Button Hardware Accent */}
           <div className="absolute right-[11px] top-[140px] w-[4px] h-[50px] bg-[#81c995] rounded-r-md shadow-sm z-0" />
           
           {/* Phone Hardware Body */}
-          <div className="relative w-[330px] h-full bg-[#111] rounded-t-[2.5rem] border-[4px] border-b-0 border-slate-800 overflow-hidden flex flex-col z-10 ">
+          <div className="relative w-[330px] h-full bg-[#111] rounded-t-[2.5rem] border-[4px] border-b-0 border-slate-800 overflow-hidden flex flex-col z-10 shadow-2xl">
             
             <div className="h-[72px] w-full shrink-0 relative flex items-center">
               <div className="absolute left-[22%] flex gap-5">

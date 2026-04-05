@@ -115,12 +115,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
-         <ThemeProvider 
-          attribute="class" 
-          defaultTheme="system" 
-          enableSystem 
-          disableTransitionOnChange
-        >
+         <ThemeProvider >
         <Providers>
           <ProvCom>{children}</ProvCom>
         </Providers>

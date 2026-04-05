@@ -5,6 +5,9 @@ import { Providers } from "@/components/redux/Provider";
 import { ProvCom } from "./ProvCom";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
+import { ThemeProvider } from './providers';
+
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -112,10 +115,17 @@ export default function RootLayout({
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
-
+         <ThemeProvider 
+          attribute="class" 
+          defaultTheme="system" 
+          enableSystem 
+          disableTransitionOnChange
+        >
         <Providers>
           <ProvCom>{children}</ProvCom>
         </Providers>
+        
+        </ThemeProvider>
 
         <SpeedInsights />
       </body>

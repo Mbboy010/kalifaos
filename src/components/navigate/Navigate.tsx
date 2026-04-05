@@ -26,7 +26,7 @@ import {
 
 export default function Navigate() {
   const dispatch = useAppDispatch();
-  const chat = useAppSelector((state) => state.chatCheck.value);
+  const chat = useAppSelector((state) => state.chatCheck.value); // chat acts as mobile menu toggle
   
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -40,6 +40,7 @@ export default function Navigate() {
   const [scrolled, setScrolled] = useState(false);
   const [isAdminSection, setIsAdminSection] = useState(false);
 
+  // Determine if we are in admin section
   useEffect(() => {
     setMounted(true);
     if (typeof window !== 'undefined') {
@@ -48,6 +49,7 @@ export default function Navigate() {
     }
   }, [pathname]);
 
+  // Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
@@ -67,11 +69,27 @@ export default function Navigate() {
     return () => unsubscribe();
   }, []);
 
+  // Scroll listener for Navbar background
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // --- NEW: Block Body Scroll when Menu or Search is Open ---
+  useEffect(() => {
+    if (chat || searchOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    // Cleanup on unmount to ensure scrolling is restored
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [chat, searchOpen]);
+  // ----------------------------------------------------------
 
   if (!mounted) return <div className="h-20 w-full" />;
 
@@ -147,7 +165,7 @@ export default function Navigate() {
                     text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white 
                     ${pathname === link.href ? 'text-blue-600 dark:text-white' : ''}`}
                 >
-                  {isAdminSection}
+                  {isAdminSection} 
                   {link.name}
                   <span className={`absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full ${
                     isAdminSection ? 'bg-red-500' : 'bg-blue-600 dark:bg-cyan-500'
@@ -190,7 +208,7 @@ export default function Navigate() {
                 ) : (
                   <div className="flex items-center gap-3">
                     {isAdmin ? (
-                      <Link href={isAdminSection ? "/" : "/admin"} className={`p-2 rounded-lg transition-all ${isAdminSection ? 'bg-blue-50 text-blue-600 dark:bg-cyan-500/10 dark:text-cyan-400' : 'bg-orange-50 text-orange-600 dark:bg-red-500/10 dark:text-red-400'}`}>
+                      <Link href={isAdminSection ? "https://kalifaos.site" : "/admin"} className={`p-2 rounded-lg transition-all ${isAdminSection ? 'bg-blue-50 text-blue-600 dark:bg-cyan-500/10 dark:text-cyan-400' : 'bg-orange-50 text-orange-600 dark:bg-red-500/10 dark:text-red-400'}`}>
                         {isAdminSection ? <Globe size={18} /> : <Shield size={18} />}
                       </Link>
                     ) : (
@@ -206,7 +224,7 @@ export default function Navigate() {
               </div>
 
               {/* Mobile Menu Button */}
-              <div className="md:hidden">
+              <div className="md:hidden relative z-50">
                 <button 
                   onClick={toggleMenu}
                   className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 transition-all"
@@ -221,15 +239,15 @@ export default function Navigate() {
         {/* --- SEARCH BAR --- */}
         {!isAdminSection && (
           <div className={`overflow-hidden transition-[max-height] duration-500 ease-in-out bg-white dark:bg-[#0a0a0a] ${
-            searchOpen ? 'max-h-96 border-b border-slate-800/50' : 'max-h-0'
+            searchOpen ? 'max-h-96 border-b border-slate-800/50 shadow-xl' : 'max-h-0'
           }`}>
             <SearchBar open={searchOpen} onClose={() => setSearchOpen(false)} />
           </div>
         )}
 
         {/* --- MOBILE MENU --- */}
-        <div className={`md:hidden overflow-y-auto transition-all duration-300 ease-in-out bg-white dark:bg-[#0a0a0a] ${
-          chat ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+        <div className={`md:hidden overflow-y-auto transition-all duration-300 ease-in-out bg-white dark:bg-[#0a0a0a] fixed left-0 w-full ${
+          chat ? 'top-20 opacity-100' : '-top-[100vh] opacity-0 pointer-events-none'
         }`} style={{ height: 'calc(100vh - 80px)' }}>
           
           <div className="container mx-auto px-6 py-8 space-y-4 pb-24">
@@ -258,11 +276,11 @@ export default function Navigate() {
                     </div>
                   </div>
                   
-                  {/* FIXED: Mobile User/Admin Links */}
+                  {/* Mobile User/Admin Links */}
                   <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                     {isAdmin ? (
                       <Link 
-                        href={isAdminSection ? "/" : "/admin"} 
+                        href={isAdminSection ? "https://kalifaos.site" : "/admin"} 
                         onClick={toggleMenu} 
                         className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border transition-all ${
                           isAdminSection 
@@ -292,6 +310,7 @@ export default function Navigate() {
               )}
             </div>
 
+            {/* Mobile Menu Main Links */}
             {currentLinks.map((link: any, index) => (
               <Link
                 key={index}
@@ -300,7 +319,9 @@ export default function Navigate() {
                 className="flex items-center justify-between p-4 rounded-xl border transition-all border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300"
               >
                 <div className="flex items-center gap-3">
-                  <span className={isAdminSection ? 'text-red-500' : 'opacity-50'}>{<Terminal size={16} />}</span>
+                  <span className={isAdminSection ? 'text-red-500' : 'opacity-50'}>
+                    {<Terminal size={16} />}
+                  </span>
                   <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
                 </div>
                 <ChevronRight size={16} className="opacity-50" />

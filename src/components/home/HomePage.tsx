@@ -1,20 +1,31 @@
-// app/components/home/HomePage.tsx
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useTheme } from 'next-themes';
+import Link from 'next/link';
+import Image from 'next/image';
+
+// Components
 import YouTubeVideos from './YouTubeVideos';
 import WindowsBypassTools from '../window/WindowsBypassTools';
 import FrpLanding from './FrpLanding';
-import { Smartphone, Shield, Zap, HelpCircle, Terminal, Cpu, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useAppSelector } from '../redux/hooks';
-import { useState } from 'react';
-import FrpToolHome from "./FrpToolHome"
+import FrpToolHome from "./FrpToolHome";
+
+// Icons
+import { 
+  Smartphone, Shield, Zap, HelpCircle, 
+  Terminal, Cpu, ChevronRight 
+} from 'lucide-react';
 
 export default function HomePage() {
-  // Logic Update: isColor = true (Dark Mode), isColor = false (Light Mode)
-  const isColor = useAppSelector((state) => state.color.value);
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [selectedPrice, setSelectedPrice] = useState<string>('');
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handlePrice = (price: string, name: string): void => {
     setSelectedPrice(price);
@@ -24,69 +35,60 @@ export default function HomePage() {
     window.open(url, '_blank');
   };
 
+  if (!mounted) return null;
+
+  const isDark = resolvedTheme === 'dark';
+
   return (
-    <div className={`min-h-screen font-sans selection:bg-cyan-500/30 transition-colors duration-300 ${
-      isColor ? 'bg-[#0a0a0a] text-slate-200' : 'bg-slate-50 text-slate-900'
-    }`}>
+    <div className="min-h-screen font-sans transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-[#0a0a0a] dark:text-slate-200 selection:bg-blue-200 dark:selection:bg-cyan-500/30">
       
       {/* --- HERO SECTION --- */}
       <section className="relative pt-10 pb-20 overflow-hidden">
         {/* Background Grid Effect */}
-        <div className="absolute inset-0 z-0 opacity-20 pointer-events-none" 
-             style={{ 
-               backgroundImage: `radial-gradient(${isColor ? '#06b6d4' : '#2563eb'} 1px, transparent 1px)`, 
-               backgroundSize: '40px 40px' 
-             }}>
-        </div>
+        <div 
+          className="absolute inset-0 z-0 opacity-20 pointer-events-none" 
+          style={{ 
+            backgroundImage: `radial-gradient(${isDark ? '#06b6d4' : '#2563eb'} 1px, transparent 1px)`, 
+            backgroundSize: '40px 40px' 
+          }}
+        />
 
         <div className="container max-w-7xl mx-auto px-4 relative z-10 text-center">
-          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-mono mb-6 animate-pulse ${
-            isColor ? 'border-cyan-500/30 bg-cyan-950/20 text-cyan-400' : 'border-blue-200 bg-blue-50 text-blue-600'
-          }`}>
-            <span className={`w-2 h-2 rounded-full ${isColor ? 'bg-cyan-500' : 'bg-blue-600'}`}></span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-mono mb-6 animate-pulse border-blue-200 bg-blue-50 text-blue-600 dark:border-cyan-500/30 dark:bg-cyan-950/20 dark:text-cyan-400">
+            <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-cyan-500"></span>
             SYSTEM ONLINE: KALIFAOS v2.0
           </div>
           
-          <h1 className={`text-5xl md:text-7xl font-bold tracking-tight mb-6 ${isColor ? 'text-white' : 'text-slate-900'}`}>
-            Root. Flash. <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">Unlock.</span>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 text-slate-900 dark:text-white">
+            Root. Flash. <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-cyan-400 dark:to-blue-600">Unlock.</span>
           </h1>
           
-          <p className={`text-xl mb-10 max-w-2xl mx-auto font-light leading-relaxed ${isColor ? 'text-slate-400' : 'text-slate-600'}`}>
+          <p className="text-xl mb-10 max-w-2xl mx-auto font-light leading-relaxed text-slate-600 dark:text-slate-400">
             Advanced mobile diagnostics and firmware solutions. Bypass FRP, unlock bootloaders, and restore devices with professional-grade tools.
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link
               href="/tools-access"
-              className={`group relative px-8 py-4 font-bold rounded-xl overflow-hidden transition-all flex items-center justify-center gap-2 ${
-                isColor 
-                  ? 'bg-cyan-600 text-white hover:bg-cyan-500 hover:shadow-[0_0_20px_rgba(6,182,212,0.5)]' 
-                  : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200'
-              }`}
+              className="group relative px-8 py-4 font-bold rounded-xl overflow-hidden transition-all flex items-center justify-center gap-2 bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200 dark:bg-cyan-600 dark:hover:bg-cyan-500 dark:hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] dark:shadow-none"
             >
               <Terminal size={20} /> Initialize Tools
             </Link>
             
             <Link
               href="/docs"
-              className={`px-8 py-4 border rounded-xl transition-all flex items-center justify-center gap-2 font-medium ${
-                isColor
-                  ? 'border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white'
-                  : 'border-slate-300 text-slate-700 hover:bg-white hover:border-slate-400 hover:shadow-sm'
-              }`}
+              className="px-8 py-4 border rounded-xl transition-all flex items-center justify-center gap-2 font-medium border-slate-300 text-slate-700 hover:bg-white hover:border-slate-400 hover:shadow-sm dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
             >
               <Cpu size={20} /> View Documentation
             </Link>
           </div>
 
-          {/* Hero Image / Dashboard Preview */}
-          <div className={`mt-16 relative mx-auto max-w-5xl rounded-xl border p-2 shadow-2xl backdrop-blur-sm ${
-            isColor ? 'border-slate-800 bg-slate-900/50' : 'border-slate-200 bg-white/50'
-          }`}>
-            <div className={`absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent ${!isColor && 'hidden'}`}></div>
+          {/* Hero Image */}
+          <div className="mt-16 relative mx-auto max-w-5xl rounded-xl border p-2 shadow-2xl backdrop-blur-sm border-slate-200 bg-white/50 dark:border-slate-800 dark:bg-slate-900/50">
+            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500/50 dark:via-cyan-500/50 to-transparent" />
             <Image
               src="/Bypass.jpg"
-              alt="Kalifaos Dashboard Interface"
+              alt="Dashboard Interface"
               width={1200}
               height={675}
               className="rounded-lg opacity-90"
@@ -96,47 +98,39 @@ export default function HomePage() {
         </div>
       </section>
 
-
-      <section className={` ${isColor ? 'bg-gradient-to-b from-[#0a0a0a] to-slate-900' : 'bg-slate-50'}`}>
+      <section className="bg-slate-50 dark:bg-gradient-to-b dark:from-[#0a0a0a] dark:to-slate-900">
         <WindowsBypassTools />
-       </section> 
+      </section> 
 
-      {/* --- CORE TOOLS COMPONENTS --- */}
+      {/* --- CORE TOOLS --- */}
       <div className="relative z-20 -mt-10 pt-10">
         <FrpLanding />
         <FrpToolHome />
       </div>
 
+      <div className="container max-w-7xl mx-auto px-4 relative z-10 text-center">
+        <div className="mt-16 relative mx-auto max-w-5xl rounded-xl border p-2 shadow-2xl backdrop-blur-sm border-slate-200 bg-white/50 dark:border-slate-800 dark:bg-slate-900/50">
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500/50 dark:via-cyan-500/50 to-transparent" />
+          <Image
+            src="/W.png"
+            alt="Windows Bypass Tools"
+            width={1200}
+            height={675}
+            className="rounded-lg opacity-90"
+          />
+        </div>
+      </div>
       
-    <div className="container max-w-7xl mx-auto px-4 relative z-10 text-center">
-      <div className={`mt-16 relative mx-auto max-w-5xl rounded-xl border p-2 shadow-2xl backdrop-blur-sm ${
-            isColor ? 'border-slate-800 bg-slate-900/50' : 'border-slate-200 bg-white/50'
-          }`}>
-            <div className={`absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent ${!isColor && 'hidden'}`}></div>
-            <Image
-              src="/W.png"
-              alt="Kalifaos WindowsBypassTools"
-              width={1200}
-              height={675}
-              className="rounded-lg opacity-90"
-              priority
-            />
-          </div>
-       </div>
-      
-      
-     {/* --- VIDEO FEED --- */}
       <div className="py-20">
         <YouTubeVideos />
       </div>
-      
 
       {/* --- FEATURES GRID --- */}
       <section id="features" className="py-24 relative">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${isColor ? 'text-white' : 'text-slate-900'}`}>System Capabilities</h2>
-            <div className={`h-1 w-20 mx-auto rounded-full ${isColor ? 'bg-cyan-600' : 'bg-blue-600'}`}></div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-900 dark:text-white">System Capabilities</h2>
+            <div className="h-1 w-20 mx-auto rounded-full bg-blue-600 dark:bg-cyan-600"></div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -147,39 +141,28 @@ export default function HomePage() {
             ].map((feature, index) => (
               <div
                 key={index}
-                className={`group p-8 rounded-2xl border transition-all duration-300 relative overflow-hidden ${
-                  isColor 
-                    ? 'border-slate-800 bg-slate-900/50 hover:bg-slate-800/80 hover:border-cyan-500/30' 
-                    : 'border-slate-200 bg-white hover:shadow-xl hover:border-blue-200'
-                }`}
+                className="group p-8 rounded-2xl border transition-all duration-300 relative overflow-hidden border-slate-200 bg-white hover:shadow-xl hover:border-blue-200 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:bg-slate-800/80 dark:hover:border-cyan-500/30"
               >
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                   {feature.icon}
                 </div>
-                <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform ${
-                  isColor ? 'bg-slate-800 text-cyan-400' : 'bg-blue-50 text-blue-600'
-                }`}>
+                <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform bg-blue-50 text-blue-600 dark:bg-slate-800 dark:text-cyan-400">
                   {feature.icon}
                 </div>
-                <h3 className={`text-xl font-bold mb-3 ${isColor ? 'text-white' : 'text-slate-900'}`}>{feature.title}</h3>
-                <p className={`leading-relaxed ${isColor ? 'text-slate-400' : 'text-slate-600'}`}>{feature.desc}</p>
+                <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-white">{feature.title}</h3>
+                <p className="leading-relaxed text-slate-600 dark:text-slate-400">{feature.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* --- HOW IT WORKS (Timeline Style) --- */}
-      <section className={`py-24 border-y ${
-        isColor ? 'bg-slate-900/30 border-slate-800' : 'bg-slate-100 border-slate-200'
-      }`}>
+      {/* --- EXECUTION SEQUENCE --- */}
+      <section className="py-24 border-y bg-slate-100 border-slate-200 dark:bg-slate-900/30 dark:border-slate-800">
         <div className="max-w-5xl mx-auto px-4">
-          <h2 className={`text-3xl font-bold text-center mb-16 ${isColor ? 'text-white' : 'text-slate-900'}`}>Execution Sequence</h2>
+          <h2 className="text-3xl font-bold text-center mb-16 text-slate-900 dark:text-white">Execution Sequence</h2>
           <div className="relative">
-             {/* Connector Line */}
-            <div className={`hidden md:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0 ${
-              isColor ? 'bg-slate-800' : 'bg-slate-300'
-            }`}></div>
+            <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0 bg-slate-300 dark:bg-slate-800" />
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
               {[
@@ -187,20 +170,12 @@ export default function HomePage() {
                 { step: '02', title: 'Processing', desc: 'Server validates & generates token.' },
                 { step: '03', title: 'Unlock', desc: 'Receive code via secure channel.' },
               ].map((item, index) => (
-                <div key={index} className={`p-6 rounded-xl border text-center shadow-xl ${
-                  isColor 
-                    ? 'bg-[#0a0a0a] border-slate-800' 
-                    : 'bg-white border-slate-200'
-                }`}>
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-mono font-bold text-lg mx-auto mb-4 border ${
-                    isColor 
-                      ? 'bg-cyan-900/20 text-cyan-400 border-cyan-500/20' 
-                      : 'bg-blue-50 text-blue-600 border-blue-100'
-                  }`}>
+                <div key={index} className="p-6 rounded-xl border text-center shadow-xl bg-white border-slate-200 dark:bg-[#0a0a0a] dark:border-slate-800">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center font-mono font-bold text-lg mx-auto mb-4 border bg-blue-50 text-blue-600 border-blue-100 dark:bg-cyan-900/20 dark:text-cyan-400 dark:border-cyan-500/20">
                     {item.step}
                   </div>
-                  <h3 className={`text-lg font-bold mb-2 ${isColor ? 'text-white' : 'text-slate-900'}`}>{item.title}</h3>
-                  <p className={`text-sm ${isColor ? 'text-slate-500' : 'text-slate-600'}`}>{item.desc}</p>
+                  <h3 className="text-lg font-bold mb-2 text-slate-900 dark:text-white">{item.title}</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-500">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -208,12 +183,10 @@ export default function HomePage() {
         </div>
       </section>
 
-
-
       {/* --- FAQ SECTION --- */}
-      <section className={`py-20 ${isColor ? 'bg-slate-900/20' : 'bg-slate-50'}`}>
+      <section className="py-20 bg-slate-50 dark:bg-slate-900/20">
         <div className="max-w-3xl mx-auto px-4">
-          <h2 className={`text-2xl font-bold text-center mb-10 font-mono ${isColor ? 'text-white' : 'text-slate-900'}`}>
+          <h2 className="text-2xl font-bold text-center mb-10 font-mono text-slate-900 dark:text-white">
             /var/log/faq
           </h2>
           <div className="space-y-4">
@@ -222,24 +195,17 @@ export default function HomePage() {
               { question: 'Do I need a PC?', answer: 'Most tools require a Windows PC, but we offer some APKs for direct mobile use.' },
               { question: 'Is it safe?', answer: 'Our tools operate in a sandbox environment to ensure zero risk to your hardware.' },
             ].map((faq, index) => (
-              <div key={index} className={`border rounded-lg p-5 ${
-                isColor 
-                  ? 'bg-[#0f0f0f] border-slate-800 text-slate-200' 
-                  : 'bg-white border-slate-200 text-slate-800 shadow-sm'
-              }`}>
+              <div key={index} className="border rounded-lg p-5 bg-white border-slate-200 text-slate-800 shadow-sm dark:bg-[#0f0f0f] dark:border-slate-800 dark:text-slate-200 dark:shadow-none">
                 <div className="flex items-center font-medium mb-2">
-                  <HelpCircle className={`w-5 h-5 mr-3 ${isColor ? 'text-cyan-500' : 'text-blue-600'}`} />
+                  <HelpCircle className="w-5 h-5 mr-3 text-blue-600 dark:text-cyan-500" />
                   {faq.question}
                 </div>
-                <p className={`text-sm pl-8 leading-relaxed ${isColor ? 'text-slate-500' : 'text-slate-600'}`}>{faq.answer}</p>
+                <p className="text-sm pl-8 leading-relaxed text-slate-600 dark:text-slate-500">{faq.answer}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
-
-
-
     </div>
   );
 }

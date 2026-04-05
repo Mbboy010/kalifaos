@@ -1,10 +1,9 @@
-// app/components/videos/YouTubeVideos.tsx
 'use client';
 
-import { Youtube, Play, Monitor, Signal, Disc } from 'lucide-react';
-import { useAppSelector } from '../redux/hooks';
-import Iframe from 'react-iframe';
 import { useState, useEffect } from 'react';
+import { useTheme } from 'next-themes';
+import { Youtube, Play, Monitor, Signal, Disc } from 'lucide-react';
+import Iframe from 'react-iframe';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/server/firebaseApi';
 
@@ -35,10 +34,30 @@ function convertToEmbedUrl(link: string): string {
   }
 }
 
+// Cyber Skeleton Loader (Now uses pure Tailwind dark mode classes)
+const VideoSkeleton = () => (
+  <div className="rounded-xl overflow-hidden border bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+    <div className="aspect-video bg-gray-800/50 relative flex items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-[shimmer_1s_infinite]"></div>
+      <Signal className="w-10 h-10 text-slate-700 animate-pulse" />
+    </div>
+    <div className="p-4 space-y-2">
+      <div className="h-4 w-3/4 rounded bg-slate-100 dark:bg-slate-800"></div>
+      <div className="h-3 w-1/2 rounded bg-slate-100 dark:bg-slate-800"></div>
+    </div>
+  </div>
+);
+
 export default function YouTubeVideos() {
-  const isColor = useAppSelector((state) => state.color.value);
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -67,43 +86,23 @@ export default function YouTubeVideos() {
     fetchVideos();
   }, []);
 
-  // Cyber Skeleton Loader
-  const VideoSkeleton = () => (
-    <div className={`rounded-xl overflow-hidden border ${
-      isColor ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
-    }`}>
-      <div className="aspect-video bg-gray-800/50 relative flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-[shimmer_1s_infinite]"></div>
-        <Signal className="w-10 h-10 text-slate-700 animate-pulse" />
-      </div>
-      <div className="p-4 space-y-2">
-        <div className={`h-4 w-3/4 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
-        <div className={`h-3 w-1/2 rounded ${isColor ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
-      </div>
-    </div>
-  );
+  if (!mounted) return null;
 
   return (
-    <div className={`w-full py-16 px-4 transition-colors duration-300 ${
-      isColor ? 'bg-[#0a0a0a] text-slate-200' : 'bg-slate-50 text-slate-900'
-    }`}>
+    <div className="w-full py-16 px-4 transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-[#0a0a0a] dark:text-slate-200">
       
       {/* --- HEADER --- */}
       <div className="max-w-6xl mx-auto mb-12 text-center">
-        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-4 ${
-          isColor ? 'bg-red-900/20 text-red-500 border border-red-900/50' : 'bg-red-100 text-red-600 border border-red-200'
-        }`}>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-4 bg-red-100 text-red-600 border border-red-200 dark:bg-red-900/20 dark:text-red-500 dark:border-red-900/50">
           <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
           Live Feed
         </div>
         
-        <h2 className={`text-3xl md:text-5xl font-bold mb-4 flex items-center justify-center gap-3 ${
-          isColor ? 'text-white' : 'text-slate-900'
-        }`}>
-          <Monitor className={`hidden md:block ${isColor ? 'text-slate-700' : 'text-slate-300'}`} />
+        <h2 className="text-3xl md:text-5xl font-bold mb-4 flex items-center justify-center gap-3 text-slate-900 dark:text-white">
+          <Monitor className="hidden md:block text-slate-300 dark:text-slate-700" />
           Tutorial <span className="text-red-600">Database</span>
         </h2>
-        <p className={`text-lg max-w-2xl mx-auto ${isColor ? 'text-slate-400' : 'text-slate-600'}`}>
+        <p className="text-lg max-w-2xl mx-auto text-slate-600 dark:text-slate-400">
           Visual guides for complex FRP bypass operations and firmware flashing.
         </p>
       </div>
@@ -118,11 +117,7 @@ export default function YouTubeVideos() {
           videos.map((video) => (
             <div
               key={video.id}
-              className={`group relative rounded-xl overflow-hidden border transition-all duration-300 hover:shadow-2xl ${
-                isColor 
-                  ? 'bg-slate-900 border-slate-800 hover:border-red-500/50 hover:shadow-[0_0_30px_rgba(239,68,68,0.15)]' 
-                  : 'bg-white border-slate-200 hover:border-red-400 shadow-lg'
-              }`}
+              className="group relative rounded-xl overflow-hidden border transition-all duration-300 shadow-lg bg-white border-slate-200 hover:border-red-400 dark:bg-slate-900 dark:border-slate-800 dark:hover:border-red-500/50 dark:hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] dark:shadow-none"
             >
               {/* Monitor Interface Overlay (Top Bar) */}
               <div className="absolute top-0 left-0 right-0 z-10 flex justify-between px-3 py-2 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
@@ -148,20 +143,14 @@ export default function YouTubeVideos() {
               {/* Meta Data */}
               <div className="p-5 relative overflow-hidden">
                 {/* Decorative background line */}
-                <div className={`absolute bottom-0 left-0 h-1 w-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left ${
-                  isColor ? 'bg-gradient-to-r from-red-600 to-red-900' : 'bg-red-500'
-                }`}></div>
+                <div className="absolute bottom-0 left-0 h-1 w-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left bg-red-500 dark:bg-gradient-to-r dark:from-red-600 dark:to-red-900"></div>
 
                 <div className="flex items-start gap-4">
-                   <div className={`p-2 rounded-lg mt-1 ${
-                      isColor ? 'bg-slate-800 text-red-500' : 'bg-red-50 text-red-600'
-                   }`}>
+                   <div className="p-2 rounded-lg mt-1 bg-red-50 text-red-600 dark:bg-slate-800 dark:text-red-500">
                       <Youtube size={20} />
                    </div>
                    <div>
-                      <h3 className={`font-bold leading-tight mb-2 line-clamp-2 ${
-                        isColor ? 'text-slate-100 group-hover:text-red-400' : 'text-slate-900 group-hover:text-red-600'
-                      }`}>
+                      <h3 className="font-bold leading-tight mb-2 line-clamp-2 text-slate-900 group-hover:text-red-600 dark:text-slate-100 dark:group-hover:text-red-400">
                         {video.title}
                       </h3>
                       <div className="flex items-center gap-2 text-xs font-mono opacity-60">
@@ -180,11 +169,10 @@ export default function YouTubeVideos() {
       <div className="mt-12 flex justify-center opacity-30">
         <div className="flex gap-2">
            {[...Array(5)].map((_, i) => (
-              <div key={i} className={`w-1 h-1 rounded-full ${isColor ? 'bg-red-500' : 'bg-slate-400'}`}></div>
+              <div key={i} className="w-1 h-1 rounded-full bg-slate-400 dark:bg-red-500"></div>
            ))}
         </div>
       </div>
     </div>
   );
 }
-

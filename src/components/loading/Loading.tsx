@@ -21,7 +21,7 @@ export default function Loading() {
   }, [pathname]);
 
   return (
-    <div className="flex dark:bg-[#0a0a0a] justify-center  items-center w-full h-[85vh]">
+    <div className="flex dark:bg-[#0a0a0a]  justify-center bg-white items-center w-full h-[85vh]">
       <OrbitingDotsSpinner />
     </div>
   );

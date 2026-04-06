@@ -1,360 +1,232 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
-import { useTheme } from 'next-themes'; // Added next-themes
-import { useAppSelector, useAppDispatch } from '../redux/hooks';
-import { setChat } from '../redux/slicer/CheckChat';
-
-// UI Components
-import Toggle from './Toggle';
-import SearchBar from './SearchBar';
-
-// Firebase Logic
-import { auth, db } from '@/server/firebaseApi';
-import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { logoutUser } from '@/server/firebaseApi';
-
-// Icons
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/server/firebaseApi";
 import { 
-  Unlock, Menu, X, Search, Terminal, ChevronRight, 
-  User, LogIn, LogOut, Shield, UserPlus, Settings, Loader2,
-  Users, HardDrive, Monitor, Youtube, MessageSquare, Globe
-} from 'lucide-react';
+  Download, 
+  HardDrive, 
+  Smartphone, 
+  Search, 
+  Terminal, 
+  ChevronRight, 
+  FileCode, 
+  Loader2,
+  FolderOpen
+} from "lucide-react";
 
-// Removed darkMode props from interface
-export default function Navigate() {
-  const dispatch = useAppDispatch();
-  const chat = useAppSelector((state) => state.chatCheck.value);
-  
-  // Next-Themes Integration
-  const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  
-  // Direct Firebase Auth State
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
-  
-  const pathname = usePathname();
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [isAdminSection, setIsAdminSection] = useState(false);
+interface Tool {
+  id: string;
+  title: string;
+  image: string; // Windows tools use this
+  link?: string; // Mobile tools use this
+}
 
-  // Handle Mounting to prevent hydration mismatch
+export default function SearchCon() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [activeTab, setActiveTab] = useState<"windows" | "mobile">("windows");
+  const [query, setQuery] = useState<string>("");
+
+  const [windowsTools, setWindowsTools] = useState<Tool[]>([]);
+  const [mobileTools, setMobileTools] = useState<Tool[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // --- FETCH DATA ---
   useEffect(() => {
-    setMounted(true);
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      setIsAdminSection(hostname.startsWith('admin.') || pathname.startsWith('/admin'));
-    }
-  }, [pathname]);
+    const fetchTools = async () => {
+      setLoading(true);
+      try {
+        const [windowsSnap, mobileSnap] = await Promise.all([
+          getDocs(collection(db, "Windows-tools")),
+          getDocs(collection(db, "download")),
+        ]);
 
-  // Derived theme state
-  const isDark = resolvedTheme === 'dark';
+        const winTools = windowsSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Tool[];
 
-  // Listen to Firebase Auth
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        try {
-          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-          setIsAdmin(userDoc.exists() && userDoc.data().role === 'admin');
-        } catch (error) {
-          setIsAdmin(false);
-        }
-      } else {
-        setUser(null);
-        setIsAdmin(false);
+        const mobTools = mobileSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Tool[];
+
+        setWindowsTools(winTools);
+        setMobileTools(mobTools);
+      } catch (error) {
+        console.error("System Error: Database Unreachable", error);
+      } finally {
+        setLoading(false);
       }
-      setIsAuthLoading(false);
-    });
-    return () => unsubscribe();
+    };
+
+    fetchTools();
   }, []);
 
+  // --- SYNC URL PARAMS ---
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    const type = searchParams.get("type");
+    const q = searchParams.get("query") || "";
+    if (type === "mobile") setActiveTab("mobile");
+    else setActiveTab("windows");
+    setQuery(q);
+  }, [searchParams]);
 
-  if (!mounted) return <div className="h-20 w-full" />; // Prevent layout shift
-
-  const toggleMenu = () => {
-    if (searchOpen) setSearchOpen(false);
-    dispatch(setChat(!chat));
+  const handleTabChange = (tab: "windows" | "mobile") => {
+    setActiveTab(tab);
+    const params = new URLSearchParams();
+    if (query) params.set("query", query);
+    params.set("type", tab);
+    router.push(`?${params.toString()}`);
   };
 
-  const toggleSearch = () => {
-    if (chat) dispatch(setChat(false));
-    setSearchOpen(!searchOpen);
-  };
+  const results = (activeTab === "windows" ? windowsTools : mobileTools).filter(
+    (item) => item.title.toLowerCase().includes(query.toLowerCase())
+  );
 
-  const handleLogout = async () => {
-    try {
-      await logoutUser();
-      if (chat) dispatch(setChat(false));
-      window.location.href = '/';
-    } catch (error) {
-      console.error("Logout failed:", error);
+  // --- SWIPE GESTURES ---
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  const handleTouchStart = (e: React.TouchEvent) => { touchStartX = e.changedTouches[0].clientX; };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    touchEndX = e.changedTouches[0].clientX;
+    const swipeDistance = touchEndX - touchStartX;
+    if (Math.abs(swipeDistance) > 50) {
+      if (swipeDistance < 0 && activeTab === "windows") handleTabChange("mobile");
+      else if (swipeDistance > 0 && activeTab === "mobile") handleTabChange("windows");
     }
   };
 
-  const handleVisitClient = () => {
-    const isProd = process.env.NODE_ENV === 'production';
-    window.location.href = isProd ? 'https://kalifaos.site' : 'http://localhost:3000';
-  };
-
-  const publicLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'FRP APKS', href: '/frp-tools-apk-download' },
-    { name: 'Windows tools', href: '/windows-tools?list_page=1' },
-  ];
-
-  const adminLinks = [
-    { name: 'Users', href: '/users', icon: <Users size={16}/> },
-    { name: 'Downloads', href: '/downloads', icon: <HardDrive size={16}/> },
-    { name: 'Windows', href: '/windows-files', icon: <Monitor size={16}/> },
-    { name: 'YouTube', href: '/youtube-videos', icon: <Youtube size={16}/> },
-    { name: 'Messages', href: '/contact-messages', icon: <MessageSquare size={16}/> },
-  ];
-
-  const currentLinks = isAdminSection ? adminLinks : publicLinks;
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-5 pb-12 flex flex-col items-center justify-center gap-4 bg-slate-50 text-slate-800 dark:bg-[#0a0a0a] dark:text-slate-200">
+         <div className="relative w-16 h-16 border-2 border-dashed rounded-full animate-spin border-blue-600 dark:border-cyan-500"></div>
+         <div className="flex items-center gap-2 text-sm font-mono opacity-70">
+            <Terminal size={14} />
+            <span className="animate-pulse">INDEXING_FILES...</span>
+         </div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <header
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b ${
-          scrolled || isAdminSection
-            ? isDark 
-              ? 'bg-[#050505]/90 backdrop-blur-xl border-slate-800 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)]' 
-              : 'bg-white/90 backdrop-blur-xl border-slate-200 shadow-sm'
-            : 'bg-transparent border-transparent'
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            
-            {/* --- LOGO --- */}
-            <Link href={isAdminSection ? "/" : "/"} className="group flex items-center gap-3 relative z-50">
-              <div className={`p-2 rounded-lg border transition-all duration-300 ${
-                isAdminSection
-                  ? 'bg-red-500/10 border-red-500/50 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
-                  : isDark 
-                    ? 'bg-slate-900 border-slate-700 text-cyan-500 group-hover:border-cyan-500 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.3)]' 
-                    : 'bg-white border-slate-200 text-blue-600 group-hover:border-blue-400'
-              }`}>
-                {isAdminSection ? <Shield size={20} /> : <Unlock size={20} />}
-              </div>
-              <div className="flex flex-col">
-                <span className={`font-bold text-xl tracking-tight leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  KALIFA<span className={isAdminSection ? 'text-red-500' : (isDark ? 'text-cyan-500' : 'text-blue-600')}>OS</span>
-                </span>
-                <span className="text-[10px] font-mono opacity-50 tracking-widest uppercase">
-                  {isAdminSection ? 'Admin Console' : 'System v2.0'}
-                </span>
-              </div>
-            </Link>
-
-            {/* --- DESKTOP NAVIGATION --- */}
-            <nav className="hidden md:flex items-center space-x-8">
-              {currentLinks.map((link: any) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className={`relative flex items-center gap-2 text-sm font-medium transition-colors duration-200 group py-2 ${
-                    isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-blue-600'
-                  } ${pathname === link.href ? (isDark ? 'text-white' : 'text-blue-600') : ''}`}
-                >
-                  {isAdminSection && link.icon && link.icon}
-                  {link.name}
-                  <span className={`absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full ${
-                    isAdminSection ? 'bg-red-500' : (isDark ? 'bg-cyan-500' : 'bg-blue-600')
-                  } ${pathname === link.href ? 'w-full' : ''}`}></span>
-                </Link>
-              ))}
-            </nav>
-
-            <div className="flex items-center gap-3 md:gap-5">
-              {!isAdminSection && (
-                <button 
-                  onClick={toggleSearch}
-                  className={`p-2 rounded-full transition-all hover:scale-110 ${
-                    isDark 
-                      ? searchOpen ? 'bg-cyan-500 text-black' : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                      : searchOpen ? 'bg-blue-600 text-white' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-100'
-                  }`}
-                >
-                  {searchOpen ? <X size={20} /> : <Search size={20} />}
-                </button>
-              )}
-
-              <div className="hidden sm:block">
-                <Toggle /> {/* Removed props - Toggle now uses useTheme internally */}
-              </div>
-
-              {/* Desktop Auth Section */}
-              <div className="hidden md:flex items-center gap-2 border-l border-slate-800/50 pl-5 min-w-[120px] justify-end">
-                {isAuthLoading ? (
-                  <Loader2 size={20} className={`animate-spin ${isDark ? 'text-slate-600' : 'text-slate-400'}`} />
-                ) : !user ? (
-                  <>
-                    <Link href="/login" className={`text-xs font-bold uppercase px-3 py-2 ${isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-blue-600'}`}>
-                      Login
-                    </Link>
-                    <Link href="/register" className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${
-                      isDark ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-black' : 'bg-blue-600 text-white hover:bg-blue-700'
-                    }`}>
-                      <UserPlus size={14} /> Join
-                    </Link>
-                  </>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    {isAdmin ? (
-                      isAdminSection ? (
-                        <button onClick={handleVisitClient} title="Visit Client" className={`flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase rounded-lg transition-all ${isDark ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-black' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}>
-                          <Globe size={16} /> Client
-                        </button>
-                      ) : (
-                        <Link href="/admin" title="Admin Panel" className={`p-2 rounded-lg transition-all ${isDark ? 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white' : 'bg-orange-50 text-orange-600 hover:bg-orange-100'}`}>
-                          <Shield size={18} />
-                        </Link>
-                      )
-                    ) : (
-                      <Link href="/profile" title="User Profile" className={`p-2 rounded-lg transition-all ${isDark ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-black' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}>
-                        <User size={18} />
-                      </Link>
-                    )}
-                    <button onClick={handleLogout} title="Logout" className={`p-2 rounded-lg transition-all ${isDark ? 'text-slate-400 hover:text-red-400 hover:bg-slate-800' : 'text-slate-500 hover:text-red-500 hover:bg-slate-100'}`}>
-                      <LogOut size={18} />
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Mobile Menu Button */}
-              <div className="md:hidden">
-                <button 
-                  onClick={toggleMenu}
-                  className={`p-2 rounded-lg border transition-all ${
-                    isDark ? 'border-slate-800 text-slate-300 bg-slate-900' : 'border-slate-200 text-slate-700 bg-white'
-                  }`}
-                >
-                  {chat ? <X size={20} /> : <Menu size={20} />}
-                </button>
-              </div>
-            </div>
-          </div>
+    <div
+      className="min-h-screen pt-24 pb-20 transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-[#0a0a0a] dark:text-slate-200"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      <div className="max-w-4xl mx-auto px-4">
+        
+        {/* --- HEADER --- */}
+        <div className="text-center mb-8">
+           <h1 className="text-2xl md:text-3xl font-bold flex items-center justify-center gap-3 mb-2">
+             <Search className="text-blue-600 dark:text-cyan-500" />
+             <span>Query Results</span>
+           </h1>
+           <p className="font-mono text-xs opacity-60">
+             Target Keyword: "{query}" // Found {results.length} Records
+           </p>
         </div>
 
-        {/* --- SEARCH BAR DROPDOWN --- */}
-        {!isAdminSection && (
-          <div className={`overflow-hidden transition-[max-height] duration-500 ease-in-out ${
-            searchOpen ? 'max-h-96 border-b border-slate-800/50' : 'max-h-0'
-          } ${isDark ? 'bg-[#0a0a0a]' : 'bg-white'}`}>
-             {/* Passed isDark helper instead of darkMode */}
-            <SearchBar isDark={isDark} open={searchOpen} onClose={() => setSearchOpen(false)} />
-          </div>
-        )}
-
-        {/* --- MOBILE MENU OVERLAY --- */}
-        <div className={`md:hidden overflow-y-auto transition-all duration-300 ease-in-out ${
-          chat ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
-        } ${isDark ? 'bg-[#0a0a0a]' : 'bg-white'}`} style={{ height: 'calc(100vh - 80px)' }}>
+        {/* --- TABS (PARTITION SELECTOR) --- */}
+        <div className="flex p-1 rounded-xl mb-8 border bg-white border-slate-200 shadow-sm dark:bg-slate-900 dark:border-slate-800">
+          <button
+            onClick={() => handleTabChange("windows")}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${
+              activeTab === "windows"
+                ? 'bg-blue-50 text-blue-600 shadow-sm dark:bg-slate-800 dark:text-cyan-400 dark:shadow-lg'
+                : 'text-slate-500 hover:text-slate-600 dark:hover:text-slate-400'
+            }`}
+          >
+            <HardDrive size={16} />
+            <span>Windows (PC)</span>
+          </button>
           
-          <div className="container mx-auto px-6 py-8 space-y-4 pb-24">
-            {/* Mobile User Card */}
-            <div className={`p-5 rounded-2xl border-2 border-dashed ${isDark ? 'border-slate-800 bg-slate-900/30' : 'border-slate-200 bg-slate-50'}`}>
-              {isAuthLoading ? (
-                 <div className="flex justify-center py-4">
-                    <Loader2 size={24} className={`animate-spin ${isDark ? 'text-slate-600' : 'text-slate-400'}`} />
-                 </div>
-              ) : !user ? (
-                <div className="grid grid-cols-2 gap-3">
-                  <Link href="/login" onClick={toggleMenu} className={`flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-xs uppercase border ${isDark ? 'border-slate-700 text-white hover:bg-slate-800' : 'border-slate-300 text-slate-900 hover:bg-slate-100'}`}>
-                    <LogIn size={16} /> Login
-                  </Link>
-                  <Link href="/register" onClick={toggleMenu} className={`flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-xs uppercase transition-all ${isDark ? 'bg-cyan-500 text-black' : 'bg-blue-600 text-white'}`}>
-                    <UserPlus size={16} /> Join
-                  </Link>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-5">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${isAdminSection ? 'bg-gradient-to-br from-red-500 to-orange-600' : (isAdmin ? 'bg-gradient-to-br from-red-500 to-orange-600' : 'bg-gradient-to-br from-cyan-500 to-blue-600')}`}>
-                      {isAdmin ? <Shield size={24} /> : <User size={24} />}
-                    </div>
-                    <div>
-                      <p className={`text-base font-bold leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>{user.displayName || 'Operator'}</p>
-                      <p className={`text-[10px] font-mono uppercase tracking-widest mt-1 ${isAdmin ? 'text-red-500' : 'text-cyan-500'}`}>
-                        {isAdmin ? 'SEC_LEVEL_ADMIN' : 'SEC_LEVEL_USER'}
-                      </p>
-                    </div>
+          <button
+            onClick={() => handleTabChange("mobile")}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${
+              activeTab === "mobile"
+                ? 'bg-green-50 text-green-600 shadow-sm dark:bg-slate-800 dark:text-green-400 dark:shadow-lg'
+                : 'text-slate-500 hover:text-slate-600 dark:hover:text-slate-400'
+            }`}
+          >
+            <Smartphone size={16} />
+            <span>Mobile (APK)</span>
+          </button>
+        </div>
+
+        {/* --- RESULTS GRID --- */}
+        <div className="space-y-4">
+          {results.length > 0 ? (
+            results.map((item) => (
+              activeTab === "windows" ? (
+                // --- WINDOWS ITEM (Now using <a>) ---
+                <a
+                  key={item.id}
+                  href={`/windows-tools/${item.id}`}
+                  className="group flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200 bg-white border-slate-200 hover:border-blue-300 shadow-sm hover:shadow-md dark:bg-slate-900/40 dark:border-slate-800 dark:hover:bg-slate-900 dark:hover:border-cyan-500/50"
+                >
+                  <div className="w-12 h-12 rounded-lg overflow-hidden border border-slate-100 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
+                    <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                   </div>
                   
-                  <div className={`grid grid-cols-2 gap-3 pt-4 border-t ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
-                    {isAdmin ? (
-                      isAdminSection ? (
-                        <button onClick={handleVisitClient} className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border ${isDark ? 'border-cyan-500/30 text-cyan-400 bg-cyan-500/10' : 'border-blue-200 text-blue-600 bg-blue-50'}`}>
-                          <Globe size={16} /> Client
-                        </button>
-                      ) : (
-                        <Link href="/admin" onClick={toggleMenu} className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border ${isDark ? 'border-red-500/30 text-red-400 bg-red-500/10' : 'border-orange-200 text-orange-600 bg-orange-50'}`}>
-                          <Shield size={16} /> Admin Panel
-                        </Link>
-                      )
-                    ) : (
-                      <Link href="/profile" onClick={toggleMenu} className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border ${isDark ? 'border-cyan-500/30 text-cyan-400 bg-cyan-500/10' : 'border-blue-200 text-blue-600 bg-blue-50'}`}>
-                        <User size={16} /> Profile
-                      </Link>
-                    )}
-                    <button onClick={handleLogout} className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border transition-colors ${isDark ? 'border-slate-800 text-slate-400 hover:text-red-400 hover:border-red-900/50' : 'border-slate-200 text-slate-600 hover:text-red-500 hover:border-red-200 hover:bg-red-50'}`}>
-                      <LogOut size={16} /> Logout
-                    </button>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold truncate text-slate-900 dark:text-white">
+                      {item.title}
+                    </h3>
+                    <p className="text-[10px] font-mono opacity-50 uppercase">Executable // Utility</p>
                   </div>
-                </div>
-              )}
-            </div>
 
-            {currentLinks.map((link: any, index) => (
-              <Link
-                key={index}
-                href={link.href}
-                onClick={toggleMenu}
-                className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
-                  isDark 
-                    ? 'border-slate-800 bg-slate-900/50 text-slate-300' 
-                    : 'border-slate-100 bg-slate-50 text-slate-700'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className={isAdminSection ? 'text-red-500' : 'opacity-50'}>
-                    {link.icon || <Terminal size={16} />}
-                  </span>
-                  <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
-                </div>
-                <ChevronRight size={16} className="opacity-50" />
-              </Link>
-            ))}
+                  <div className="p-2 rounded-full transition-transform group-hover:translate-x-1 bg-blue-50 text-blue-600 dark:bg-slate-800 dark:text-cyan-500">
+                    <ChevronRight size={16} />
+                  </div>
+                </a>
+              ) : (
+                // --- MOBILE ITEM (Already using <a>) ---
+                <a
+                  key={item.id}
+                  href={item.link}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200 bg-white border-slate-200 hover:border-green-300 shadow-sm hover:shadow-md dark:bg-slate-900/40 dark:border-slate-800 dark:hover:bg-slate-900 dark:hover:border-green-500/50"
+                >
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center border bg-green-50 border-green-100 text-green-600 dark:bg-slate-800 dark:border-slate-700 dark:text-green-500">
+                    <FileCode size={24} />
+                  </div>
 
-            {/* Mobile System Controls */}
-            <div className="pt-4 space-y-3">
-               <p className="text-[10px] font-mono opacity-40 uppercase tracking-widest ml-2">System Config</p>
-               <div className="flex items-center justify-between p-4 rounded-xl border border-dashed border-slate-700">
-                <span className={`text-xs font-mono font-bold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                  DARK_MODE_STATUS
-                </span>
-                <Toggle />
-              </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold truncate text-slate-900 dark:text-white">
+                      {item.title}
+                    </h3>
+                    <p className="text-[10px] font-mono opacity-50 uppercase">Android Package // APK</p>
+                  </div>
+
+                  <div className="p-2 rounded-full transition-transform group-hover:scale-110 bg-green-50 text-green-600 dark:bg-slate-800 dark:text-green-500">
+                    <Download size={16} />
+                  </div>
+                </a>
+              )
+            ))
+          ) : (
+            // --- EMPTY STATE ---
+            <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed rounded-xl border-slate-200 text-slate-400 dark:border-slate-800 dark:text-slate-600">
+               <FolderOpen size={48} className="mb-4 opacity-50" />
+               <p className="font-mono text-sm">No artifacts found in this sector.</p>
+               <a 
+                 href="/"
+                 className="mt-4 text-xs hover:underline opacity-70"
+               >
+                 Return to Root Directory
+               </a>
             </div>
-          </div>
+          )}
         </div>
-      </header>
-      
-      <div className="h-20" /> 
-    </>
+      </div>
+    </div>
   );
 }

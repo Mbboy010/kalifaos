@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import Image from 'next/image';
-
+import BannerCarousel from "./BannerCarousel"
 // Components
 import YouTubeVideos from './YouTubeVideos';
 import WindowsBypassTools from '../window/WindowsBypassTools';
@@ -41,7 +41,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen font-sans transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-[#0a0a0a] dark:text-slate-200 selection:bg-blue-200 dark:selection:bg-cyan-500/30">
-      
+      <BannerCarousel />
       {/* --- HERO SECTION --- */}
       <section className="relative pt-10 pb-20 overflow-hidden">
         {/* Background Grid Effect */}
@@ -53,11 +53,9 @@ export default function HomePage() {
           }}
         />
 
+      
         <div className="container max-w-7xl mx-auto px-4 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-mono mb-6 animate-pulse border-blue-200 bg-blue-50 text-blue-600 dark:border-cyan-500/30 dark:bg-cyan-950/20 dark:text-cyan-400">
-            <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-cyan-500"></span>
-            SYSTEM ONLINE: KALIFAOS v2.0
-          </div>
+
           
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 text-slate-900 dark:text-white">
             Root. Flash. <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-cyan-400 dark:to-blue-600">Unlock.</span>

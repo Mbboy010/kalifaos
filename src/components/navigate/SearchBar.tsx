@@ -83,7 +83,7 @@ export default function SearchBar({ open, onClose }: SearchBarProps) {
     e.preventDefault();
     if (!search.trim()) return;
     onClose();
-    router.push(`/search?query=${encodeURIComponent(search)}&type=${type}`);
+    window.location.href = `/search?query=${encodeURIComponent(search)}&type=${type}`;
   };
 
   const filteredResults = results.filter(
@@ -174,7 +174,7 @@ export default function SearchBar({ open, onClose }: SearchBarProps) {
                   key={item.id}
                   onClick={() => {
                     if (item.type === 'window') {
-                      router.push(`/windows-tools/${item.id}`);
+                      window.location.href = `/windows-tools/${item.id}`;
                     } else if (item.download) {
                       window.open(item.download, '_blank');
                     }

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   User, Mail, Phone, Shield, Terminal, 
   Settings, LogOut, Cpu, Activity, Clock,
-  Edit3, ShieldAlert, Globe, Loader2
+  Edit3, ShieldAlert, Globe, Loader2, Lock // Added Lock here
 } from 'lucide-react';
 
 // Firebase Imports
@@ -129,7 +129,8 @@ export default function ProfilePage() {
               <div className="flex justify-between items-center">
                 <span className="text-xs font-mono opacity-60">Uptime_Since:</span>
                 <span className="text-xs font-bold">
-                   {userData?.createdAt?.toDate().toLocaleDateString() || 'N/A'}
+                   {/* Safe check for Firestore toDate() */}
+                   {userData?.createdAt?.toDate ? userData.createdAt.toDate().toLocaleDateString() : 'N/A'}
                 </span>
               </div>
             </div>

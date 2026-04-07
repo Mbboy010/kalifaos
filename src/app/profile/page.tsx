@@ -63,7 +63,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col  justify-center bg-slate-50 dark:bg-[#050505]">
+      <div className="min-h-screen flex flex-col items-center  bg-slate-50 dark:bg-[#050505]">
         <Cpu className="animate-spin mt-20 text-blue-600 dark:text-cyan-500 mb-4" size={40} />
         <p className="font-mono text-xs tracking-widest opacity-50 dark:text-slate-400">SYNCHRONIZING_CORE...</p>
       </div>

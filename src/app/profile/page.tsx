@@ -72,22 +72,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen pb-20 transition-colors duration-500 bg-slate-100 text-slate-900 dark:bg-[#050505] dark:text-slate-300">
-      
-      {/* --- HEADER --- */}
-      <header className="w-full p-6 border-b backdrop-blur-md sticky top-0 z-50 bg-white/80 border-slate-200 dark:bg-[#0a0a0a]/80 dark:border-slate-800/50">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Terminal size={20} className="text-blue-600 dark:text-cyan-500" />
-            <span className="font-black tracking-tighter uppercase">Kernel_Identity_v1.0.4</span>
-          </div>
-          <button 
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all bg-red-50 text-red-600 border border-red-100 hover:bg-red-600 hover:text-white dark:bg-red-500/10 dark:text-red-500 dark:border-red-500/20 dark:hover:bg-red-500 dark:hover:text-white"
-          >
-            <LogOut size={14} /> Terminate_Session
-          </button>
-        </div>
-      </header>
 
       <main className="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         

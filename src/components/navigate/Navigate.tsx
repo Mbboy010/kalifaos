@@ -202,7 +202,7 @@ export default function Navigate() {
                       Login
                     </a>
                     <a href="/register" className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all bg-blue-600 hover:bg-blue-700 text-white dark:bg-cyan-500/10 dark:text-cyan-400 dark:border dark:border-cyan-500/20 dark:hover:bg-cyan-500 dark:hover:text-black">
-                      <UserPlus size={14} /> Join
+                      <UserPlus size={14} /> register
                     </a>
                   </>
                 ) : (
@@ -259,7 +259,7 @@ export default function Navigate() {
                     <LogIn size={16} /> Login
                   </a>
                   <a href="/register" onClick={toggleMenu} className="flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-xs uppercase bg-blue-600 dark:bg-cyan-500 text-white dark:text-black">
-                    <UserPlus size={16} /> Join
+                    <UserPlus size={16} /> register
                   </a>
                 </div>
               ) : (

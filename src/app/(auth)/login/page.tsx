@@ -13,12 +13,6 @@ export const metadata: Metadata = {
   // ✅ 3. Description (mostly for social media preview)
   description: "Sign in to your Kalifa Os account to access premium mobile repair tools, manage your downloads, and contact support in Zaria.",
   
-  // ✅ 4. ROBOTS: This tells Google "Don't show this page in search results"
-  // This is a "Best Practice" for login pages to keep your SEO clean.
-  robots: {
-    index: false,
-    follow: false,
-  },
 
   // ✅ 5. Social Media Preview (WhatsApp/Facebook/Twitter)
   openGraph: {

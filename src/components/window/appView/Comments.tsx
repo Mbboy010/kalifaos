@@ -2,16 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
-import { db } from '@/server/firebaseApi';
+import { db, auth } from '@/server/firebaseApi'; // Ensure auth is exported from your config
+import { onAuthStateChanged } from 'firebase/auth';
 import {
   collection,
   addDoc,
+  getDoc,
+  doc,
   serverTimestamp,
   query,
   orderBy,
   onSnapshot,
 } from 'firebase/firestore';
-import { MessageSquare, Send, User, Hash, Clock, Terminal } from 'lucide-react';
+import { MessageSquare, Send, User, Hash, Clock, Terminal, ShieldCheck } from 'lucide-react';
 
 interface Comment {
   id: string;
@@ -26,6 +29,7 @@ export default function Comments({ contentId }: { contentId: string }) {
   const [mounted, setMounted] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -36,6 +40,40 @@ export default function Comments({ contentId }: { contentId: string }) {
   // Hydration safety
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // 🔹 AUTH & DB USER DATA SYNC
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+        
+        // 1. Try to fetch extended data from the 'users' collection
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setFormData((prev) => ({
+            ...prev,
+            name: userData.username || userData.name || user.displayName || 'Authenticated Agent',
+            email: user.email || '',
+          }));
+        } else {
+          // 2. Fallback to Auth provider data if no DB doc exists
+          setFormData((prev) => ({
+            ...prev,
+            name: user.displayName || 'Agent_' + user.uid.slice(0, 5),
+            email: user.email || '',
+          }));
+        }
+      } else {
+        setIsAuthenticated(false);
+        setFormData({ name: '', email: '', comment: '' });
+      }
+    });
+
+    return () => unsubscribeAuth();
   }, []);
 
   // 🔹 Fetch comments in real-time
@@ -76,8 +114,9 @@ export default function Comments({ contentId }: { contentId: string }) {
         email: formData.email,
         comment: formData.comment,
         timestamp: serverTimestamp(),
+        userId: auth.currentUser?.uid || 'guest', // Store UID for security/moderation
       });
-      setFormData({ name: '', email: '', comment: '' });
+      setFormData((prev) => ({ ...prev, comment: '' })); // Only clear comment field
     } catch (error) {
       console.error('Error adding comment:', error);
     }
@@ -90,7 +129,7 @@ export default function Comments({ contentId }: { contentId: string }) {
       
       {/* --- HEADER --- */}
       <div className="flex items-center gap-3 mb-8 border-b border-dashed border-slate-700/50 pb-4">
-        <Terminal className="text-blue-600 dark:text-cyan-500" />
+        <Terminal className="text-blue-600 dark:text-cyan-500" size={20} />
         <h2 className="text-lg font-mono font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
           /var/log/user_feedback
         </h2>
@@ -108,21 +147,21 @@ export default function Comments({ contentId }: { contentId: string }) {
               key={comment.id}
               className="relative group rounded-lg p-5 border-l-2 transition-all hover:bg-opacity-50 bg-slate-50 border-l-blue-500 border-t border-r border-b border-slate-100 dark:bg-slate-900/40 dark:border-l-cyan-500/50 dark:border-t-transparent dark:border-r-transparent dark:border-b-transparent dark:hover:border-slate-700"
             >
-              {/* User Meta */}
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded flex items-center justify-center bg-blue-100 text-blue-600 dark:bg-slate-800 dark:text-cyan-400">
                     <User size={16} />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                    <span className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
                       {comment.name}
+                      {/* Identity Badge for Verified Users */}
+                      <ShieldCheck size={12} className="text-cyan-500 opacity-60" />
                     </span>
                     <span className="text-[10px] opacity-50 font-mono">{comment.email}</span>
                   </div>
                 </div>
                 
-                {/* Timestamp */}
                 <div className="flex items-center gap-1 text-[10px] font-mono opacity-50 text-slate-500 dark:text-slate-400">
                   <Clock size={10} />
                   {comment.timestamp?.toDate
@@ -131,7 +170,6 @@ export default function Comments({ contentId }: { contentId: string }) {
                 </div>
               </div>
 
-              {/* Message Content */}
               <p className="text-sm leading-relaxed font-mono text-slate-600 dark:text-slate-400">
                 <span className="opacity-30 mr-2 select-none text-blue-500 dark:text-cyan-500">{'>'}</span>
                 {comment.comment}
@@ -162,7 +200,10 @@ export default function Comments({ contentId }: { contentId: string }) {
                 placeholder="Agent Name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full p-3 pl-10 rounded-lg bg-transparent border outline-none font-mono text-sm transition-all border-slate-300 text-slate-900 focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:text-white dark:focus:border-cyan-500 dark:focus:bg-slate-800"
+                readOnly={isAuthenticated}
+                className={`w-full p-3 pl-10 rounded-lg bg-transparent border outline-none font-mono text-sm transition-all border-slate-300 dark:border-slate-700 dark:text-white ${
+                  isAuthenticated ? 'opacity-50 cursor-not-allowed' : 'focus:border-blue-500 focus:bg-white dark:focus:border-cyan-500 dark:focus:bg-slate-800'
+                }`}
               />
               <User size={14} className="absolute left-3 top-3.5 opacity-50" />
             </div>
@@ -175,28 +216,30 @@ export default function Comments({ contentId }: { contentId: string }) {
                 placeholder="Secure Email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full p-3 pl-10 rounded-lg bg-transparent border outline-none font-mono text-sm transition-all border-slate-300 text-slate-900 focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:text-white dark:focus:border-cyan-500 dark:focus:bg-slate-800"
+                readOnly={isAuthenticated}
+                className={`w-full p-3 pl-10 rounded-lg bg-transparent border outline-none font-mono text-sm transition-all border-slate-300 dark:border-slate-700 dark:text-white ${
+                  isAuthenticated ? 'opacity-50 cursor-not-allowed' : 'focus:border-blue-500 focus:bg-white dark:focus:border-cyan-500 dark:focus:bg-slate-800'
+                }`}
               />
               <div className="absolute left-3 top-3.5 opacity-50 text-[10px]">@</div>
             </div>
           </div>
 
-          {/* Comment Area */}
           <textarea
             name="comment"
-            placeholder="Input data packet content..."
+            placeholder={isAuthenticated ? "Log content detected... Ready to transmit." : "Input data packet content..."}
             value={formData.comment}
             onChange={handleChange}
+            required
             className="w-full p-3 rounded-lg bg-transparent border outline-none font-mono text-sm transition-all min-h-[100px] border-slate-300 text-slate-900 focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:text-white dark:focus:border-cyan-500 dark:focus:bg-slate-800"
           />
 
-          {/* Submit Button */}
           <button
             type="submit"
             className="w-full sm:w-auto px-6 py-3 rounded-lg font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 transition-all transform active:scale-95 bg-blue-600 text-white hover:bg-blue-700 shadow-lg dark:bg-cyan-600 dark:hover:bg-cyan-500 dark:shadow-[0_0_15px_rgba(6,182,212,0.3)]"
           >
             <Send size={16} />
-            Transmit Data
+            {isAuthenticated ? 'Execute Command' : 'Transmit Data'}
           </button>
         </form>
       </div>

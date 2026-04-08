@@ -22,7 +22,8 @@ import {
   Activity,
   CreditCard,
   Maximize2,
-  FileCode
+  FileCode,
+  Info // Added for the alert
 } from "lucide-react";
 
 // Firebase
@@ -109,6 +110,9 @@ export default function AppView() {
   const [fullscreen, setFullscreen] = useState<string | null>(null);
   const [animate, setAnimate] = useState(false);
 
+  // 🔹 New State for Download Alert
+  const [showDownloadAlert, setShowDownloadAlert] = useState(false);
+
   useEffect(() => {
     setMounted(true);
     async function fetchTool() {
@@ -140,14 +144,14 @@ export default function AppView() {
   }, [id]);
 
   useEffect(() => {
-    if (fullscreen) {
+    if (fullscreen || showDownloadAlert) {
       document.body.style.overflow = "hidden";
       setTimeout(() => setAnimate(true), 10);
     } else {
       document.body.style.overflow = "";
       setAnimate(false);
     }
-  }, [fullscreen]);
+  }, [fullscreen, showDownloadAlert]);
 
   const formatPrice = (price: string | number) => {
     const num = Number(price);
@@ -161,10 +165,20 @@ export default function AppView() {
 
   const handleDownload = async () => {
     if (!tool) return;
+
+    // 🔹 Validate Download URL
+    if (!tool.downloadUrl || tool.downloadUrl.trim() === "") {
+        setShowDownloadAlert(true);
+        return;
+    }
+
     try {
       const docRef = doc(db, "Windows-tools", tool.id);
       await updateDoc(docRef, { downloads: increment(1) });
       setTool((prev) => (prev ? { ...prev, downloads: (prev.downloads || 0) + 1 } : prev));
+      
+      // Open link in new tab
+      window.open(tool.downloadUrl, '_blank', 'noopener,noreferrer');
     } catch (error) { console.error(error); }
   };
 
@@ -206,27 +220,23 @@ export default function AppView() {
       <div className="relative pt-5 pb-12 border-b bg-white border-slate-200 dark:bg-slate-900/30 dark:border-slate-800">
         <div className="container mx-auto px-4">
           
-          {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-xs font-mono mb-6 opacity-50">
             <Home size={12} />
             <span>/ repository / windows / {tool.id.substring(0, 8)}...</span>
           </div>
 
           <div className="flex flex-col lg:flex-row gap-8 items-start">
-            {/* App Icon */}
             <div className="relative group w-32 h-32 lg:w-40 lg:h-40 flex-shrink-0 rounded-2xl overflow-hidden border-2 shadow-2xl border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
               <img src={tool.image} alt={tool.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             </div>
 
-            {/* App Info */}
             <div className="flex-1 w-full">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                 <h1 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white">
                   {tool.title}
                 </h1>
                 
-                {/* Security Badge */}
                 <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${
                   tool.security === 'Safe' 
                     ? 'bg-green-50 border-green-200 text-green-700 dark:bg-green-950/30 dark:border-green-800 dark:text-green-400'
@@ -237,7 +247,6 @@ export default function AppView() {
                 </div>
               </div>
 
-              {/* Quick Stats Row */}
               <div className="flex flex-wrap items-center gap-6 text-sm mb-8 font-mono opacity-80">
                 <div className="flex items-center gap-2">
                    <Activity size={16} className="text-blue-600 dark:text-cyan-500" />
@@ -253,7 +262,6 @@ export default function AppView() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
                 {Number(tool.price) > 0 ? (
                   <button
@@ -264,16 +272,13 @@ export default function AppView() {
                     <span>Purchase License ({formatPrice(tool.price)})</span>
                   </button>
                 ) : (
-                  <a
-                    href={tool.downloadUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
                     onClick={handleDownload}
                     className="flex-1 sm:flex-none inline-flex items-center justify-center gap-3 px-8 py-3 rounded-xl font-bold transition-all bg-blue-600 text-white hover:bg-blue-700 shadow-lg dark:bg-cyan-600 dark:hover:bg-cyan-500 dark:hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]"
                   >
                     <Download size={20} />
                     <span>Download</span>
-                  </a>
+                  </button>
                 )}
               </div>
             </div>
@@ -282,8 +287,6 @@ export default function AppView() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        
-        {/* --- METADATA GRID --- */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           {[
             { icon: <Tag />, label: "License", value: formatPrice(tool.price), color: "text-blue-500" },
@@ -302,11 +305,7 @@ export default function AppView() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* --- MAIN CONTENT (LEFT) --- */}
           <div className="lg:col-span-2 space-y-12">
-            
-            {/* SCREENSHOTS */}
             {tool.screenshots && tool.screenshots.length > 0 && (
               <section>
                 <div className="flex items-center gap-2 mb-4">
@@ -330,7 +329,6 @@ export default function AppView() {
               </section>
             )}
 
-            {/* DESCRIPTION */}
             <section className="rounded-2xl py-6 border bg-white border-slate-200 shadow-sm dark:bg-[#0f0f0f] dark:border-slate-800">
               <div className="flex mx-4 items-center gap-2 mb-6 border-b border-dashed border-slate-700/50 pb-4">
                 <Terminal size={18} className="text-blue-600 dark:text-cyan-500" />
@@ -355,18 +353,50 @@ export default function AppView() {
             </section>
           </div>
 
-          {/* --- SIDEBAR (RIGHT) --- */}
           <div className="space-y-8">
              <div className="sticky top-24">
                <h3 className="text-sm font-bold uppercase tracking-widest opacity-50 mb-4">Related Packages</h3>
                <Suggestions currentToolId={tool.id} />
              </div>
           </div>
-
         </div>
       </div>
 
-      {/* --- FULLSCREEN MODAL --- */}
+      {/* --- CUSTOM DOWNLOAD UNAVAILABLE ALERT --- */}
+      {showDownloadAlert && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+          <div 
+            className={`relative w-full max-w-md bg-white dark:bg-[#0f0f0f] rounded-2xl border-2 border-slate-200 dark:border-red-900/30 p-8 shadow-2xl transition-all duration-300 ${
+              animate ? "scale-100 opacity-100" : "scale-95 opacity-0"
+            }`}
+          >
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4 text-red-500 animate-pulse">
+                <AlertTriangle size={32} />
+              </div>
+              
+              <h3 className="text-xl font-black tracking-tight text-slate-900 dark:text-white mb-2 uppercase font-mono">
+                Asset_Not_Linked
+              </h3>
+              
+              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 mb-8 font-medium">
+                Download link is not available here. Please check the 
+                <span className="text-blue-600 dark:text-cyan-400 font-bold mx-1">System Description</span> 
+                section below to find alternative download sources for this file.
+              </p>
+
+              <button 
+                onClick={() => setShowDownloadAlert(false)}
+                className="w-full py-3 bg-slate-900 text-white dark:bg-red-600 dark:hover:bg-red-500 rounded-xl font-bold uppercase tracking-widest text-xs transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
+              >
+                <X size={16} /> Close Terminal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- FULLSCREEN SCREENSHOT MODAL --- */}
       {fullscreen && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md"

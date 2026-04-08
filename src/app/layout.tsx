@@ -106,7 +106,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className={` min-h-screen w-screen transition-colors duration-500 bg-gray-100 text-gray-800 dark:bg-[#121212] dark:text-white  ${geistSans.variable} ${geistMono.variable}`}>
         <Script
           id="adsense-init"
           async

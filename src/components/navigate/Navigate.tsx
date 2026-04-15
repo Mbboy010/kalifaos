@@ -18,15 +18,16 @@ import { doc, getDoc } from 'firebase/firestore';
 import { logoutUser } from '@/server/firebaseApi';
 
 // Icons
-import { 
+import { Home, Smartphone,
   Unlock, Menu, X, Search, Terminal, ChevronRight, 
   User, LogIn, LogOut, Shield, UserPlus, Loader2,
-  Users, HardDrive, Monitor, Youtube, MessageSquare, Globe
+  Users, HardDrive, Monitor, Youtube, MessageSquare, Globe,
+  Server, Mail, CreditCard, Scale // Added these for the new features
 } from 'lucide-react';
 
 export default function Navigate() {
   const dispatch = useAppDispatch();
-  const chat = useAppSelector((state) => state.chatCheck.value); // chat acts as mobile menu toggle
+  const chat = useAppSelector((state) => state.chatCheck.value); 
   
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -40,7 +41,6 @@ export default function Navigate() {
   const [scrolled, setScrolled] = useState(false);
   const [isAdminSection, setIsAdminSection] = useState(false);
 
-  // Determine if we are in admin section
   useEffect(() => {
     setMounted(true);
     if (typeof window !== 'undefined') {
@@ -49,7 +49,6 @@ export default function Navigate() {
     }
   }, [pathname]);
 
-  // Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
@@ -69,27 +68,20 @@ export default function Navigate() {
     return () => unsubscribe();
   }, []);
 
-  // Scroll listener for Navbar background
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // --- NEW: Block Body Scroll when Menu or Search is Open ---
   useEffect(() => {
     if (chat || searchOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
-
-    // Cleanup on unmount to ensure scrolling is restored
-    return () => {
-      document.body.style.overflow = '';
-    };
+    return () => { document.body.style.overflow = ''; };
   }, [chat, searchOpen]);
-  // ----------------------------------------------------------
 
   if (!mounted) return <div className="h-20 w-full" />;
 
@@ -108,10 +100,19 @@ export default function Navigate() {
     }
   };
 
+  // 🔹 Client Section Links
   const publicLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'FRP APKS', href: '/frp-tools-apk-download' },
-    { name: 'Windows tools', href: '/windows-tools?list_page=1' },
+ { name: 'Home', href: '/', icon: <Home size={16} /> },
+  { name: 'FRP APKS', href: '/frp-tools-apk-download', icon: <Smartphone size={16} />},
+  { name: 'Windows tools', href: '/windows-tools?list_page=1', icon: <Monitor size={16} /> },
+    { name: 'Online Server Tools', href: '/server-tools', icon: <Server size={16}/> },
+    { name: 'Contact Us', href: '/contact', icon: <Mail size={16}/> },
+  ];
+
+  // 🔹 New Section: Other Pages
+  const otherLinks = [
+    { name: 'Payment Details', href: '/payments', icon: <CreditCard size={16}/> },
+    { name: 'Website Rules', href: '/rules', icon: <Scale size={16}/> },
   ];
 
   const adminLinks = [
@@ -136,7 +137,6 @@ export default function Navigate() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             
-            {/* --- LOGO --- */}
             <a href="/" className="group flex items-center gap-3 relative z-50">
               <div className={`p-2 rounded-lg border transition-all duration-300 ${
                 isAdminSection
@@ -155,7 +155,6 @@ export default function Navigate() {
               </div>
             </a>
 
-            {/* --- DESKTOP NAVIGATION --- */}
             <nav className="hidden md:flex items-center space-x-8">
               {currentLinks.map((link: any) => (
                 <a
@@ -165,7 +164,6 @@ export default function Navigate() {
                     text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white 
                     ${pathname === link.href ? 'text-blue-600 dark:text-white' : ''}`}
                 >
-                  {isAdminSection} 
                   {link.name}
                   <span className={`absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full ${
                     isAdminSection ? 'bg-red-500' : 'bg-blue-600 dark:bg-cyan-500'
@@ -192,7 +190,6 @@ export default function Navigate() {
                 <Toggle />
               </div>
 
-              {/* Desktop Auth Section */}
               <div className="hidden md:flex items-center gap-2 border-l border-slate-800/50 pl-5 min-w-[120px] justify-end">
                 {isAuthLoading ? (
                   <Loader2 size={20} className="animate-spin text-slate-400 dark:text-slate-600" />
@@ -223,7 +220,6 @@ export default function Navigate() {
                 )}
               </div>
 
-              {/* Mobile Menu Button */}
               <div className="md:hidden relative z-50">
                 <button 
                   onClick={toggleMenu}
@@ -236,7 +232,6 @@ export default function Navigate() {
           </div>
         </div>
 
-        {/* --- SEARCH BAR --- */}
         {!isAdminSection && (
           <div className={`overflow-hidden transition-[max-height] duration-500 ease-in-out bg-white dark:bg-[#0a0a0a] ${
             searchOpen ? 'max-h-96 border-b border-slate-800/50 shadow-xl' : 'max-h-0'
@@ -251,7 +246,7 @@ export default function Navigate() {
         }`} style={{ height: 'calc(100vh - 80px)' }}>
           
           <div className="container mx-auto px-6 py-8 space-y-4 pb-24">
-            {/* User Card Mobile */}
+            {/* User Card */}
             <div className="p-5 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30">
               {!user ? (
                 <div className="grid grid-cols-2 gap-3">
@@ -276,7 +271,6 @@ export default function Navigate() {
                     </div>
                   </div>
                   
-                  {/* Mobile User/Admin Links */}
                   <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                     {isAdmin ? (
                       <a 
@@ -291,18 +285,11 @@ export default function Navigate() {
                         {isAdminSection ? <><Globe size={16} /> Client</> : <><Shield size={16} /> Admin</>}
                       </a>
                     ) : (
-                      <a 
-                        href="/profile" 
-                        onClick={toggleMenu} 
-                        className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-                      >
+                      <a href="/profile" onClick={toggleMenu} className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
                         <User size={16} /> Profile
                       </a>
                     )}
-                    <button 
-                      onClick={handleLogout} 
-                      className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-slate-800 dark:hover:text-red-400"
-                    >
+                    <button onClick={handleLogout} className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-red-500 hover:bg-red-50">
                       <LogOut size={16} /> Logout
                     </button>
                   </div>
@@ -310,7 +297,8 @@ export default function Navigate() {
               )}
             </div>
 
-            {/* Mobile Menu Main Links */}
+            {/* 1: Client Section Links */}
+            <p className="text-[10px] font-mono opacity-40 uppercase tracking-widest ml-2">Client Section</p>
             {currentLinks.map((link: any, index) => (
               <a
                 key={index}
@@ -319,14 +307,37 @@ export default function Navigate() {
                 className="flex items-center justify-between p-4 rounded-xl border transition-all border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300"
               >
                 <div className="flex items-center gap-3">
-                  <span className={isAdminSection ? 'text-red-500' : 'opacity-50'}>
-                    {<Terminal size={16} />}
+                  <span className={isAdminSection ? 'text-red-500' : 'text-blue-600 dark:text-cyan-500'}>
+                    {link.icon || <Terminal size={16} />}
                   </span>
                   <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
                 </div>
                 <ChevronRight size={16} className="opacity-50" />
               </a>
             ))}
+
+            {/* 2: Other Pages Section */}
+            {!isAdminSection && (
+              <div className="pt-4 space-y-4">
+                <p className="text-[10px] font-mono opacity-40 uppercase tracking-widest ml-2">Other Pages</p>
+                {otherLinks.map((link: any, index) => (
+                  <a
+                    key={index}
+                    href={link.href}
+                    onClick={toggleMenu}
+                    className="flex items-center justify-between p-4 rounded-xl border transition-all border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-blue-600 dark:text-cyan-500">
+                        {link.icon}
+                      </span>
+                      <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
+                    </div>
+                    <ChevronRight size={16} className="opacity-50" />
+                  </a>
+                ))}
+              </div>
+            )}
 
             <div className="pt-4 space-y-3">
                <p className="text-[10px] font-mono opacity-40 uppercase tracking-widest ml-2">System Config</p>

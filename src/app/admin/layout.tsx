@@ -33,9 +33,9 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} bg-black text-gray-200  `}>
   
          <div className="">
-           <AdminGuard>
+
                {children}
-           </AdminGuard>
+
          </div>
       </body>
     </html>

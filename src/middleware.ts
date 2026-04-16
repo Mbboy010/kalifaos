@@ -6,7 +6,7 @@ export function middleware(req: NextRequest) {
   const hostname = req.headers.get('host') || '';
   const pathname = url.pathname;
 
-  // 1. SYSTEM BYPASS
+  // 1. SYSTEM BYPASS (Assets, Internal Next.js paths, etc.)
   if (
     pathname.startsWith('/__/') || 
     pathname.includes('.') || 
@@ -21,27 +21,32 @@ export function middleware(req: NextRequest) {
   const protocol = isProduction ? 'https' : 'http';
 
   // 2. Extract Subdomain
-  const cleanHostname = hostname.replace(/:\d+$/, ''); 
+  const cleanHostname = hostname.replace(/:\d+$/, ''); // Remove port for localhost
   let subdomain = '';
   
   if (isProduction) {
-    if (cleanHostname.endsWith('.kalifaos.site')) {
-      subdomain = cleanHostname.replace('.kalifaos.site', '');
+    if (cleanHostname.endsWith(`.kalifaos.site`)) {
+      subdomain = cleanHostname.replace(`.kalifaos.site`, '');
     }
   } else {
+    // FIX: Properly detect subdomains on localhost (e.g., admin.localhost)
     const parts = cleanHostname.split('.');
     if (parts.length > 1) {
        subdomain = parts[0];
     }
   }
 
-  // 3. CLEANUP: Redirect Legacy Subdomains
+  // 3. CLEANUP: Redirect Legacy Subdomains to Naked Domain
   const isLegacySubdomain = ['app', 'auth'].includes(subdomain);
-  if (isLegacySubdomain || hostname.includes('.vercel.app')) {
-    return NextResponse.redirect(new URL(pathname + url.search, `${protocol}://${baseDomain}`), 301);
+  const isVercelDomain = hostname.includes('.vercel.app');
+
+  if (isLegacySubdomain || isVercelDomain) {
+    const destination = new URL(pathname + url.search, `${protocol}://${baseDomain}`);
+    return NextResponse.redirect(destination, 301);
   }
 
-  // 4. ADMIN ROUTE REDIRECT (main.site/admin -> admin.main.site)
+  // 4. ADMIN ROUTE REDIRECT (kalifaos.site/admin -> admin.kalifaos.site)
+  // If the user tries to access /admin on the main domain, send them to the subdomain
   if (pathname.startsWith('/admin') && subdomain !== 'admin') {
     const newPath = pathname.replace(/^\/admin/, '') || '/';
     return NextResponse.redirect(new URL(newPath + url.search, `${protocol}://admin.${baseDomain}`));
@@ -49,21 +54,18 @@ export function middleware(req: NextRequest) {
 
   // 5. ADMIN SUBDOMAIN INTERNAL ROUTING
   if (subdomain === 'admin') {
-    // Prevent recursive loop: If the path is already internal, stop here.
+    // CRITICAL FIX: If the internal path already starts with /admin (from a previous rewrite), 
+    // do not rewrite it again to avoid /admin/admin/... loops.
     if (pathname.startsWith('/admin')) {
       return NextResponse.next();
     }
 
-    /**
-     * This handles the Home Page (https://admin.kalifaos.site/) 
-     * and all sub-pages (e.g., /users, /settings).
-     * It maps them internally to src/app/admin/[[...path]]
-     */
-    const internalPath = `/admin${pathname}`;
-    return NextResponse.rewrite(new URL(internalPath, req.url));
+    const path = pathname === '/' ? '' : pathname;
+    url.pathname = `/admin${path}`;
+    return NextResponse.rewrite(url);
   }
 
-  // 6. DEFAULT (Main Site Home & Pages)
+  // 6. DEFAULT (Naked Domain)
   return NextResponse.next();
 }
 

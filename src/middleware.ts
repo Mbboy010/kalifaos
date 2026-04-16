@@ -7,6 +7,7 @@ export function middleware(req: NextRequest) {
   const pathname = url.pathname;
 
   // 1. SYSTEM BYPASS
+  // Includes assets, internal Next.js paths, and API routes
   if (
     pathname.startsWith('/__/') || 
     pathname.includes('.') || 
@@ -30,18 +31,24 @@ export function middleware(req: NextRequest) {
     }
   } else {
     const parts = cleanHostname.split('.');
+    // On localhost, we assume the first part is the subdomain (e.g., admin.localhost)
     if (parts.length > 1) {
        subdomain = parts[0];
     }
   }
 
-  // 3. CLEANUP: Redirect Legacy Subdomains
+  // 3. CLEANUP: Redirect Legacy Subdomains to Naked Domain
   const isLegacySubdomain = ['app', 'auth'].includes(subdomain);
-  if (isLegacySubdomain || hostname.includes('.vercel.app')) {
-    return NextResponse.redirect(new URL(pathname + url.search, `${protocol}://${baseDomain}`), 301);
+  const isVercelDomain = hostname.includes('.vercel.app');
+
+  if (isLegacySubdomain || isVercelDomain) {
+    return NextResponse.redirect(
+      new URL(pathname + url.search, `${protocol}://${baseDomain}`),
+      301
+    );
   }
 
-  // 4. ADMIN ROUTE REDIRECT (main.site/admin -> admin.main.site)
+  // 4. ADMIN ROUTE REDIRECT (kalifaos.site/admin -> admin.kalifaos.site)
   if (pathname.startsWith('/admin') && subdomain !== 'admin') {
     const newPath = pathname.replace(/^\/admin/, '') || '/';
     return NextResponse.redirect(new URL(newPath + url.search, `${protocol}://admin.${baseDomain}`));
@@ -49,24 +56,28 @@ export function middleware(req: NextRequest) {
 
   // 5. ADMIN SUBDOMAIN INTERNAL ROUTING
   if (subdomain === 'admin') {
-    // Prevent recursive loop: If the path is already internal, stop here.
+    /**
+     * CRITICAL FIX: Loop Protection.
+     * When we rewrite to '/admin/users', the middleware runs again.
+     * We must check if the path already starts with /admin to prevent 
+     * rewriting it into /admin/admin/users.
+     */
     if (pathname.startsWith('/admin')) {
       return NextResponse.next();
     }
 
-    /**
-     * This handles the Home Page (https://admin.kalifaos.site/) 
-     * and all sub-pages (e.g., /users, /settings).
-     * It maps them internally to src/app/admin/[[...path]]
-     */
-    const internalPath = `/admin${pathname}`;
+    const path = pathname === '/' ? '' : pathname;
+    const internalPath = `/admin${path}`;
+    
+    // Using a new URL object for the rewrite is more stable than modifying the clone
     return NextResponse.rewrite(new URL(internalPath, req.url));
   }
 
-  // 6. DEFAULT (Main Site Home & Pages)
+  // 6. DEFAULT (Naked Domain / Main Site)
   return NextResponse.next();
 }
 
 export const config = {
+  // Ensure this matcher covers all routes except for the ones listed
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico|__|.*\\..*).*)'],
 };

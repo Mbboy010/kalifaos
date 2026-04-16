@@ -56,7 +56,7 @@ export default function InstrumentalPage() {
       name: 'Kalifa Os',
       image: 'https://kalifaos.site/logo.png',
       telephone: '+2349161963225', // ✅ Your Number
-      email: 'support@kalifaos.site', // Replace with your real email
+      email: 'kalifaos763@gmail.com', // Replace with your real email
       address: {
         '@type': 'PostalAddress',
         streetAddress: 'PZ Zaria',

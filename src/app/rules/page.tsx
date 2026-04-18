@@ -4,20 +4,20 @@ import { Smartphone, RotateCcw, Music, Scale, Zap, Cpu } from 'lucide-react';
 
 const RulesPage = () => {
   const RuleCard = ({ icon: Icon, title, description, points }: any) => (
-    <div className="bg-[#111111] border border-zinc-800 p-6 rounded-2xl hover:border-blue-900 transition-all duration-300">
+    <div className="bg-zinc-50 dark:bg-[#111111] border border-zinc-200 dark:border-zinc-800 p-6 rounded-2xl hover:border-blue-600 dark:hover:border-blue-900 transition-all duration-300 shadow-sm dark:shadow-none">
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-zinc-900 rounded-lg">
-          <Icon className="w-6 h-6 text-blue-500" />
+        <div className="p-2 bg-zinc-200 dark:bg-zinc-900 rounded-lg">
+          <Icon className="w-6 h-6 text-blue-600 dark:text-blue-500" />
         </div>
-        <h3 className="text-xl font-bold text-white uppercase tracking-tight">{title}</h3>
+        <h3 className="text-xl font-bold text-zinc-900 dark:text-white uppercase tracking-tight">{title}</h3>
       </div>
-      <p className="text-zinc-400 text-sm mb-4 leading-relaxed">
+      <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-4 leading-relaxed">
         {description}
       </p>
       <ul className="space-y-2">
         {points.map((point: string, index: number) => (
-          <li key={index} className="flex items-start gap-2 text-sm text-zinc-300">
-            <span className="text-blue-500 mt-1">•</span>
+          <li key={index} className="flex items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+            <span className="text-blue-600 dark:text-blue-500 mt-1">•</span>
             {point}
           </li>
         ))}
@@ -26,15 +26,15 @@ const RulesPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-black text-zinc-300 selection:bg-blue-500 selection:text-white">
+    <div className="min-h-screen bg-white dark:bg-black text-zinc-800 dark:text-zinc-300 selection:bg-blue-500 selection:text-white transition-colors duration-300">
       <div className="max-w-6xl mx-auto px-6 py-16">
         
         {/* Header Section */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tighter uppercase">
+          <h1 className="text-4xl md:text-6xl font-black text-zinc-900 dark:text-white mb-4 tracking-tighter uppercase">
             Service <span className="text-blue-600">Protocols</span>
           </h1>
-          <p className="max-w-2xl mx-auto text-zinc-500 text-lg">
+          <p className="max-w-2xl mx-auto text-zinc-500 dark:text-zinc-500 text-lg">
             Standard operating procedures for Mobile Engineering, OS Flashing, and Digital Asset acquisition.
           </p>
         </div>
@@ -117,15 +117,15 @@ const RulesPage = () => {
         </div>
 
         {/* Call to Action Footer */}
-        <div className="mt-20 p-10 bg-zinc-900/50 border border-zinc-800 rounded-3xl text-center backdrop-blur-sm">
-          <p className="text-zinc-400 italic text-sm mb-6">
+        <div className="mt-20 p-10 bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-3xl text-center backdrop-blur-sm">
+          <p className="text-zinc-500 dark:text-zinc-400 italic text-sm mb-6">
             "Software is a tool, engineering is a craft." — Operating since 2025
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <button className="px-10 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/20">
               I Accept the Terms
             </button>
-            <button className="px-10 py-4 border border-zinc-700 text-white font-bold rounded-xl hover:bg-zinc-800 transition-all">
+            <button className="px-10 py-4 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white font-bold rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all">
               Contact Support
             </button>
           </div>

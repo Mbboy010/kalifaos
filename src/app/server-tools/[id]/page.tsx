@@ -15,62 +15,76 @@ export default function ItemDetail() {
     .flatMap((group) => group.items)
     .find((i) => i.id === id);
 
-  // If the ID doesn't match any item in our data, show 404
   if (!item) {
     return notFound();
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#050505", color: "#fff", padding: "40px 24px" }}>
-      <div style={{ maxWidth: 600, margin: "0 auto" }}>
+    <div className="min-h-screen bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white transition-colors duration-300 px-6 py-10">
+      <div className="max-w-2xl mx-auto">
         <Link 
           href="/server-tools" 
-          style={{ color: "#00ff66", textDecoration: "none", fontSize: 12, fontFamily: "monospace" }}
+          className="text-sky-500 dark:text-sky-400 hover:text-blue-500 transition-colors text-xs font-mono"
         >
           &lt; BACK_TO_CONSOLE
         </Link>
         
-        <div style={{ marginTop: 40, border: "1px solid #1a1a1a", padding: 30, borderRadius: 8, background: "#080808" }}>
-          <h1 style={{ fontSize: 24, marginBottom: 20, color: "#00ff66" }}>Service Details</h1>
+        <div className="mt-10 border border-slate-200 dark:border-[#1a1a1a] p-8 rounded-xl bg-white dark:bg-[#080808] shadow-sm dark:shadow-none">
+          <h1 className="text-2xl font-bold mb-6 text-blue-600 dark:text-sky-400">
+            Service Details
+          </h1>
           
-          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="flex flex-col gap-6">
             <div>
-              <label style={{ color: "#555", fontSize: 11, display: "block", marginBottom: 5 }}>SERVICE_NAME</label>
-              <div style={{ fontSize: 16, lineHeight: 1.5 }}>{item.name}</div>
+              <label className="text-slate-400 dark:text-zinc-600 text-[10px] uppercase tracking-widest block mb-1">
+                SERVICE_NAME
+              </label>
+              <div className="text-lg font-medium leading-relaxed">
+                {item.name}
+              </div>
             </div>
 
-            <div style={{ display: "flex", gap: 40 }}>
+            <div className="flex flex-wrap gap-10">
               <div>
-                <label style={{ color: "#555", fontSize: 11, display: "block", marginBottom: 5 }}>EST_DELIVERY</label>
-                <div style={{ color: "#bbb" }}>{item.delivery}</div>
+                <label className="text-slate-400 dark:text-zinc-600 text-[10px] uppercase tracking-widest block mb-1">
+                  EST_DELIVERY
+                </label>
+                <div className="text-slate-600 dark:text-zinc-400">
+                  {item.delivery}
+                </div>
               </div>
               <div>
-                <label style={{ color: "#555", fontSize: 11, display: "block", marginBottom: 5 }}>CREDITS_REQUIRED</label>
-                <div style={{ color: "#00ff66", fontWeight: "bold", fontFamily: "monospace" }}>{item.price}</div>
+                <label className="text-slate-400 dark:text-zinc-600 text-[10px] uppercase tracking-widest block mb-1">
+                  CREDITS_REQUIRED
+                </label>
+                <div className="text-blue-600 dark:text-sky-400 font-bold font-mono text-lg">
+                  {item.price}
+                </div>
               </div>
             </div>
+
+            <div className="border-t border-slate-100 dark:border-[#1a1a1a] pt-6">
+              <label className="text-slate-400 dark:text-zinc-600 text-[10px] uppercase tracking-widest block mb-3">
+                SERVICE_OVERVIEW
+              </label>
+              <div 
+                className="text-sm leading-relaxed text-slate-700 dark:text-zinc-300 bg-slate-50 dark:bg-[#0c0c0c] p-4 rounded-lg border-l-4 border-blue-500 dark:border-sky-500"
+                dangerouslySetInnerHTML={{ __html: item.description }}
+              />
+            </div>
             
-            <div style={{ borderTop: "1px solid #1a1a1a", marginTop: 10, paddingTop: 20 }}>
-              <label style={{ color: "#555", fontSize: 11, display: "block", marginBottom: 5 }}>INTERNAL_ID</label>
-              <div style={{ color: "#444", fontSize: 12, fontFamily: "monospace" }}>{item.id}</div>
+            <div className="border-t border-slate-100 dark:border-[#1a1a1a] mt-2 pt-6">
+              <label className="text-slate-400 dark:text-zinc-600 text-[10px] uppercase tracking-widest block mb-1">
+                INTERNAL_ID
+              </label>
+              <div className="text-slate-400 dark:text-zinc-800 text-xs font-mono">
+                {item.id}
+              </div>
             </div>
           </div>
 
           <button 
-            style={{ 
-              marginTop: 40, 
-              width: "100%", 
-              background: "#00ff66", 
-              color: "#000",
-              border: "none", 
-              padding: "12px", 
-              borderRadius: 4, 
-              fontWeight: "bold", 
-              cursor: "pointer",
-              transition: "opacity 0.2s"
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+            className="mt-10 w-full bg-blue-600 hover:bg-sky-500 dark:bg-sky-500 dark:hover:bg-blue-600 text-white dark:text-black py-4 rounded-lg font-black transition-all duration-200 uppercase tracking-widest active:scale-[0.98]"
           >
             INITIALIZE SERVICE
           </button>

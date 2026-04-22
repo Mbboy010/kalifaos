@@ -202,7 +202,7 @@ export default function Footer() {
           {/* Developer Signature */}
           <div className="text-xs font-mono px-4 py-2 rounded-lg border bg-slate-900/50 border-slate-800 text-slate-500">
              <span className="opacity-50">git commit -m </span>
-             <span className={isAdminSection ? 'text-red-500' : 'text-cyan-500'}>"developed by Musa Hakilu"</span>
+             <span className={isAdminSection ? 'text-red-500' : 'text-cyan-500'}>"developed by Mbboy"</span>
           </div>
         </div>
       </div>

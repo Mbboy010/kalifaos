@@ -39,7 +39,7 @@ export default function ResellerPricingIMEI() {
       </div>
 
       {/* Sticky Search */}
-      <div style={{ position: "sticky", top: 0, zIndex: 100, background: "rgba(5, 5, 5, 0.8)", backdropFilter: "blur(12px)", borderBottom: "1px solid #1a1a1a", padding: "16px 24px" }}>
+      <div style={{top: 0,background: "rgba(5, 5, 5, 0.8)", backdropFilter: "blur(12px)", borderBottom: "1px solid #1a1a1a", padding: "16px 24px" }}>
         <div style={{ maxWidth: 960, margin: "0 auto", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
           <input
             type="text"

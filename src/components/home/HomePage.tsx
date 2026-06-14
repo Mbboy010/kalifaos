@@ -10,6 +10,7 @@ import YouTubeVideos from './YouTubeVideos';
 import WindowsBypassTools from '../window/WindowsBypassTools';
 import FrpLanding from './FrpLanding';
 import FrpToolHome from "./FrpToolHome";
+import App from "./App";
 
 // Icons
 import { 
@@ -97,8 +98,9 @@ export default function HomePage() {
       </section>
 
       <section className="bg-slate-50 dark:bg-gradient-to-b dark:from-[#0a0a0a] dark:to-slate-900">
-        <WindowsBypassTools />
+        <App />
       </section> 
+        <WindowsBypassTools />
 
       {/* --- CORE TOOLS --- */}
       <div className="relative z-20 -mt-10 pt-10">

@@ -46,7 +46,7 @@ export default function MainLayout() {
   const [darkMode, setDarkMode] = useState(true);
 
   return (
-    <div className={`${darkMode ? 'dark bg-[#050505] text-white' : 'bg-slate-50 text-slate-900'} min-h-screen transition-colors duration-300`}>
+    <div className={`${darkMode ? ' text-white' : 'text-slate-900'} min-h-screen transition-colors duration-300`}>
       <Topbar darkMode={darkMode} setDarkMode={setDarkMode} />
       <Banner />
       <Hero />
@@ -106,9 +106,9 @@ export function Hero() {
   return (
     <section className="px-6 py-10 flex flex-col items-center text-center">
       <div className="mb-8">
-        <div className="inline-block border border-blue-500/30 dark:border-sky-400/30 bg-blue-50 dark:bg-[#0c1a30] rounded-full px-4 py-1.5 shadow-[0_0_15px_rgba(56,189,248,0.15)] transition-colors">
-          <span className="text-blue-600 dark:text-sky-400 text-xs font-bold tracking-wide">
-            PREMIUM KALIFAOS SERVICES PLATFORM
+        <div className="inline-block border border-[#ff6b00]/50 bg-[#25150c] rounded-full px-4 py-1.5 shadow-[0_0_15px_rgba(255,107,0,0.2)]">
+          <span className="text-[#ff6b00] text-xs font-bold tracking-wide">
+            PREMIUM GSM SERVICES PLATFORM
           </span>
         </div>
       </div>
@@ -192,7 +192,7 @@ export function Stats() {
     <section className="px-6 pb-16 flex flex-col items-center gap-6 max-w-5xl mx-auto">
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 w-full">
         <div className="bg-white dark:bg-[#151b2b] border border-slate-200 dark:border-white/5 rounded-[2rem] p-8 flex flex-col items-center justify-center shadow-sm dark:shadow-none">
-          <span className="text-4xl font-bold text-blue-600 dark:text-sky-400 mb-2">50K+</span>
+          <span className="text-4xl font-bold text-blue-600 dark:text-sky-400 mb-2">25k+</span>
           <span className="text-slate-500 dark:text-gray-400 text-sm">Completed Orders</span>
         </div>
         
@@ -230,7 +230,7 @@ export function Payments() {
 
 export function FloatingWhatsApp() {
   return (
-    <a href="#" className="fixed bottom-6 right-6 w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-[0_4px_15px_rgba(37,211,102,0.4)] hover:scale-110 active:scale-95 transition-transform z-50">
+    <a href="#" className="fixed bottom-6 right-6 w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-[0_4px_15px_rgba(37,211,102,0.4)] hover:scale-110 active:scale-95 transition-transform z-10">
       <WhatsAppIcon />
     </a>
   );

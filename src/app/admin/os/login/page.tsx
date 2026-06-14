@@ -41,7 +41,7 @@ const LoginPage = () => {
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push('/dashboard');
+      router.push('/');
     } catch (err: any) {
       setError("Invalid email or password.");
     } finally {
@@ -54,7 +54,7 @@ const LoginPage = () => {
     setError(null);
     try {
       await handleGoogleSignIn();
-      router.push('/dashboard');
+      router.push('/');
     } catch (err: any) {
       setError("Google authentication failed.");
     } finally {

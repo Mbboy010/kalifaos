@@ -7,7 +7,7 @@ import { Topbar, Banner, Hero, Services, Stats, Payments, FloatingWhatsApp } fro
 
 export default function App() {
   return (
-    <div className=" min-h-screen font-sans selection:bg-blue-500/30 overflow-x-hidden">
+    <div className=" min-h-screen font-sans overflow-x-hidden">
       <main className="w-full relative">
         <Hero />
         <Services />

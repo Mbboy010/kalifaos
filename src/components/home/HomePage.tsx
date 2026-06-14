@@ -97,7 +97,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-slate-50 dark:bg-gradient-to-b dark:from-[#0a0a0a] dark:to-slate-900">
+      <section className="">
         <App />
       </section> 
         <WindowsBypassTools />

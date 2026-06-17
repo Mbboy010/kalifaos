@@ -22,7 +22,7 @@ import { Home, Smartphone,
   Unlock, Menu, X, Search, Terminal, ChevronRight, 
   User, LogIn, LogOut, Shield, UserPlus, Loader2,
   Users, HardDrive, Monitor, Youtube, MessageSquare, Globe,
-  Server, Mail, CreditCard, Scale // Added these for the new features
+  Server, Mail, CreditCard, Scale, Wrench
 } from 'lucide-react';
 
 export default function Navigate() {
@@ -100,17 +100,21 @@ export default function Navigate() {
     }
   };
 
-  // 🔹 Client Section Links
-  const publicLinks = [
- { name: 'Home', href: '/', icon: <Home size={16} /> },
-  { name: 'FRP APKS', href: '/frp-tools-apk-download', icon: <Smartphone size={16} />},
-  { name: 'Windows tools', href: '/windows-tools?list_page=1', icon: <Monitor size={16} /> },
-    { name: 'Online Server Tools', href: '/server-tools', icon: <Server size={16}/> },
-    { name: 'Contact Us', href: '/contact', icon: <Mail size={16}/> },
+  // 🔹 Link Groupings for Mobile Sections
+  const clientLinks = [
+    { name: 'Home', href: '/', icon: <Home size={16} /> },
+    { name: 'FRP APKS', href: '/frp-tools-apk-download', icon: <Smartphone size={16} />},
+    { name: 'Windows tools', href: '/windows-tools?list_page=1', icon: <Monitor size={16} /> },
   ];
 
-  // 🔹 New Section: Other Pages
+  const serverToolLinks = [
+    { name: 'IMEI Service', href: '/imei-service', icon: <Globe size={16}/> },
+    { name: 'Server Service', href: '/server-service', icon: <Server size={16}/> },
+    { name: 'Tool Rent Service', href: '/tool-rent-service', icon: <Wrench size={16}/> },
+  ];
+
   const otherLinks = [
+    { name: 'Contact Us', href: '/contact', icon: <Mail size={16}/> },
     { name: 'Payment Details', href: '/payments', icon: <CreditCard size={16}/> },
     { name: 'Website Rules', href: '/rules', icon: <Scale size={16}/> },
   ];
@@ -123,7 +127,9 @@ export default function Navigate() {
     { name: 'Messages', href: '/contact-messages', icon: <MessageSquare size={16}/> },
   ];
 
-  const currentLinks = isAdminSection ? adminLinks : publicLinks;
+  // Combine links for desktop view
+  const publicDesktopLinks = [...clientLinks, ...serverToolLinks, { name: 'Contact Us', href: '/contact', icon: <Mail size={16}/> }];
+  const currentDesktopLinks = isAdminSection ? adminLinks : publicDesktopLinks;
 
   return (
     <>
@@ -134,10 +140,10 @@ export default function Navigate() {
             : 'bg-transparent border-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             
-            <a href="/" className="group flex items-center gap-3 relative z-50">
+            <a href="/" className="group flex items-center gap-3 relative z-50 shrink-0">
               <div className={`p-2 rounded-lg border transition-all duration-300 ${
                 isAdminSection
                   ? 'bg-red-500/10 border-red-500/50 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
@@ -155,12 +161,13 @@ export default function Navigate() {
               </div>
             </a>
 
-            <nav className="hidden md:flex items-center space-x-8">
-              {currentLinks.map((link: any) => (
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center gap-4 xl:gap-6 flex-1 justify-center px-4">
+              {currentDesktopLinks.map((link: any) => (
                 <a
                   key={link.name}
                   href={link.href}
-                  className={`relative flex items-center gap-2 text-sm font-medium transition-colors duration-200 group py-2 
+                  className={`relative flex items-center gap-2 text-[13px] xl:text-sm font-medium transition-colors duration-200 group py-2 whitespace-nowrap
                     text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white 
                     ${pathname === link.href ? 'text-blue-600 dark:text-white' : ''}`}
                 >
@@ -172,7 +179,7 @@ export default function Navigate() {
               ))}
             </nav>
 
-            <div className="flex items-center gap-3 md:gap-5">
+            <div className="flex items-center gap-3 lg:gap-4 shrink-0">
               {!isAdminSection && (
                 <button 
                   onClick={() => setSearchOpen(!searchOpen)}
@@ -190,15 +197,15 @@ export default function Navigate() {
                 <Toggle />
               </div>
 
-              <div className="hidden md:flex items-center gap-2 border-l border-slate-800/50 pl-5 min-w-[120px] justify-end">
+              <div className="hidden lg:flex items-center gap-2 border-l border-slate-800/50 pl-4 xl:pl-5 min-w-[120px] justify-end">
                 {isAuthLoading ? (
                   <Loader2 size={20} className="animate-spin text-slate-400 dark:text-slate-600" />
                 ) : !user ? (
                   <>
-                    <a href="/login" className="text-xs font-bold uppercase px-3 py-2 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white">
+                    <a href="/login" className="text-xs font-bold uppercase px-2 xl:px-3 py-2 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white">
                       Login
                     </a>
-                    <a href="/register" className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all bg-blue-600 hover:bg-blue-700 text-white dark:bg-cyan-500/10 dark:text-cyan-400 dark:border dark:border-cyan-500/20 dark:hover:bg-cyan-500 dark:hover:text-black">
+                    <a href="/register" className="flex items-center gap-2 px-3 xl:px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all bg-blue-600 hover:bg-blue-700 text-white dark:bg-cyan-500/10 dark:text-cyan-400 dark:border dark:border-cyan-500/20 dark:hover:bg-cyan-500 dark:hover:text-black whitespace-nowrap">
                       <UserPlus size={14} /> register
                     </a>
                   </>
@@ -220,7 +227,7 @@ export default function Navigate() {
                 )}
               </div>
 
-              <div className="md:hidden relative z-50">
+              <div className="lg:hidden relative z-50">
                 <button 
                   onClick={toggleMenu}
                   className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 transition-all"
@@ -241,7 +248,7 @@ export default function Navigate() {
         )}
 
         {/* --- MOBILE MENU --- */}
-        <div className={`md:hidden overflow-y-auto transition-all duration-300 ease-in-out bg-white dark:bg-[#0a0a0a] fixed left-0 w-full ${
+        <div className={`lg:hidden overflow-y-auto transition-all duration-300 ease-in-out bg-white dark:bg-[#0a0a0a] fixed left-0 w-full ${
           chat ? 'top-20 opacity-100' : '-top-[100vh] opacity-0 pointer-events-none'
         }`} style={{ height: 'calc(100vh - 80px)' }}>
           
@@ -297,30 +304,11 @@ export default function Navigate() {
               )}
             </div>
 
-            {/* 1: Client Section Links */}
-            <p className="text-[10px] font-mono opacity-40 uppercase tracking-widest ml-2">Client Section</p>
-            {currentLinks.map((link: any, index) => (
-              <a
-                key={index}
-                href={link.href}
-                onClick={toggleMenu}
-                className="flex items-center justify-between p-4 rounded-xl border transition-all border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300"
-              >
-                <div className="flex items-center gap-3">
-                  <span className={isAdminSection ? 'text-red-500' : 'text-blue-600 dark:text-cyan-500'}>
-                    {link.icon || <Terminal size={16} />}
-                  </span>
-                  <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
-                </div>
-                <ChevronRight size={16} className="opacity-50" />
-              </a>
-            ))}
-
-            {/* 2: Other Pages Section */}
-            {!isAdminSection && (
-              <div className="pt-4 space-y-4">
-                <p className="text-[10px] font-mono opacity-40 uppercase tracking-widest ml-2">Other Pages</p>
-                {otherLinks.map((link: any, index) => (
+            {isAdminSection ? (
+              // ADMIN MOBILE MENU
+              <div className="space-y-2">
+                <p className="text-[10px] font-mono opacity-40 uppercase tracking-widest ml-2 mb-2">Admin Section</p>
+                {adminLinks.map((link: any, index) => (
                   <a
                     key={index}
                     href={link.href}
@@ -328,15 +316,73 @@ export default function Navigate() {
                     className="flex items-center justify-between p-4 rounded-xl border transition-all border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-blue-600 dark:text-cyan-500">
-                        {link.icon}
-                      </span>
+                      <span className="text-red-500">{link.icon}</span>
                       <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
                     </div>
                     <ChevronRight size={16} className="opacity-50" />
                   </a>
                 ))}
               </div>
+            ) : (
+              // PUBLIC MOBILE MENU
+              <>
+                {/* 1: Client Section */}
+                <div className="space-y-2">
+                  <p className="text-[10px] font-mono opacity-40 uppercase tracking-widest ml-2 mb-2">Client Section</p>
+                  {clientLinks.map((link: any, index) => (
+                    <a
+                      key={index}
+                      href={link.href}
+                      onClick={toggleMenu}
+                      className="flex items-center justify-between p-4 rounded-xl border transition-all border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-blue-600 dark:text-cyan-500">{link.icon}</span>
+                        <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
+                      </div>
+                      <ChevronRight size={16} className="opacity-50" />
+                    </a>
+                  ))}
+                </div>
+
+                {/* 2: Online Server Tools Section */}
+                <div className="pt-4 space-y-2">
+                  <p className="text-[10px] font-mono opacity-40 uppercase tracking-widest ml-2 mb-2">Online Server Tools</p>
+                  {serverToolLinks.map((link: any, index) => (
+                    <a
+                      key={index}
+                      href={link.href}
+                      onClick={toggleMenu}
+                      className="flex items-center justify-between p-4 rounded-xl border transition-all border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-blue-600 dark:text-cyan-500">{link.icon}</span>
+                        <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
+                      </div>
+                      <ChevronRight size={16} className="opacity-50" />
+                    </a>
+                  ))}
+                </div>
+
+                {/* 3: Other Pages Section */}
+                <div className="pt-4 space-y-2">
+                  <p className="text-[10px] font-mono opacity-40 uppercase tracking-widest ml-2 mb-2">Other Pages</p>
+                  {otherLinks.map((link: any, index) => (
+                    <a
+                      key={index}
+                      href={link.href}
+                      onClick={toggleMenu}
+                      className="flex items-center justify-between p-4 rounded-xl border transition-all border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-blue-600 dark:text-cyan-500">{link.icon}</span>
+                        <span className="font-semibold uppercase text-xs tracking-wider">{link.name}</span>
+                      </div>
+                      <ChevronRight size={16} className="opacity-50" />
+                    </a>
+                  ))}
+                </div>
+              </>
             )}
 
             <div className="pt-4 space-y-3">

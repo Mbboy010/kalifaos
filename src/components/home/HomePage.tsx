@@ -103,7 +103,7 @@ export default function HomePage() {
         <WindowsBypassTools />
 
       {/* --- CORE TOOLS --- */}
-      <div className="relative z-20 -mt-10 pt-10">
+      <div className="relative  -mt-10 pt-10">
         <FrpLanding />
         <FrpToolHome />
       </div>

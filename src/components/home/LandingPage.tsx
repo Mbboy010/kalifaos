@@ -53,7 +53,7 @@ export default function MainLayout() {
       <Services />
       <Stats />
       <Payments />
-      <FloatingWhatsApp />
+      <FloatingContactButtons />
     </div>
   );
 }
@@ -214,7 +214,6 @@ export function Payments() {
   return (
     <section className="px-6 pb-24 text-center">
       <h3 className="text-slate-900 dark:text-white text-3xl font-medium mb-8">Secure Payments</h3>
-      {/* Upscaled card containers from max-w-[280px] to max-w-[360px] */}
       <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-4 max-w-[360px] mx-auto">
         <div className="bg-white dark:bg-[#151b2b] border border-slate-100 dark:border-none p-3 rounded-2xl flex items-center justify-center w-28 h-20 shadow-sm"><PayPalIcon /></div>
         <div className="bg-white dark:bg-[#151b2b] border border-slate-100 dark:border-none p-3 rounded-2xl flex items-center justify-center w-28 h-20 shadow-sm"><BitcoinIcon /></div>
@@ -229,9 +228,31 @@ export function Payments() {
 }
 
 export function FloatingWhatsApp() {
+  const commonClasses = "w-14 h-14 text-white rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-transform duration-300";
+
   return (
-    <a href="#" className="fixed bottom-6 right-6 w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-[0_4px_15px_rgba(37,211,102,0.4)] hover:scale-110 active:scale-95 transition-transform z-10">
-      <WhatsAppIcon />
-    </a>
+    <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-20">
+      {/* Telegram Button */}
+      <a
+        href="https://t.me/YOUR_USERNAME"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Contact on Telegram"
+        className={`${commonClasses} bg-[#33A8E2] shadow-[0_4px_15px_rgba(51,168,226,0.4)]`}
+      >
+        <TelegramIcon />
+      </a>
+
+      {/* WhatsApp Button */}
+      <a
+        href="https://wa.me/234XXXXXXXXXX"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Contact on WhatsApp"
+        className={`${commonClasses} bg-[#25D366] shadow-[0_4px_15px_rgba(37,211,102,0.4)]`}
+      >
+        <WhatsAppIcon />
+      </a>
+    </div>
   );
 }

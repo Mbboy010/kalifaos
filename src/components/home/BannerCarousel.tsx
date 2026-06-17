@@ -30,7 +30,11 @@ export default function BannerCarousel() {
 
   return (
     <div className="w-full flex justify-center items-center p-4">
-      <div className="relative w-full max-w-[1400px] aspect-[21/9] overflow-hidden rounded-xl shadow-2xl bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+      {/* FIXED: Removed all the fixed heights (h-[250px], etc.) and the 21:9 aspect ratio.
+        Added "aspect-video" (which is exactly 16:9). 
+        Now the container will perfectly match your 1920x1080 images on every device without cropping. 
+      */}
+      <div className="relative w-full max-w-[1400px] aspect-video overflow-hidden rounded-xl shadow-2xl bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
         
         {/* --- MOVING TRACK --- */}
         <div 
@@ -38,11 +42,12 @@ export default function BannerCarousel() {
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {SLIDES.map((slide) => (
-            <div key={slide.id} className="min-w-full h-full shrink-0">
+            <div key={slide.id} className="relative min-w-full h-full shrink-0">
               <img
                 src={slide.src}
                 alt={slide.alt}
-                className="w-full h-full object-cover select-none"
+                // Because the container is now 16:9, object-cover will fit perfectly without cutting off text.
+                className="absolute inset-0 w-full h-full object-cover select-none"
                 draggable="false"
               />
             </div>

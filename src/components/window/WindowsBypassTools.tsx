@@ -48,24 +48,11 @@ export default function WindowsBypassTools() {
     if (price === undefined || price === null || price === '') return '';
     const raw = typeof price === 'number' ? price : Number(String(price).replace(/[^0-9.-]+/g, ''));
     if (Number.isNaN(raw)) return String(price);
-    if (raw === 0) return 'COMMUNITY_ACCESS';
+    if (raw === 0) return 'FREE';
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: 'NGN',
     }).format(raw);
-  };
-
-  const formatDate = (value: any) => {
-    const now = Date.now();
-    const then = getTimeFromValue(value);
-    if (!then) return '';
-    const diffSec = Math.floor((now - then) / 1000);
-    if (diffSec < 60) return `${diffSec}s ago`;
-    const minutes = Math.floor(diffSec / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    return `${Math.floor(hours / 24)}d ago`;
   };
 
   // --- DATA FETCHING ---
@@ -182,7 +169,7 @@ export default function WindowsBypassTools() {
                   </span>
                   <div className="flex items-center gap-2 text-sm font-bold opacity-50 bg-slate-200/50 dark:bg-slate-800/50 px-4 py-2 rounded-full">
                     <Clock size={16} />
-                    {formatDate(tool.date)}
+                    {getTimeFromValue(tool.date) ? new Date(getTimeFromValue(tool.date)).toLocaleDateString() : 'N/A'}
                   </div>
                 </div>
               </div>

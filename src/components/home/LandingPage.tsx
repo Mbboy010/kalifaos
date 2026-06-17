@@ -53,7 +53,7 @@ export default function MainLayout() {
       <Services />
       <Stats />
       <Payments />
-      <FloatingContactButtons />
+      <FloatingWhatsApp />
     </div>
   );
 }

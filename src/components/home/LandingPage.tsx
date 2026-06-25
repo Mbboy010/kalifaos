@@ -125,14 +125,14 @@ export function Hero() {
 
       <div className="flex flex-col w-full gap-4 max-w-xs">
         {/* Adjusted to Natural Brand Color (#25D366) */}
-        <button className="bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-xl py-4 flex items-center justify-center gap-2 font-semibold shadow-[0_4px_20px_rgba(37,211,102,0.25)] transition-all active:scale-95">
+        <a href="https://wa.me/2349161963225" target="_blank" rel="noopener noreferrer" className="bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-xl py-4 flex items-center justify-center gap-2 font-semibold shadow-[0_4px_20px_rgba(37,211,102,0.25)] transition-all active:scale-95">
           <WhatsAppIcon />
           WhatsApp Support
-        </button>
-        <button className="bg-sky-500 hover:bg-sky-600 text-white dark:text-black rounded-xl py-4 flex items-center justify-center gap-2 font-semibold shadow-[0_4px_20px_rgba(14,165,233,0.25)] transition-all active:scale-95">
+        </a>
+        <a href="https://t.me/+PeoKYiTOWpozNDM0" target="_blank" rel="noopener noreferrer" className="bg-sky-500 hover:bg-sky-600 text-white dark:text-black rounded-xl py-4 flex items-center justify-center gap-2 font-semibold shadow-[0_4px_20px_rgba(14,165,233,0.25)] transition-all active:scale-95">
           <TelegramIcon />
           Telegram Channel
-        </button>
+        </a>
       </div>
     </section>
   );
@@ -234,7 +234,7 @@ export function FloatingWhatsApp() {
     <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-20">
       {/* Telegram Button */}
       <a
-        href="https://t.me/YOUR_USERNAME"
+        href="https://t.me/+PeoKYiTOWpozNDM0"
         target="_blank"
         rel="noopener noreferrer"
         title="Contact on Telegram"
@@ -245,7 +245,7 @@ export function FloatingWhatsApp() {
 
       {/* WhatsApp Button */}
       <a
-        href="https://wa.me/234XXXXXXXXXX"
+        href="https://wa.me/2349161963225"
         target="_blank"
         rel="noopener noreferrer"
         title="Contact on WhatsApp"

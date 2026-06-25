@@ -96,11 +96,8 @@ export default function ProfilePage() {
             </div>
             
             <h1 className="text-2xl font-black tracking-tighter mb-1 text-slate-900 dark:text-white">
-              {userData?.name || 'Musa Hakilu'}
+              {userData?.name || 'Unknown'}
             </h1>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-blue-600 dark:text-cyan-500 mb-6">
-              Full-Stack Developer & Security Expert
-            </p>
 
             <div className="flex items-center justify-center gap-2 mb-6">
                <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-900 text-[10px] font-mono border dark:border-slate-800">
@@ -149,23 +146,8 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* ASSET ARCHIVE / PROJECTS SECTION */}
-          <div className="p-8 rounded-2xl border bg-white border-slate-200 dark:bg-[#0a0a0a] dark:border-slate-800">
-            <h2 className="text-xl font-black tracking-tighter mb-6 flex items-center gap-3 text-slate-900 dark:text-white">
-              <HardDrive className="text-blue-600 dark:text-cyan-500" /> Active_Asset_Nodes
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <ProjectNode name="Asstudio" type="Marketplace" />
-              <ProjectNode name="Kalifa OS" type="Firmware" />
-              <ProjectNode name="SolDevHub" type="Web3" />
-            </div>
-          </div>
+          
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <ActionCard icon={<Lock size={20} />} label="Security_Vault" href="/settings/security" />
-            <ActionCard icon={<Activity size={20} />} label="System_Logs" href="/settings/logs" />
-            <ActionCard icon={<Globe size={20} />} label="Global_Sync" href="/" />
-          </div>
         </section>
       </main>
     </div>

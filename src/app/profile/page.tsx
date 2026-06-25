@@ -6,7 +6,7 @@ import {
   User, Mail, Phone, Shield, Terminal, 
   Settings, LogOut, Cpu, Activity, Clock,
   Edit3, ShieldAlert, Globe, Loader2, Lock,
-  MapPin, Calendar, SwatchBook, Binary, HardDrive
+  MapPin, Calendar, SwatchBook, Binary, HardDrive, Map
 } from 'lucide-react';
 
 // Firebase Imports
@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation';
 
 interface UserData {
   uid: string;
-  name: string; // Map to the 'name' field in your registry
+  name: string; 
   email: string;
   phone: string;
   role: string;
@@ -70,6 +70,14 @@ export default function ProfilePage() {
     );
   }
 
+  // Address logic to bypass the "6yy" placeholder from the DB
+  const displayAddress = userData?.address && userData.address !== '6yy' 
+    ? userData.address 
+    : 'Kargi, Kubau Local Government';
+  
+  const displayCity = userData?.city || 'Zaria';
+  const displayCountry = userData?.country || 'Nigeria';
+
   return (
     <div className="min-h-screen pb-20 transition-colors duration-500 bg-slate-100 text-slate-900 dark:bg-[#050505] dark:text-slate-300">
 
@@ -80,7 +88,7 @@ export default function ProfilePage() {
           <div className="p-8 rounded-2xl border text-center transition-all bg-white border-slate-200 shadow-xl dark:bg-[#0a0a0a] dark:border-slate-800 dark:shadow-2xl">
             <div className="relative inline-block mb-6">
               <div className="w-32 h-32 rounded-3xl border-2 flex items-center justify-center text-4xl font-black bg-blue-50 border-blue-200 text-blue-600 dark:bg-slate-900 dark:border-cyan-500/30 dark:text-white">
-                {userData?.name?.charAt(0).toUpperCase() || 'U'}
+                {userData?.name?.charAt(0).toUpperCase() || 'M'}
               </div>
               <div className="absolute -bottom-2 -right-2 p-2 rounded-xl border bg-blue-600 text-white border-white dark:bg-cyan-500 dark:text-black dark:border-slate-900 shadow-lg">
                 <Shield size={16} />
@@ -130,7 +138,11 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <ParamCard icon={<Mail size={14} />} label="Network_Address" value={userData?.email} />
               <ParamCard icon={<Phone size={14} />} label="Comms_Line" value={userData?.phone || '+234 ...'} />
-              <ParamCard icon={<MapPin size={14} />} label="Geolocation" value={`${userData?.city || 'Kaduna'}, ${userData?.country || 'Nigeria'}`} />
+              
+              {/* Address and Geolocation appropriately separated */}
+              <ParamCard icon={<Map size={14} />} label="Street_Address" value={displayAddress} />
+              <ParamCard icon={<MapPin size={14} />} label="Geolocation" value={`${displayCity}, ${displayCountry}`} />
+              
               <ParamCard icon={<Calendar size={14} />} label="Cycle_Date (DOB)" value={userData?.dob || 'YYYY-MM-DD'} />
               <ParamCard icon={<SwatchBook size={14} />} label="Identity_Type" value={userData?.gender || 'Not_Set'} />
               <ParamCard icon={<ShieldAlert size={14} />} label="Protocol_ID" value={userData?.uid} fullWidth />

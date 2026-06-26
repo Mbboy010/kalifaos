@@ -7,14 +7,14 @@ import {
   Settings, LogOut, Cpu, Activity, Clock,
   Edit3, ShieldAlert, Globe, Loader2, Lock,
   MapPin, Calendar, SwatchBook, Binary, HardDrive, Map,
-  DollarSign, PlusCircle, History, CreditCard,
-  Smartphone, Server, Wrench // Added icons for the new services
+  DollarSign, PlusCircle, History, CreditCard, CheckCircle2, X,
+  Smartphone, Server, Wrench 
 } from 'lucide-react';
 
 // Firebase Imports
 import { auth, db } from '@/server/firebaseApi';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 
 // Financial types
@@ -26,11 +26,10 @@ interface Transaction {
   type: 'deposit' | 'withdrawal' | 'payment';
 }
 
-// New Service History types
 interface ServiceLog {
   id: string;
   serviceType: 'IMEI Service' | 'Server Service' | 'Tool Rent Service';
-  details: string; // e.g., "Device Unlock", "FRP Bypass", "Box Rent 24h"
+  details: string; 
   date: string;
   status: 'success' | 'pending' | 'failed';
 }
@@ -52,21 +51,73 @@ interface UserData {
   balance?: number;
   depositId?: string;
   transactions?: Transaction[];
-  serviceLogs?: ServiceLog[]; // Added service logs field
+  serviceLogs?: ServiceLog[]; 
 }
+
+const COUNTRIES = [
+  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan",
+  "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi",
+  "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic",
+  "Denmark", "Djibouti", "Dominica", "Dominican Republic",
+  "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia",
+  "Fiji", "Finland", "France",
+  "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana",
+  "Haiti", "Honduras", "Hungary",
+  "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy",
+  "Jamaica", "Japan", "Jordan",
+  "Kazakhstan", "Kenya", "Kiribati", "Korea, North", "Korea, South", "Kosovo", "Kuwait", "Kyrgyzstan",
+  "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg",
+  "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar",
+  "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway",
+  "Oman",
+  "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal",
+  "Qatar",
+  "Romania", "Russia", "Rwanda",
+  "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria",
+  "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu",
+  "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan",
+  "Vanuatu", "Vatican City", "Venezuela", "Vietnam",
+  "Yemen", "Zambia", "Zimbabwe"
+];
 
 export default function ProfilePage() {
   const router = useRouter();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  
+  // Modal Update States
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [updateFormData, setUpdateFormData] = useState({
+    name: '',
+    phone: '',
+    country: '',
+    city: '',
+    address: '',
+    gender: '',
+    dob: ''
+  });
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
+        setIsEmailVerified(user.emailVerified);
         const userDocRef = doc(db, "users", user.uid);
         const unsubscribeDoc = onSnapshot(userDocRef, (docSnap) => {
           if (docSnap.exists()) {
-            setUserData(docSnap.data() as UserData);
+            const data = docSnap.data() as UserData;
+            setUserData(data);
+            setUpdateFormData({
+              name: data.name || '',
+              phone: data.phone || '',
+              country: data.country || '',
+              city: data.city || '',
+              address: data.address || '',
+              gender: data.gender || '',
+              dob: data.dob || ''
+            });
           }
           setLoading(false);
         });
@@ -80,6 +131,34 @@ export default function ProfilePage() {
     return () => unsubscribeAuth();
   }, [router]);
 
+  const handleUpdateRegistry = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!auth.currentUser) return;
+    
+    setUpdateLoading(true);
+    setUpdateError(null);
+
+    try {
+      const userDocRef = doc(db, "users", auth.currentUser.uid);
+      // Strictly updating secondary attributes - excluding UID and Email entirely
+      await updateDoc(userDocRef, {
+        name: updateFormData.name,
+        phone: updateFormData.phone,
+        country: updateFormData.country,
+        city: updateFormData.city,
+        address: updateFormData.address,
+        gender: updateFormData.gender,
+        dob: updateFormData.dob
+      });
+      setIsUpdateModalOpen(false);
+    } catch (err: any) {
+      setUpdateError('Registry Write Failure: Operation Terminated');
+      console.error(err);
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
   const handleLogout = async () => {
     await signOut(auth);
     router.push('/login');
@@ -87,7 +166,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center  bg-slate-50 dark:bg-[#050505]">
+      <div className="min-h-screen flex flex-col items-center bg-slate-50 dark:bg-[#050505]">
         <Cpu className="animate-spin mt-20 text-blue-600 dark:text-cyan-500 mb-4" size={40} />
         <p className="font-mono text-xs tracking-widest opacity-50 dark:text-slate-400">SYNCHRONIZING_CORE...</p>
       </div>
@@ -109,7 +188,7 @@ export default function ProfilePage() {
         {/* --- LEFT: IDENTITY NODE --- */}
         <section className="lg:col-span-4 space-y-6">
           <div className="p-8 rounded-2xl border text-center transition-all bg-white border-slate-200 shadow-xl dark:bg-[#0a0a0a] dark:border-slate-800 dark:shadow-2xl">
-            <div className="relative inline-block mb-6">
+            <div className="relative inline-block mb-4">
               <div className="w-32 h-32 rounded-3xl border-2 flex items-center justify-center text-4xl font-black bg-blue-50 border-blue-200 text-blue-600 dark:bg-slate-900 dark:border-cyan-500/30 dark:text-white">
                 {userData?.name?.charAt(0).toUpperCase() || 'M'}
               </div>
@@ -122,13 +201,29 @@ export default function ProfilePage() {
               {userData?.name || 'Unknown'}
             </h1>
 
+            {/* Authority Verification Status Module */}
+            <div className="flex justify-center mb-4">
+              {isEmailVerified ? (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold bg-green-50 text-green-600 border border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20">
+                  <CheckCircle2 size={12} /> Authority_Verified
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold bg-amber-50 text-amber-600 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">
+                  <ShieldAlert size={12} /> Unverified_Operator
+                </div>
+              )}
+            </div>
+
             <div className="flex items-center justify-center gap-2 mb-6 w-full">
                <span className="px-3 py-2 w-full rounded-xl bg-slate-100 dark:bg-slate-900 text-[10px] font-mono border dark:border-slate-800 break-all">
                   ID: {userData?.uid}
                </span>
             </div>
 
-            <button className="w-full py-3 rounded-xl border font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all border-slate-200 hover:bg-slate-50 text-slate-600 dark:border-slate-800 dark:hover:bg-slate-900 dark:text-slate-400 dark:hover:text-white">
+            <button 
+              onClick={() => setIsUpdateModalOpen(true)}
+              className="w-full py-3 rounded-xl border font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all border-slate-200 hover:bg-slate-50 text-slate-600 dark:border-slate-800 dark:hover:bg-slate-900 dark:text-slate-400 dark:hover:text-white"
+            >
               <Edit3 size={14} /> Update_Core_Registry
             </button>
           </div>
@@ -268,11 +363,189 @@ export default function ProfilePage() {
 
         </section>
       </main>
+
+      {/* --- SECURE UPDATE CORE REGISTRY MODAL OVERLAY --- */}
+      {isUpdateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-xl p-6 rounded-2xl border shadow-2xl bg-white dark:bg-[#0a0a0a] border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+            
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-black uppercase tracking-tight flex items-center gap-2 text-slate-900 dark:text-white">
+                <Settings className="text-blue-600 dark:text-cyan-500" size={18} /> Update_Core_Parameters
+              </h3>
+              <button 
+                onClick={() => setIsUpdateModalOpen(false)}
+                className="p-1.5 rounded-lg opacity-50 hover:opacity-100 transition-opacity bg-slate-100 dark:bg-slate-900"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {updateError && (
+              <div className="mb-4 p-3 text-[10px] font-mono font-bold uppercase tracking-wider rounded-lg border bg-red-50 border-red-200 text-red-600 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-400">
+                {updateError}
+              </div>
+            )}
+
+            <form onSubmit={handleUpdateRegistry} className="space-y-4">
+              
+              {/* IMMUTABLE FIELDS PROTOCOL - STRICT READ ONLY */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl border border-dashed bg-slate-50 border-slate-200 dark:bg-slate-950/40 dark:border-slate-850">
+                <div>
+                  <label className="block text-[9px] font-mono font-bold uppercase tracking-widest text-red-500 mb-1 flex items-center gap-1">
+                    <Lock size={10} /> Immutable Network ID
+                  </label>
+                  <input 
+                    type="text" 
+                    value={userData?.uid || ''} 
+                    disabled 
+                    className="w-full px-3 py-2 text-xs font-mono rounded-lg border outline-none cursor-not-allowed bg-slate-200/60 border-slate-300 opacity-60 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-500" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-mono font-bold uppercase tracking-widest text-red-500 mb-1 flex items-center gap-1">
+                    <Lock size={10} /> Immutable System Email
+                  </label>
+                  <input 
+                    type="text" 
+                    value={userData?.email || ''} 
+                    disabled 
+                    className="w-full px-3 py-2 text-xs font-mono rounded-lg border outline-none cursor-not-allowed bg-slate-200/60 border-slate-300 opacity-60 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-500" 
+                  />
+                </div>
+              </div>
+
+              {/* MUTABLE REGISTRY PARAMETERS */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-mono font-bold uppercase tracking-widest opacity-60 mb-1">Operator Name</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-2.5 w-4 h-4 opacity-40" />
+                    <input 
+                      type="text" 
+                      value={updateFormData.name} 
+                      onChange={(e) => setUpdateFormData(p => ({ ...p, name: e.target.value }))}
+                      required 
+                      className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border outline-none bg-slate-50 border-slate-200 dark:bg-slate-900/50 dark:border-slate-800 focus:border-blue-500 dark:focus:border-cyan-500" 
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-mono font-bold uppercase tracking-widest opacity-60 mb-1">Communications Line (Phone)</label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-2.5 w-4 h-4 opacity-40" />
+                    <input 
+                      type="tel" 
+                      value={updateFormData.phone} 
+                      onChange={(e) => setUpdateFormData(p => ({ ...p, phone: e.target.value }))}
+                      required 
+                      className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border outline-none bg-slate-50 border-slate-200 dark:bg-slate-900/50 dark:border-slate-800 focus:border-blue-500 dark:focus:border-cyan-500" 
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-mono font-bold uppercase tracking-widest opacity-60 mb-1">Territory</label>
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-2.5 w-4 h-4 opacity-40 z-10" />
+                      <select 
+                        value={updateFormData.country} 
+                        onChange={(e) => setUpdateFormData(p => ({ ...p, country: e.target.value }))}
+                        required 
+                        className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border outline-none bg-slate-50 border-slate-200 dark:bg-slate-900 dark:border-slate-800 dark:text-white appearance-none focus:border-blue-500 dark:focus:border-cyan-500 cursor-pointer"
+                      >
+                        <option value="" disabled>Select Territory</option>
+                        {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-mono font-bold uppercase tracking-widest opacity-60 mb-1">City Node</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-2.5 w-4 h-4 opacity-40" />
+                      <input 
+                        type="text" 
+                        value={updateFormData.city} 
+                        onChange={(e) => setUpdateFormData(p => ({ ...p, city: e.target.value }))}
+                        required 
+                        className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border outline-none bg-slate-50 border-slate-200 dark:bg-slate-900/50 dark:border-slate-800 focus:border-blue-500 dark:focus:border-cyan-500" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-mono font-bold uppercase tracking-widest opacity-60 mb-1">Residential Address</label>
+                  <textarea 
+                    value={updateFormData.address} 
+                    onChange={(e) => setUpdateFormData(p => ({ ...p, address: e.target.value }))}
+                    required 
+                    className="w-full p-3 h-20 text-sm rounded-xl border outline-none bg-slate-50 border-slate-200 dark:bg-slate-900/50 dark:border-slate-800 focus:border-blue-500 dark:focus:border-cyan-500 resize-none" 
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-mono font-bold uppercase tracking-widest opacity-60 mb-1">Gender Class</label>
+                    <div className="relative">
+                      <SwatchBook className="absolute left-3 top-2.5 w-4 h-4 opacity-40 z-10" />
+                      <select 
+                        value={updateFormData.gender} 
+                        onChange={(e) => setUpdateFormData(p => ({ ...p, gender: e.target.value }))}
+                        required 
+                        className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border outline-none bg-slate-50 border-slate-200 dark:bg-slate-900 dark:border-slate-800 dark:text-white appearance-none focus:border-blue-500 dark:focus:border-cyan-500"
+                      >
+                        <option value="" disabled>Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-mono font-bold uppercase tracking-widest opacity-60 mb-1">Cycle Date (DOB)</label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-2.5 w-4 h-4 opacity-40" />
+                      <input 
+                        type="date" 
+                        value={updateFormData.dob} 
+                        onChange={(e) => setUpdateFormData(p => ({ ...p, dob: e.target.value }))}
+                        required 
+                        className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border outline-none bg-slate-50 border-slate-200 dark:bg-slate-900/50 dark:border-slate-800 focus:border-blue-500 dark:focus:border-cyan-500" 
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex gap-4 mt-6 border-t pt-4 border-slate-200 dark:border-slate-800">
+                <button 
+                  type="button" 
+                  onClick={() => setIsUpdateModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl border font-bold text-sm bg-white border-slate-200 dark:bg-slate-900/50 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                >
+                  Abort
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={updateLoading}
+                  className="flex-[2] py-2.5 rounded-xl font-black text-sm uppercase tracking-wider bg-blue-600 text-white dark:bg-cyan-500 dark:text-black hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                >
+                  {updateLoading ? <Loader2 className="animate-spin" size={16} /> : 'Commit_Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// Sub-components for cleaner structure
 function StatusRow({ label, value, isStatus = false }: { label: string, value: string, isStatus?: boolean }) {
   return (
     <div className="flex justify-between items-center">

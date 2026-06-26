@@ -15,7 +15,8 @@ import {
   createUserWithEmailAndPassword, 
   updateProfile, 
   GoogleAuthProvider, 
-  signInWithPopup 
+  signInWithPopup,
+  onAuthStateChanged
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
@@ -68,6 +69,18 @@ export default function Sign() {
     confirmPassword: ''
   });
 
+  // Authentication State Observer
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Redirect to profile/dashboard if authenticated
+        router.push('/');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
   // Security Protocol Logic
   const isMinLength = formData.password.length >= 8;
   const hasUpper = /[A-Z]/.test(formData.password);
@@ -91,10 +104,14 @@ export default function Sign() {
     setError('');
     if (step === 1) {
       if (!formData.name || !formData.email || !formData.phone) return setError('All fields required');
-      setIsLoading(true);
-      const exists = await checkEmailExists(formData.email);
-      setIsLoading(false);
-      if (exists) return setError('Network address already registered');
+      
+      // If they are not in Google Auth flow, double-check email uniqueness in DB
+      if (!isGoogleAuth) {
+        setIsLoading(true);
+        const exists = await checkEmailExists(formData.email);
+        setIsLoading(false);
+        if (exists) return setError('Network address already registered');
+      }
     }
     if (step === 2 && (!formData.country || !formData.city || !formData.address)) return setError('Location data incomplete');
     if (step === 3 && (!formData.gender || !formData.dob)) return setError('Personal parameters required');
@@ -110,9 +127,12 @@ export default function Sign() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const userDoc = await getDoc(doc(db, "users", user.uid));
+      
       if (userDoc.exists()) {
+        // User already has an account in the DB, send to dashboard
         router.push('/');
       } else {
+        // User is new to the DB, prefill what we can from Google
         setFormData(prev => ({ 
           ...prev, 
           name: user.displayName || '', 
@@ -120,7 +140,10 @@ export default function Sign() {
           phone: user.phoneNumber || '' 
         }));
         setIsGoogleAuth(true);
-        setStep(2); // Skip Step 1 after Google Auth
+        
+        // Return them to Step 1 to ensure they fill out the Phone Number
+        // (Google Auth rarely provides one natively)
+        setStep(1); 
       }
     } catch (err: any) {
       setError('Google Auth Sequence Failed');
@@ -132,6 +155,12 @@ export default function Sign() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate final step data based on auth method before submitting
+    if (isGoogleAuth && (!formData.gender || !formData.dob)) {
+      setError('Personal parameters required');
+      return;
+    }
+
     if (!isGoogleAuth && (!isPasswordValid || !passwordsMatch)) {
       setError('Security protocols not met.');
       return;
@@ -139,22 +168,44 @@ export default function Sign() {
 
     setIsLoading(true);
     setError('');
+    
     try {
       let user = auth.currentUser;
+      
+      // If not Google auth, create the user with email & password
       if (!isGoogleAuth) {
         const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
         user = userCredential.user;
         await updateProfile(user, { displayName: formData.name });
       }
+
+      // If user exists (either from fresh creation or from previous Google Sign In)
       if (user) {
+        // Generate a random deposit ID for their wallet
+        const newDepositId = `DEP-${Math.random().toString(36).substring(2, 11).toUpperCase()}`;
+
         await setDoc(doc(db, "users", user.uid), {
           uid: user.uid,
-          ...formData,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          country: formData.country,
+          city: formData.city,
+          address: formData.address,
+          gender: formData.gender,
+          dob: formData.dob,
           role: "user",
           createdAt: serverTimestamp(),
           status: "active",
-          authMethod: isGoogleAuth ? "google" : "email"
+          authMethod: isGoogleAuth ? "google" : "email",
+          photoURL: user.photoURL || "",
+          // --- FINANCIAL DEFAULT VALUES ---
+          balance: 0.00,
+          depositId: newDepositId,
+          transactions: [],
+          serviceLogs: []
         });
+        
         router.push('/');
       }
     } catch (err: any) {
@@ -193,7 +244,15 @@ export default function Sign() {
               </div>
               <div className="relative">
                 <Mail className="absolute left-4 top-3.5 w-5 h-5 opacity-40" />
-                <input type="email" placeholder="System Email" value={formData.email} onChange={(e) => updateField('email', e.target.value)} required className="w-full pl-12 pr-4 py-3 rounded-xl border outline-none bg-slate-50 border-slate-200 dark:bg-slate-900/50 dark:border-slate-800 focus:border-blue-500 dark:focus:border-cyan-500" />
+                <input 
+                  type="email" 
+                  placeholder="System Email" 
+                  value={formData.email} 
+                  onChange={(e) => updateField('email', e.target.value)} 
+                  required 
+                  readOnly={isGoogleAuth} // Lock email if imported via Google Auth
+                  className={`w-full pl-12 pr-4 py-3 rounded-xl border outline-none border-slate-200 dark:border-slate-800 focus:border-blue-500 dark:focus:border-cyan-500 ${isGoogleAuth ? 'bg-slate-200 dark:bg-slate-900/30 opacity-60 cursor-not-allowed' : 'bg-slate-50 dark:bg-slate-900/50'}`} 
+                />
               </div>
               <div className="relative">
                 <Phone className="absolute left-4 top-3.5 w-5 h-5 opacity-40" />
@@ -239,7 +298,7 @@ export default function Sign() {
           )}
 
           {/* STEP 4: SECURITY */}
-          {step === 4 && (
+          {step === 4 && !isGoogleAuth && (
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="relative">
                 <Lock className="absolute left-4 top-3.5 w-5 h-5 opacity-40" />
@@ -270,7 +329,7 @@ export default function Sign() {
           {/* Navigation Buttons */}
           <div className="flex gap-4 mt-8">
             {step > 1 && (
-              <button type="button" onClick={() => setStep(step - 1)} className="flex-1 py-4 rounded-xl border font-bold flex items-center justify-center gap-2 bg-white border-slate-200 dark:bg-slate-900/50 dark:border-slate-700">
+              <button type="button" onClick={() => setStep(step - 1)} className="flex-1 py-4 rounded-xl border font-bold flex items-center justify-center gap-2 bg-white border-slate-200 dark:bg-slate-900/50 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                 <ArrowLeft size={18} /> Back
               </button>
             )}
@@ -285,8 +344,8 @@ export default function Sign() {
           </div>
         </form>
 
-        {/* GOOGLE AUTHORITY (Added Back Here) */}
-        {step === 1 && (
+        {/* GOOGLE AUTHORITY */}
+        {step === 1 && !isGoogleAuth && (
           <div className="mt-8">
             <div className="relative flex items-center py-4">
               <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>

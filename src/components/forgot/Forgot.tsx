@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   Mail, ArrowRight, ShieldCheck, Terminal, 
   KeyRound, Loader2, AlertCircle, CheckCircle2 
@@ -9,13 +10,27 @@ import {
 
 // Firebase Imports
 import { auth } from '@/server/firebaseApi';
-import { sendPasswordResetEmail } from 'firebase/auth';
+import { sendPasswordResetEmail, onAuthStateChanged } from 'firebase/auth';
 
 export default function Forgot() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Authentication State Observer
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // If user is already authenticated, return them to the profile/home page
+        router.push('/');
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [router]);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
@@ -9,12 +9,14 @@ import {
 } from 'lucide-react';
 
 // Firebase Imports
-import { auth } from '@/server/firebaseApi';
+import { auth, db } from '@/server/firebaseApi';
 import { 
   signInWithEmailAndPassword, 
   signInWithPopup, 
-  GoogleAuthProvider 
+  GoogleAuthProvider,
+  onAuthStateChanged
 } from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function Log() {
   const router = useRouter();
@@ -24,6 +26,19 @@ export default function Log() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Authentication State Observer
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // If user is already authenticated, return them to the profile/home page
+        router.push('/');
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [router]);
 
   const finalizeLogin = async (user: any) => {
     const isProduction = process.env.NODE_ENV === 'production';
@@ -75,9 +90,43 @@ export default function Log() {
 
     try {
       const result = await signInWithPopup(auth, provider);
-      await finalizeLogin(result.user);
+      const user = result.user;
+
+      // Database Check & Creation Protocol
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+
+      if (!userDoc.exists()) {
+        // Generate a random deposit ID for their wallet
+        const newDepositId = `DEP-${Math.random().toString(36).substring(2, 11).toUpperCase()}`;
+
+        // Create the user profile in Firestore
+        await setDoc(userRef, {
+          uid: user.uid,
+          name: user.displayName || '',
+          email: user.email || '',
+          phone: user.phoneNumber || '',
+          country: '', // Defaults left empty as they bypass the registration form
+          city: '',
+          address: '',
+          gender: '',
+          dob: '',
+          role: "user",
+          createdAt: serverTimestamp(),
+          status: "active",
+          authMethod: "google",
+          photoURL: user.photoURL || "",
+          balance: 0.00,
+          depositId: newDepositId,
+          transactions: [],
+          serviceLogs: []
+        });
+      }
+
+      await finalizeLogin(user);
     } catch (err: any) {
       setError('Google Authority Verification Failed');
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
